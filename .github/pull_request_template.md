@@ -2,7 +2,7 @@
 
 Thanks for opening a pull request! Here are some tips to get everything merged smoothly:
 
-1. Read our contributor guidelines: https://github.com/Dynatrace/dynatrace-operator/blob/main/CONTRIBUTING.md
+1. Read our contributor guidelines: https://github.com/Dynatrace/dynatrace-bootstrapper/blob/main/CONTRIBUTING.md
 
 2. If the PR is unfinished, raise it as a draft or prefix the title with "WIP:" so it's clear to everyone.
 
