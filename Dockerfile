@@ -16,7 +16,7 @@ RUN --mount=type=cache,target="/root/.cache/go-build" \
     go build -tags -trimpath -ldflags="${GO_LINKER_ARGS}" \
     -o ./build/_output/bin/dynatrace-bootstrapper
 
-FROM --platform=$TARGETPLATFORM public.ecr.aws/dynatrace/dynatrace-codemodules:1.299.73.20250109-153420 AS codemodules
+FROM public.ecr.aws/dynatrace/dynatrace-codemodules:1.299.73.20250109-153420 AS codemodules
 
 # copy bootstrapper binary
 COPY --from=build /app/build/_output/bin /usr/local/bin
