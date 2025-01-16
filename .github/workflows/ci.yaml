@@ -45,7 +45,7 @@ jobs:
         with:
           # renovate depName=github.com/golangci/golangci-lint
           version: v1.63.4
-          args: --build-tags e2e --timeout 300s --out-${NO_FUTURE}format colored-line-number
+          args: --timeout 300s --out-${NO_FUTURE}format colored-line-number
       - name: Run deadcode
         id: deadcode
         run: |
@@ -78,7 +78,7 @@ jobs:
         uses: docker/metadata-action@369eb591f429131d6889c46b94e711f089e6ca96 # v5.6.1
         id: meta
         with:
-          images: dynatrace/dynatrace-bootstrapper
+          images: ${{ env.DOCKER_REPOSITORY }}
           tags: ${{ steps.prep.outputs.docker_image_tag }}
           labels: |
             ${{ steps.prep.outputs.docker_image_labels }}

@@ -1,4 +1,4 @@
-IMAGE ?= quay.io/dynatrace/dynatrace-operator
+IMAGE ?= quay.io/dynatrace/dynatrace-bootstrapper
 DEBUG ?= false
 
 #Needed for the e2e pipeline to work
@@ -24,14 +24,14 @@ ifeq ($(TAG), snapshot)
 	$(error "Image tag is snapshot, please set TAG to a valid tag")
 endif
 
-## Builds an Operator image with a given IMAGE and TAG
+## Builds an Bootstrapper image with a given IMAGE and TAG
 images/build: ensure-tag-not-snapshot
 	./hack/build/build_image.sh "${IMAGE}" "${TAG}" "${DEBUG}"
 
-## Pushes an ALREADY BUILT Operator image with a given IMAGE and TAG
+## Pushes an ALREADY BUILT Bootstrapper image with a given IMAGE and TAG
 images/push: ensure-tag-not-snapshot
 	./hack/build/push_image.sh "${IMAGE}" "${TAG}"
 
-## Builds an Operator image and pushes it
+## Builds an Bootstrapper image and pushes it
 images/build/push: images/build images/push
 

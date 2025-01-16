@@ -22,11 +22,6 @@ prerequisites: prerequisites/setup-go-dev-dependencies prerequisites/markdownlin
 ## Setup go development dependencies
 prerequisites/setup-go-dev-dependencies: prerequisites/go-linting prerequisites/mockery
 
-## Install 'controller-gen' if it is missing
-prerequisites/controller-gen:
-	go install "sigs.k8s.io/controller-tools/cmd/controller-gen@$(controller_gen_version)"
-CONTROLLER_GEN=$(shell hack/build/command.sh controller-gen)
-
 ## Install go linters
 prerequisites/go-linting: prerequisites/go-deadcode
 	go install github.com/golangci/golangci-lint/cmd/golangci-lint@$(golang_ci_cmd_version)
@@ -42,11 +37,6 @@ prerequisites/go-deadcode:
 ## Install go test coverage
 prerequisites/go-test-coverage:
 	go install github.com/vladopajic/go-test-coverage/v2@latest
-
-## Installs 'kustomize' if it is missing
-prerequisites/kustomize:
-	go install "sigs.k8s.io/kustomize/kustomize/v5@$(kustomize_version)"
-KUSTOMIZE=$(shell hack/build/command.sh kustomize)
 
 ## Install 'markdownlint' if it is missing
 prerequisites/markdownlint:

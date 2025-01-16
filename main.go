@@ -20,7 +20,7 @@ func main() {
 
 func new() *cobra.Command {
 	cmd := &cobra.Command{
-		Use:  "dynatrace-operator",
+		Use:  "dynatrace-bootstrapper",
 		RunE: base,
 	}
 

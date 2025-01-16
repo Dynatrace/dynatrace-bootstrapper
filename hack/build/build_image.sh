@@ -23,13 +23,13 @@ else
   CONTAINER_CMD=docker
 fi
 
-OPERATOR_BUILD_PLATFORM="--platform=linux/amd64"
-if [ -n "${OPERATOR_DEV_BUILD_PLATFORM}" ]; then
-  echo "overriding platform to ${OPERATOR_DEV_BUILD_PLATFORM}"
-  OPERATOR_BUILD_PLATFORM="--platform=${OPERATOR_DEV_BUILD_PLATFORM}"
+BOOTSTRAPPER_BUILD_PLATFORM="--platform=linux/amd64"
+if [ -n "${BOOTSTRAPPER_DEV_BUILD_PLATFORM}" ]; then
+  echo "overriding platform to ${BOOTSTRAPPER_DEV_BUILD_PLATFORM}"
+  BOOTSTRAPPER_BUILD_PLATFORM="--platform=${BOOTSTRAPPER_DEV_BUILD_PLATFORM}"
 fi
 
-${CONTAINER_CMD} build "${OPERATOR_BUILD_PLATFORM}" . -f ./Dockerfile -t "${out_image}" \
+${CONTAINER_CMD} build "${BOOTSTRAPPER_BUILD_PLATFORM}" . -f ./Dockerfile -t "${out_image}" \
   --build-arg "GO_LINKER_ARGS=${go_linker_args}" \
   --label "quay.expires-after=14d"
 

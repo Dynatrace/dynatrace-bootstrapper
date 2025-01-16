@@ -47,7 +47,7 @@ SHELL ?= bash
 
 -include hack/make/*.mk
 
-## Builds the operator image and pushes it to quay with a snapshot tag
+## Builds the bootstrapper image and pushes it to quay with a snapshot tag
 build: images/build/push
 
 ## Runs alls the linters
@@ -56,5 +56,5 @@ lint: go/lint markdown/lint
 ## Runs the unit tests
 test: go/test
 
-## Installs prerequisites, builds and pushes a tagged operator image, and deploys the operator on a cluster
+## Installs prerequisites, builds and pushes a tagged bootstrapper image, and deploys the bootstrapper on a cluster
 all: prerequisites lint test build

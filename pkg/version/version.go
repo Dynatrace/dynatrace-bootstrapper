@@ -7,7 +7,7 @@ var (
 	// AppName contains the name of the application
 	AppName = "dynatrace-bootsrapper"
 
-	// Version contains the version of the Operator. Assigned externally.
+	// Version contains the version of the Bootstrapper. Assigned externally.
 	Version = "snapshot"
 
 	// Commit indicates the Git commit hash the binary was build from. Assigned externally.

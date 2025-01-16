@@ -1,5 +1,5 @@
 name: Build Docker Image
-description: Builds the operator docker image
+description: Builds the bootstrapper docker image
 inputs:
   platform:
     description: The platform for which the image will be built
@@ -36,13 +36,13 @@ runs:
         file: ./Dockerfile
         platforms: linux/${{ inputs.platform }}
         push: false
-        tags: operator-${{ inputs.platform }}:${{ inputs.image-tag }}
+        tags: bootstrapper-${{ inputs.platform }}:${{ inputs.image-tag }}
         labels: ${{ inputs.labels }}
-        outputs: type=docker,dest=/tmp/operator-${{ inputs.platform }}.tar
+        outputs: type=docker,dest=/tmp/bootstrapper-${{ inputs.platform }}.tar
     - name: Upload artifact
       uses: actions/upload-artifact@65c4c4a1ddee5b72f698fdd19549f0f0fb45cf08 # v4.6.0
       with:
-        name: operator-${{ inputs.platform }}
-        path: /tmp/operator-${{ inputs.platform }}.tar
+        name: bootstrapper-${{ inputs.platform }}
+        path: /tmp/bootstrapper-${{ inputs.platform }}.tar
         retention-days: 1
 

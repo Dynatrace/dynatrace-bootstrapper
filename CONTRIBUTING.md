@@ -14,7 +14,7 @@ Make sure all the following are true when creating a pull-request:
 
 ## Quick start
 
-1. Fork the dynatrace-operator repository and get the source code:
+1. Fork the dynatrace-bootstrapper repository and get the source code:
 
     ```sh
     git clone https://github.com/<your_username>/dynatrace-bootstrapper
