@@ -27,7 +27,7 @@ go/wsl:
 
 ## Runs golangci-lint
 go/golangci:
-	golangci-lint run --build-tags "$(shell ./hack/build/create_go_build_tags.sh true)" --timeout 300s
+	golangci-lint run --timeout 300s
 
 go/betteralign:
 	betteralign -apply ./...
@@ -37,7 +37,7 @@ go/lint: prerequisites/go-linting go/format go/vet go/wsl go/betteralign go/gola
 
 ## Runs all go unit tests and writes the coverprofile to coverage.txt
 go/test:
-	go test ./... -coverprofile=coverage.txt -covermode=atomic -coverpkg=./... -tags "$(shell ./hack/build/create_go_build_tags.sh false)"
+	go test ./... -coverprofile=coverage.txt -covermode=atomic -coverpkg=./...
 
 ## Runs all go unit tests and opens coverage report in a browser
 go/coverage: go/test
@@ -50,7 +50,7 @@ go/gen_mocks: prerequisites/mockery
 ## Runs deadcode https://go.dev/blog/deadcode
 go/deadcode: prerequisites/go-deadcode
 	# we add `tee` in the end to make it fail if it finds dead code, by default deadcode always return exit code 0
-	deadcode -test -tags="$(shell ./hack/build/create_go_build_tags.sh true)" $(LINT_TARGET) | tee deadcode.out && [ ! -s deadcode.out ]
+	deadcode -test $(LINT_TARGET) | tee deadcode.out && [ ! -s deadcode.out ]
 
 ## Runs go-test-coverage tool
 go/check-coverage: prerequisites/go-test-coverage
