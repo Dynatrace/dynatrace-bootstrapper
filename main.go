@@ -1,33 +1,47 @@
 package main
 
 import (
-	"fmt"
 	"os"
 
+	"github.com/Dynatrace/dynatrace-bootstrapper/pkg/move"
 	"github.com/Dynatrace/dynatrace-bootstrapper/pkg/version"
+	"github.com/sirupsen/logrus"
+	"github.com/spf13/afero"
 	"github.com/spf13/cobra"
 )
 
 func main() {
-	cmd := new()
+	cmd := bootstrapper(afero.NewOsFs())
 
 	err := cmd.Execute()
 	if err != nil {
-		fmt.Println(err)
+		logrus.Errorf("Error during bootstrapping: %v", err)
 		os.Exit(1)
 	}
 }
 
-func new() *cobra.Command {
+func bootstrapper(fs afero.Fs) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:  "dynatrace-bootstrapper",
-		RunE: base,
+		RunE: run(fs),
 	}
+
+	move.AddFlags(cmd)
 
 	return cmd
 }
 
-func base(_ *cobra.Command, _ []string) error {
-	version.Print()
-	return nil
+func run(fs afero.Fs) func(cmd *cobra.Command, _ []string) error {
+	return func(cmd *cobra.Command, _ []string) error {
+		version.Print()
+
+		err := cmd.ValidateRequiredFlags()
+		if err != nil {
+			return err
+		}
+
+		return move.Execute(afero.Afero{
+			Fs: fs,
+		})
+	}
 }

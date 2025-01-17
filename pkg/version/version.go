@@ -1,6 +1,8 @@
 package version
 
-import "fmt"
+import (
+	"github.com/sirupsen/logrus"
+)
 
 var (
 
@@ -18,5 +20,5 @@ var (
 )
 
 func Print() {
-	fmt.Printf("name: %s, version: %s, commit: %s, build_date: %s", AppName, Version, Commit, BuildDate)
+	logrus.Infof("name: %s, version: %s, commit: %s, build_date: %s", AppName, Version, Commit, BuildDate)
 }
