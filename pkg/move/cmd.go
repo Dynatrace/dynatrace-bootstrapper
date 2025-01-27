@@ -32,7 +32,7 @@ func AddFlags(cmd *cobra.Command) {
 	cmd.PersistentFlags().StringVar(&targetFolder, targetFolderFlag, "", "Base path where to copy the codemodule TO.")
 	_ = cmd.MarkPersistentFlagRequired(targetFolderFlag)
 
-	cmd.PersistentFlags().StringVar(&workFolder, workFolderFlag, "", "(Optional) Base path for a tmp folder, this is where the command will do its work, to make sure the operations are atomic.")
+	cmd.PersistentFlags().StringVar(&workFolder, workFolderFlag, "", "(Optional) Base path for a tmp folder, this is where the command will do its work, to make sure the operations are atomic. It must be on the same disk as the target folder.")
 }
 
 // Execute moves the contents of a folder to another via copying.
