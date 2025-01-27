@@ -34,14 +34,25 @@ func AddFlags(cmd *cobra.Command) {
 func Execute(fs afero.Afero) error {
 	logrus.Infof("Starting to copy from %s to %s", source, target)
 
-	err := copyFolder(fs, source, target)
+	tmpLocation := filepath.Join(filepath.Dir(target), "tmp")
+
+	err := copyFolder(fs, source, tmpLocation)
 	if err != nil {
 		logrus.Errorf("Error moving folder: %v", err)
-	} else {
-		logrus.Infof("Successfully copied from %s to %s", source, target)
+
+		return err
 	}
 
-	return err
+	err = fs.Rename(tmpLocation, target)
+	if err != nil {
+		logrus.Errorf("Error finalizing move: %v", err)
+
+		return err
+	}
+
+	logrus.Infof("Successfully copied from %s to %s", source, target)
+
+	return nil
 }
 
 func copyFolder(fs afero.Fs, from string, to string) error {
