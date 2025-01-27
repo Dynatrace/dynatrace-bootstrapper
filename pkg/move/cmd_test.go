@@ -16,12 +16,14 @@ func TestExecute(t *testing.T) {
 		// Create source directory and files
 		sourceDir := "/source"
 		targetDir := "/target"
+		workDir := "/work"
 		_ = fs.MkdirAll(sourceDir, 0755)
 		_ = afero.WriteFile(fs, sourceDir+"/file1.txt", []byte("file1 content"), 0644)
 		_ = afero.WriteFile(fs, sourceDir+"/file2.txt", []byte("file2 content"), 0644)
 
-		source = sourceDir
-		target = targetDir
+		sourceFolder = sourceDir
+		targetFolder = targetDir
+		workFolder = workDir
 
 		err := Execute(fs)
 		require.NoError(t, err)
@@ -47,6 +49,11 @@ func TestExecute(t *testing.T) {
 		content, err = afero.ReadFile(fs, targetDir+"/file2.txt")
 		assert.NoError(t, err)
 		assert.Equal(t, "file2 content", string(content))
+
+		// Check the cleanup happened of the copied files
+		exists, err = afero.DirExists(fs, workDir)
+		require.NoError(t, err)
+		assert.False(t, exists)
 	})
 }
 

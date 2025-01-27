@@ -12,45 +12,95 @@ import (
 )
 
 const (
-	sourceFlag = "source"
-	targetFlag = "target"
+	sourceFolderFlag = "source"
+	targetFolderFlag = "target"
+	workFolderFlag   = "work"
+
+	copyTmpFolder = "copy-tmp"
 )
 
 var (
-	source string
-	target string
+	sourceFolder string
+	targetFolder string
+	workFolder   string
 )
 
 func AddFlags(cmd *cobra.Command) {
-	cmd.PersistentFlags().StringVar(&source, sourceFlag, "", "Base path where to copy the codemodule FROM.")
-	_ = cmd.MarkPersistentFlagRequired(sourceFlag)
+	cmd.PersistentFlags().StringVar(&sourceFolder, sourceFolderFlag, "", "Base path where to copy the codemodule FROM.")
+	_ = cmd.MarkPersistentFlagRequired(sourceFolderFlag)
 
-	cmd.PersistentFlags().StringVar(&target, targetFlag, "", "Base path where to copy the codemodule TO.")
-	_ = cmd.MarkPersistentFlagRequired(targetFlag)
+	cmd.PersistentFlags().StringVar(&targetFolder, targetFolderFlag, "", "Base path where to copy the codemodule TO.")
+	_ = cmd.MarkPersistentFlagRequired(targetFolderFlag)
+
+	cmd.PersistentFlags().StringVar(&workFolder, workFolderFlag, "", "(Optional) Base path for a tmp folder, this is where the command will do its work, to make sure the operations are atomic.")
 }
 
 // Execute moves the contents of a folder to another via copying.
 // This could be a simple os.Rename, however that will not work if the source and target are on different disk.
 func Execute(fs afero.Afero) error {
-	logrus.Infof("Starting to copy from %s to %s", source, target)
+	if workFolder != "" {
+		return atomicCopy(fs)
+	}
 
-	tmpLocation := filepath.Join(filepath.Dir(target), "tmp")
+	return simpleCopy(fs)
+}
 
-	err := copyFolder(fs, source, tmpLocation)
+func atomicCopy(fs afero.Afero) error {
+	logrus.Infof("Starting to copy (atomic) from %s to %s", sourceFolder, targetFolder)
+
+	err := fs.RemoveAll(workFolder)
+	if err != nil {
+		logrus.Errorf("Failed initial cleanup of workdir: %v", err)
+
+		return err
+	}
+
+	err = fs.MkdirAll(workFolder, os.ModePerm)
+	if err != nil {
+		logrus.Errorf("Failed to create the base workdir: %v", err)
+
+		return err
+	}
+
+	defer func() {
+		err := fs.RemoveAll(workFolder)
+		if err != nil {
+			logrus.Errorf("Failed to do cleanup after run: %v", err)
+		}
+	}()
+
+	tmpFolder := filepath.Join(workFolder, copyTmpFolder)
+
+	err = copyFolder(fs, sourceFolder, tmpFolder)
 	if err != nil {
 		logrus.Errorf("Error moving folder: %v", err)
 
 		return err
 	}
 
-	err = fs.Rename(tmpLocation, target)
+	err = fs.Rename(tmpFolder, targetFolder)
 	if err != nil {
 		logrus.Errorf("Error finalizing move: %v", err)
 
 		return err
 	}
 
-	logrus.Infof("Successfully copied from %s to %s", source, target)
+	logrus.Infof("Successfully copied from %s to %s", sourceFolder, targetFolder)
+
+	return nil
+}
+
+func simpleCopy(fs afero.Afero) error {
+	logrus.Infof("Starting to copy (simple) from %s to %s", sourceFolder, targetFolder)
+
+	err := copyFolder(fs, sourceFolder, targetFolder)
+	if err != nil {
+		logrus.Errorf("Error moving folder: %v", err)
+
+		return err
+	}
+
+	logrus.Infof("Successfully copied from %s to %s", sourceFolder, targetFolder)
 
 	return nil
 }
