@@ -14,12 +14,12 @@ COPY pkg ./pkg
 RUN --mount=type=cache,target="/root/.cache/go-build" \
     CGO_ENABLED=0 GOOS=$TARGETOS GOARCH=$TARGETARCH \
     go build -tags -trimpath -ldflags="${GO_LINKER_ARGS}" \
-    -o ./build/_output/bin/dynatrace-bootstrapper
+    -o ./build/_output/bin/bootstrap
 
 FROM public.ecr.aws/dynatrace/dynatrace-codemodules:1.299.73.20250109-153420 AS codemodules
 
 # copy bootstrapper binary
-COPY --from=build /app/build/_output/bin /usr/local/bin
+COPY --from=build /app/build/_output/bin /opt/dynatrace/bin
 
 LABEL name="Dynatrace Bootstrapper" \
       vendor="Dynatrace LLC" \
