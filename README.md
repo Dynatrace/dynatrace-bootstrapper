@@ -35,5 +35,5 @@ The `dynatrace-bootstrapper` is a small CLI binary that is meant to be built int
 ## Development
 
 - To run tests: `make test`
-- To run linting : `make lint`
+- To run linting: `make lint`
 - To build a testing image: `make build`
