@@ -32,6 +32,13 @@ The `dynatrace-bootstrapper` is a small CLI binary built into a [Dynatrace CodeM
 - This is an **optional** arg
 - The `--work` arg defines the base path for a tmp folder, this is where the command will do its work, to make sure the operations are atomic. It must be on the same disk as the target folder.
 
+#### `--technology`
+
+*Example*: `--technology="python,java"`
+
+- This is an **optional** arg
+- The `--technology` arg defines the paths associated to the given technology in the `manifest.json` file. Only those files will be copied that match the technology. It is a comma-separated list.
+
 ## Development
 
 - To run tests: `make test`
