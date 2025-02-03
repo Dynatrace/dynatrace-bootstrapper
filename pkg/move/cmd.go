@@ -1,9 +1,11 @@
 package move
 
 import (
+	"encoding/json"
 	"io"
 	"os"
 	"path/filepath"
+	"strings"
 
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
@@ -15,6 +17,7 @@ const (
 	sourceFolderFlag = "source"
 	targetFolderFlag = "target"
 	workFolderFlag   = "work"
+	technologyFlag   = "technology"
 
 	copyTmpFolder = "copy-tmp"
 )
@@ -23,7 +26,19 @@ var (
 	sourceFolder string
 	targetFolder string
 	workFolder   string
+	technology   string
 )
+
+type Manifest struct {
+	Technologies map[string]map[string][]FileEntry `json:"technologies"`
+	Version      string                            `json:"version"`
+}
+
+type FileEntry struct {
+	Path    string `json:"path"`
+	Version string `json:"version"`
+	MD5     string `json:"md5"`
+}
 
 func AddFlags(cmd *cobra.Command) {
 	cmd.PersistentFlags().StringVar(&sourceFolder, sourceFolderFlag, "", "Base path where to copy the codemodule FROM.")
@@ -33,6 +48,9 @@ func AddFlags(cmd *cobra.Command) {
 	_ = cmd.MarkPersistentFlagRequired(targetFolderFlag)
 
 	cmd.PersistentFlags().StringVar(&workFolder, workFolderFlag, "", "(Optional) Base path for a tmp folder, this is where the command will do its work, to make sure the operations are atomic. It must be on the same disk as the target folder.")
+
+	cmd.PersistentFlags().StringVar(&technology, technologyFlag, "", "(Optional) Comma-separated list of technologies to filter files.")
+
 }
 
 // Execute moves the contents of a folder to another via copying.
@@ -105,6 +123,40 @@ func simpleCopy(fs afero.Afero) error {
 	return nil
 }
 
+func filterFilesByTechnology(fs afero.Afero, source string, technologies []string) ([]string, error) {
+	manifestPath := filepath.Join(source, "manifest.json")
+
+	manifestFile, err := fs.ReadFile(manifestPath)
+	if err != nil {
+		return nil, errors.WithMessage(err, "failed to open manifest.json")
+	}
+
+	var manifest Manifest
+	if err := json.Unmarshal(manifestFile, &manifest); err != nil {
+		return nil, errors.WithMessage(err, "failed to parse manifest.json")
+	}
+
+	var paths []string
+
+	for _, tech := range technologies {
+		techData, exists := manifest.Technologies[tech]
+		if !exists {
+			logrus.Warnf("technology %s not found", tech)
+			continue
+		}
+
+		for _, files := range techData {
+			logrus.Infof("processing technology %s", tech)
+
+			for _, file := range files {
+				paths = append(paths, filepath.Join(source, file.Path))
+			}
+		}
+	}
+
+	return paths, nil
+}
+
 func copyFolder(fs afero.Fs, from string, to string) error {
 	fromInfo, err := fs.Stat(from)
 	if err != nil {
@@ -120,6 +172,17 @@ func copyFolder(fs afero.Fs, from string, to string) error {
 		return errors.WithStack(err)
 	}
 
+	var filteredPaths []string
+
+	if technology != "" {
+		var err error
+
+		filteredPaths, err = filterFilesByTechnology(afero.Afero{Fs: fs}, sourceFolder, strings.Split(technology, ","))
+		if err != nil {
+			return err
+		}
+	}
+
 	entries, err := afero.ReadDir(fs, from)
 	if err != nil {
 		return errors.WithStack(err)
@@ -130,18 +193,22 @@ func copyFolder(fs afero.Fs, from string, to string) error {
 		fromPath := filepath.Join(to, entry.Name())
 
 		if entry.IsDir() {
-			logrus.Infof("Copying directory %s to %s", toPath, fromPath)
+			if len(filteredPaths) == 0 {
+				logrus.Infof("Copying directory %s to %s", toPath, fromPath)
 
-			err = copyFolder(fs, toPath, fromPath)
-			if err != nil {
-				return err
+				err = copyFolder(fs, toPath, fromPath)
+				if err != nil {
+					return err
+				}
 			}
 		} else {
-			logrus.Infof("Copying file %s to %s", toPath, fromPath)
+			if len(filteredPaths) == 0 || contains(filteredPaths, strings.Split(fromPath, to)[1]) {
+				logrus.Infof("Copying file %s to %s", toPath, fromPath)
 
-			err = copyFile(fs, toPath, fromPath)
-			if err != nil {
-				return err
+				err = copyFile(fs, toPath, fromPath)
+				if err != nil {
+					return err
+				}
 			}
 		}
 	}
@@ -179,4 +246,14 @@ func copyFile(fs afero.Fs, sourcePath string, destinationPath string) error {
 	}
 
 	return nil
+}
+
+func contains(slice []string, item string) bool {
+	for _, s := range slice {
+		if strings.Contains(s, item) {
+			return true
+		}
+	}
+
+	return false
 }
