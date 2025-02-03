@@ -32,7 +32,7 @@ The `dynatrace-bootstrapper` is a small CLI binary that is meant to be built int
 - This is an **optional** arg
 - The `--work` arg defines the base path for a tmp folder, this is where the command will do its work, to make sure the operations are atomic. It must be on the same disk as the target folder.
 
-### Development
+## Development
 
 - To run tests: `make test`
 - To run linting : `make lint`
