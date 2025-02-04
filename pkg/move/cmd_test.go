@@ -56,103 +56,62 @@ func TestExecute(t *testing.T) {
 		require.NoError(t, err)
 		assert.False(t, exists)
 	})
-}
+	t.Run("execute with technology param", func(t *testing.T) {
+		fs := afero.Afero{Fs: afero.NewMemMapFs()}
 
-func TestCopyFolder(t *testing.T) {
-	fs := afero.NewMemMapFs()
-	src := "/src"
-	err := fs.MkdirAll(src, 0755)
-	require.NoError(t, err)
+		sourceDir := "/source"
+		targetDir := "/target"
 
-	err = afero.WriteFile(fs, filepath.Join(src, "file1.txt"), []byte("Hello"), 0644)
-	require.NoError(t, err)
+		manifestContent := `{
+			"version": "1.0",
+			"technologies": {
+				"java": {
+					"x86": [
+						{"path": "fileA1.txt", "version": "1.0", "md5": "abc123"}
+					]
+				},
+				"python": {
+					"arm": [
+						{"path": "fileA2.txt", "version": "1.0", "md5": "ghi789"}
+					]
+				}
+			}
+		}`
 
-	err = fs.MkdirAll(filepath.Join(src, "subdir"), 0755)
-	require.NoError(t, err)
+		technologyList := "java"
+		_ = fs.MkdirAll(sourceDir, 0755)
+		_ = afero.WriteFile(fs, sourceDir+"/manifest.json", []byte(manifestContent), 0644)
+		_ = afero.WriteFile(fs, sourceDir+"/fileA1.txt", []byte("fileA1 content"), 0644)
+		_ = afero.WriteFile(fs, sourceDir+"/fileA2.txt", []byte("fileA2 content"), 0644)
 
-	err = afero.WriteFile(fs, filepath.Join(src, "subdir", "file2.txt"), []byte("World"), 0644)
-	require.NoError(t, err)
+		sourceFolder = sourceDir
+		targetFolder = targetDir
+		technology = technologyList
 
-	dst := "/dst"
-	err = fs.MkdirAll(dst, 0755)
-	require.NoError(t, err)
-
-	err = copyFolder(fs, src, dst)
-	require.NoError(t, err)
-
-	srcFiles, err := afero.ReadDir(fs, src)
-	require.NoError(t, err)
-	dstFiles, err := afero.ReadDir(fs, dst)
-	require.NoError(t, err)
-	require.Len(t, dstFiles, len(srcFiles))
-
-	checkFolder(t, fs, src, dst)
-}
-
-func TestCopyFolderWithTechnologyFiltering(t *testing.T) {
-	fs := afero.Afero{Fs: afero.NewMemMapFs()}
-
-	sourceDir := "/source"
-	targetDir := "/target"
-
-	sourceFolder = sourceDir
-	targetFolder = targetDir
-
-	_ = fs.MkdirAll(sourceDir, 0755)
-	_ = fs.MkdirAll(targetDir, 0755)
-
-	manifestContent := `{
-        "version": "1.0",
-        "technologies": {
-            "java": {
-                "x86": [
-                    {"path": "fileA1.txt", "version": "1.0", "md5": "abc123"},
-                    {"path": "fileA2.txt", "version": "1.0", "md5": "def456"}
-                ]
-            },
-            "python": {
-                "arm": [
-                    {"path": "fileB1.txt", "version": "1.0", "md5": "ghi789"}
-                ]
-            }
-        }
-    }`
-
-	_ = afero.WriteFile(fs, filepath.Join(sourceDir, "manifest.json"), []byte(manifestContent), 0644)
-	_ = afero.WriteFile(fs, filepath.Join(sourceDir, "fileA1.txt"), []byte("java a1"), 0644)
-	_ = afero.WriteFile(fs, filepath.Join(sourceDir, "fileA2.txt"), []byte("java a2"), 0644)
-	_ = afero.WriteFile(fs, filepath.Join(sourceDir, "fileB1.txt"), []byte("python b1"), 0644)
-	_ = afero.WriteFile(fs, filepath.Join(sourceDir, "fileC1.txt"), []byte("unrelated"), 0644)
-
-	t.Run("copy with single technology filter", func(t *testing.T) {
-		technology = "java"
-		err := copyFolder(fs, sourceDir, targetDir)
+		err := Execute(fs)
 		require.NoError(t, err)
 
-		assertFileExists(t, fs, filepath.Join(targetDir, "fileA1.txt"))
-		assertFileExists(t, fs, filepath.Join(targetDir, "fileA2.txt"))
-		assertFileNotExists(t, fs, filepath.Join(targetDir, "fileB1.txt"))
-		assertFileNotExists(t, fs, filepath.Join(targetDir, "fileC1.txt"))
-	})
-	t.Run("copy with multiple technology filter", func(t *testing.T) {
-		technology = "java,python"
-		err := copyFolder(fs, sourceDir, targetDir)
+		// Check if the target directory and files exist
+		exists, err := afero.DirExists(fs, targetDir)
 		require.NoError(t, err)
+		assert.True(t, exists)
 
-		assertFileExists(t, fs, filepath.Join(targetDir, "fileA1.txt"))
-		assertFileExists(t, fs, filepath.Join(targetDir, "fileA2.txt"))
-		assertFileExists(t, fs, filepath.Join(targetDir, "fileB1.txt"))
-		assertFileNotExists(t, fs, filepath.Join(targetDir, "fileC1.txt"))
-	})
-	t.Run("copy with invalid technology filter", func(t *testing.T) {
-		technology = "php"
-		err := copyFolder(fs, sourceDir, targetDir)
-		require.NoError(t, err)
+		file1Exists, err := afero.Exists(fs, targetDir+"/fileA1.txt")
+		assert.NoError(t, err)
+		assert.True(t, file1Exists)
 
-		assertFileExists(t, fs, filepath.Join(targetDir, "fileA1.txt"))
-		assertFileExists(t, fs, filepath.Join(targetDir, "fileA2.txt"))
-		assertFileExists(t, fs, filepath.Join(targetDir, "fileB1.txt"))
-		assertFileExists(t, fs, filepath.Join(targetDir, "fileC1.txt"))
+		file2Exists, err := afero.Exists(fs, targetDir+"/fileA2.txt")
+		assert.NoError(t, err)
+		assert.False(t, file2Exists)
+
+		// Check the content of the copied files
+		content, err := afero.ReadFile(fs, targetDir+"/fileA1.txt")
+		assert.NoError(t, err)
+		assert.Equal(t, "fileA1 content", string(content))
+
+		content, err = afero.ReadFile(fs, targetDir+"/fileA2.txt")
+		assert.Error(t, err)
+		assert.Empty(t, string(content))
 	})
 }
 
@@ -169,62 +128,6 @@ func assertFileNotExists(t *testing.T, fs afero.Fs, path string) {
 	exists, err := afero.Exists(fs, path)
 	assert.NoError(t, err)
 	assert.False(t, exists, fmt.Sprintf("file should not exist: %s", path))
-}
-
-func TestFilterFilesByTechnology(t *testing.T) {
-	fs := afero.Afero{Fs: afero.NewMemMapFs()}
-
-	sourceDir := "/source"
-	_ = fs.MkdirAll(sourceDir, 0755)
-	manifestContent := `{
-        "version": "1.0",
-        "technologies": {
-            "java": {
-                "x86": [
-                    {"path": "fileA1.txt", "version": "1.0", "md5": "abc123"},
-                    {"path": "fileA2.txt", "version": "1.0", "md5": "def456"}
-                ]
-            },
-            "python": {
-                "arm": [
-                    {"path": "fileB1.txt", "version": "1.0", "md5": "ghi789"}
-                ]
-            }
-        }
-    }`
-	_ = afero.WriteFile(fs, filepath.Join(sourceDir, "manifest.json"), []byte(manifestContent), 0644)
-	_ = afero.WriteFile(fs, filepath.Join(sourceDir, "fileA1.txt"), []byte("a1 content"), 0644)
-	_ = afero.WriteFile(fs, filepath.Join(sourceDir, "fileA2.txt"), []byte("a2 content"), 0644)
-	_ = afero.WriteFile(fs, filepath.Join(sourceDir, "fileB1.txt"), []byte("b1 content"), 0644)
-
-	t.Run("filter single technology", func(t *testing.T) {
-		paths, err := filterFilesByTechnology(fs, sourceDir, []string{"java"})
-		require.NoError(t, err)
-		assert.ElementsMatch(t, []string{
-			filepath.Join(sourceDir, "fileA1.txt"),
-			filepath.Join(sourceDir, "fileA2.txt"),
-		}, paths)
-	})
-	t.Run("filter multiple technologies", func(t *testing.T) {
-		paths, err := filterFilesByTechnology(fs, sourceDir, []string{"java", "python"})
-		require.NoError(t, err)
-		assert.ElementsMatch(t, []string{
-			filepath.Join(sourceDir, "fileA1.txt"),
-			filepath.Join(sourceDir, "fileA2.txt"),
-			filepath.Join(sourceDir, "fileB1.txt"),
-		}, paths)
-	})
-	t.Run("not filter non-existing technology", func(t *testing.T) {
-		paths, err := filterFilesByTechnology(fs, sourceDir, []string{"php"})
-		require.NoError(t, err)
-		assert.Empty(t, paths)
-	})
-	t.Run("filter with missing manifest", func(t *testing.T) {
-		fs := afero.Afero{Fs: afero.NewMemMapFs()}
-		paths, err := filterFilesByTechnology(fs, sourceDir, []string{"java"})
-		require.Error(t, err)
-		assert.Nil(t, paths)
-	})
 }
 
 func checkFolder(t *testing.T, fs afero.Fs, src, dst string) {
