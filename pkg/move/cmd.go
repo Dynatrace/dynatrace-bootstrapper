@@ -10,8 +10,6 @@ const (
 	targetFolderFlag = "target"
 	workFolderFlag   = "work"
 	technologyFlag   = "technology"
-
-	copyTmpFolder = "copy-tmp"
 )
 
 var (

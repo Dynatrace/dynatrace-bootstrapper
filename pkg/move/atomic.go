@@ -32,21 +32,12 @@ func atomic(copy copyFunc) copyFunc {
 			}
 		}()
 
-		//tmpFolder := filepath.Join(workFolder, copyTmpFolder)
-
 		err = copy(fs)
 		if err != nil {
 			logrus.Errorf("Error moving folder: %v", err)
 
 			return err
 		}
-
-		//err = fs.Rename(tmpFolder, targetFolder)
-		//if err != nil {
-		//	logrus.Errorf("Error finalizing move: %v", err)
-
-		//			return err
-		//		}
 
 		logrus.Infof("Successfully copied from %s to %s", sourceFolder, targetFolder)
 

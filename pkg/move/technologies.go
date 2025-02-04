@@ -37,6 +37,12 @@ func copyByTechnology(fs afero.Afero) error {
 		targetFile := filepath.Join(targetFolder, strings.Split(path, sourceFolder)[1])
 
 		err = fs.MkdirAll(filepath.Dir(targetFile), os.ModePerm) // check source dir's Stat.Mode
+		if err != nil {
+			logrus.Errorf("Error checking folder: %v", err)
+
+			return err
+		}
+
 		err = copyFile(fs, path, targetFile)
 
 		if err != nil {

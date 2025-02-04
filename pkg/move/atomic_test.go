@@ -11,7 +11,7 @@ import (
 func mockCopyFunc(isSuccessful bool) copyFunc {
 	return func(fs afero.Afero) error {
 		if isSuccessful {
-			fs.MkdirAll("/work/tmp", 0755)
+			fs.MkdirAll("/work/tmp", 0755) //nolint:errcheck
 			return nil
 		}
 
@@ -24,11 +24,12 @@ func TestAtomic_NoError(t *testing.T) {
 	targetFolder = "/target"
 	workFolder = "/work"
 
-	fs.MkdirAll(sourceFolder, 0755)
+	err := fs.MkdirAll(sourceFolder, 0755)
+	assert.NoError(t, err)
 
 	atomicCopy := atomic(mockCopyFunc(true))
 
-	err := atomicCopy(fs)
+	err = atomicCopy(fs)
 	assert.NoError(t, err)
 
 	exists, err := fs.DirExists(workFolder)
