@@ -2,7 +2,6 @@ package move
 
 import (
 	"encoding/json"
-	"os"
 	"path/filepath"
 	"strings"
 
@@ -36,7 +35,14 @@ func copyByTechnology(fs afero.Afero) error {
 	for _, path := range filteredPaths {
 		targetFile := filepath.Join(targetFolder, strings.Split(path, sourceFolder)[1])
 
-		err = fs.MkdirAll(filepath.Dir(targetFile), os.ModePerm) // check source dir's Stat.Mode
+		sourceStatMode, err := fs.Stat(sourceFolder)
+		if err != nil {
+			logrus.Errorf("Error checking stat mode from source folder: %v", err)
+
+			return err
+		}
+
+		err = fs.MkdirAll(filepath.Dir(targetFile), sourceStatMode.Mode()) //TODO: check source dir's Stat.Mode
 		if err != nil {
 			logrus.Errorf("Error checking folder: %v", err)
 
