@@ -42,7 +42,7 @@ func copyByTechnology(fs afero.Afero) error {
 			return err
 		}
 
-		err = fs.MkdirAll(filepath.Dir(targetFile), sourceStatMode.Mode()) //TODO: check source dir's Stat.Mode
+		err = fs.MkdirAll(filepath.Dir(targetFile), sourceStatMode.Mode())
 		if err != nil {
 			logrus.Errorf("Error checking folder: %v", err)
 
