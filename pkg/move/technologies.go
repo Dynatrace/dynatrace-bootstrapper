@@ -80,12 +80,12 @@ func filterFilesByTechnology(fs afero.Afero, source string, technologies []strin
 	for _, tech := range technologies {
 		techData, exists := manifest.Technologies[tech]
 		if !exists {
-			logrus.Warnf("technology %s not found", tech)
+			logrus.Warnf("Technology %s not found", tech)
 			continue
 		}
 
-		for _, files := range techData {
-			logrus.Infof("processing technology %s", tech)
+		for arch, files := range techData {
+			logrus.Infof("Collecting files for technology %s for arch %s", tech, arch)
 
 			for _, file := range files {
 				paths = append(paths, filepath.Join(source, file.Path))
