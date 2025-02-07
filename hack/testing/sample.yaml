@@ -1,0 +1,99 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  labels:
+    istio-injection: enabled
+  name: bootstrapper-test
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: bootstrapper-test
+  name: bootstrapper-test
+  namespace: bootstrapper-test
+spec:
+  replicas: 5
+  selector:
+    matchLabels:
+      app: bootstrapper-test
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app: bootstrapper-test
+    spec:
+      serviceAccountName: php-glibc
+      initContainers:
+      - args:
+        - --source=/opt/dynatrace/oneagent
+        - --target=/mnt/bin
+        image: quay.io/dynatrace/dynatrace-bootstrapper:snapshot
+        imagePullPolicy: Always
+        name: codemodule-download
+        resources: {}
+        securityContext:
+          readOnlyRootFilesystem: true
+          runAsUser: 0
+          seLinuxOptions:
+            level: s0
+          seccompProfile:
+            type: RuntimeDefault
+        terminationMessagePath: /dev/termination-log
+        terminationMessagePolicy: File
+        volumeMounts:
+        - mountPath: /mnt/bin
+          name: dynatrace-codemodules
+      containers:
+      - image: docker.io/php:fpm-stretch
+        imagePullPolicy: Always
+        livenessProbe:
+          failureThreshold: 3
+          tcpSocket:
+            port: 9000
+          initialDelaySeconds: 600
+          periodSeconds: 30
+          successThreshold: 1
+          timeoutSeconds: 2
+        name: app
+        volumeMounts:
+        - mountPath: /opt/dynatrace/oneagent
+          name: dynatrace-codemodules
+        ports:
+          - containerPort: 9000
+            protocol: TCP
+        readinessProbe:
+          failureThreshold: 3
+          tcpSocket:
+            port: 9000
+          periodSeconds: 10
+          successThreshold: 1
+          timeoutSeconds: 1
+        resources:
+          requests:
+            memory: 64Mi
+          limits:
+            memory: 128Mi
+      restartPolicy: Always
+      tolerations:
+        - key: kubernetes.io/arch
+          value: arm64
+          effect: NoSchedule
+        - key: kubernetes.io/arch
+          value: amd64
+          effect: NoSchedule
+      securityContext:
+        runAsUser: 0
+        runAsGroup: 0
+        fsGroup: 2000
+      terminationGracePeriodSeconds: 30
+      volumes:
+      - emptyDir: {}
+        name: dynatrace-codemodules
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: php-glibc
+  namespace: bootstrapper-test
