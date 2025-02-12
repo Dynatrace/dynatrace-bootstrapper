@@ -3,6 +3,7 @@ package main
 import (
 	"os"
 
+	"github.com/Dynatrace/dynatrace-bootstrapper/pkg/configure"
 	"github.com/Dynatrace/dynatrace-bootstrapper/pkg/move"
 	"github.com/Dynatrace/dynatrace-bootstrapper/pkg/version"
 	"github.com/sirupsen/logrus"
@@ -27,6 +28,7 @@ func bootstrapper(fs afero.Fs) *cobra.Command {
 	}
 
 	move.AddFlags(cmd)
+	configure.AddFlags(cmd)
 
 	return cmd
 }
@@ -40,8 +42,15 @@ func run(fs afero.Fs) func(cmd *cobra.Command, _ []string) error {
 			return err
 		}
 
-		return move.Execute(afero.Afero{
+		aferoFs := afero.Afero{
 			Fs: fs,
-		})
+		}
+
+		err = move.Execute(aferoFs)
+		if err != nil {
+			return err
+		}
+
+		return configure.Execute(aferoFs)
 	}
 }

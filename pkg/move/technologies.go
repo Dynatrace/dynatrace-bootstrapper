@@ -8,6 +8,7 @@ import (
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/afero"
+	fsutils "github.com/Dynatrace/dynatrace-bootstrapper/pkg/utils/fs"
 )
 
 type Manifest struct {
@@ -53,7 +54,7 @@ func copyByTechnology(fs afero.Afero, from string, to string) error {
 
 		logrus.Infof("Copying file %s to %s", path, targetFile)
 
-		err = copyFile(fs, path, targetFile)
+		err = fsutils.CopyFile(fs, path, targetFile)
 		if err != nil {
 			logrus.Errorf("Error copying file: %v", err)
 

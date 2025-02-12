@@ -2,7 +2,6 @@ package move
 
 import (
 	"fmt"
-	"path/filepath"
 	"testing"
 
 	"github.com/spf13/afero"
@@ -128,42 +127,4 @@ func assertFileNotExists(t *testing.T, fs afero.Fs, path string) {
 	exists, err := afero.Exists(fs, path)
 	assert.NoError(t, err)
 	assert.False(t, exists, fmt.Sprintf("file should not exist: %s", path))
-}
-
-func checkFolder(t *testing.T, fs afero.Fs, src, dst string) {
-	srcFiles, err := afero.ReadDir(fs, src)
-	require.NoError(t, err)
-	dstFiles, err := afero.ReadDir(fs, dst)
-	require.NoError(t, err)
-	require.Len(t, dstFiles, len(srcFiles))
-
-	for i := range srcFiles {
-		srcName := srcFiles[i].Name()
-		dstName := dstFiles[i].Name()
-		require.Equal(t, srcName, dstName)
-
-		srcPath := filepath.Join(src, srcName)
-		dstPath := filepath.Join(dst, dstName)
-
-		srcInfo, err := fs.Stat(srcPath)
-		require.NoError(t, err)
-
-		dstInfo, err := fs.Stat(dstPath)
-		require.NoError(t, err)
-
-		assert.Equal(t, srcInfo.Mode(), dstInfo.Mode())
-
-		if srcInfo.IsDir() {
-			assert.True(t, dstInfo.IsDir())
-			checkFolder(t, fs, srcPath, dstPath)
-		} else {
-			srcData, err := afero.ReadFile(fs, srcPath)
-			require.NoError(t, err)
-
-			dstData, err := afero.ReadFile(fs, dstPath)
-			require.NoError(t, err)
-
-			assert.Equal(t, srcData, dstData)
-		}
-	}
 }
