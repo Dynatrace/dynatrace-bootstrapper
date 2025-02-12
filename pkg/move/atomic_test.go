@@ -14,12 +14,11 @@ func mockCopyFuncWithAtomicCheck(t *testing.T, isSuccessful bool) copyFunc {
 	t.Helper()
 
 	return func(fs afero.Afero, _, targetFolder string) error {
-
 		// according to the inner copyFunc, the targetFolder should be the workFolder
 		// the actual targetFolder will be created outside the copyFunc by the atomic wrapper using fs.Rename
 		require.Equal(t, workFolder, targetFolder)
 
-		// the atomicWrapper should already have created the base workFolder
+		// the atomic wrapper should already have created the base workFolder
 		exists, err := fs.DirExists(targetFolder)
 		require.NoError(t, err)
 		require.True(t, exists)
@@ -28,6 +27,7 @@ func mockCopyFuncWithAtomicCheck(t *testing.T, isSuccessful bool) copyFunc {
 			file, err := fs.Create(filepath.Join(targetFolder, "test.txt"))
 			require.NoError(t, err)
 			file.Close()
+
 			return nil
 		}
 

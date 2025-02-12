@@ -25,7 +25,7 @@ func atomic(copy copyFunc) copyFunc {
 			return err
 		}
 
-		defer func(){
+		defer func() {
 			if err != nil {
 				if cleanupErr := fs.RemoveAll(workFolder); cleanupErr != nil {
 					logrus.Errorf("Failed cleanup of workdir after failure: %v", err)
