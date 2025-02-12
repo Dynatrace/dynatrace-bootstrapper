@@ -16,7 +16,7 @@ RUN --mount=type=cache,target="/root/.cache/go-build" \
     go build -tags -trimpath -ldflags="${GO_LINKER_ARGS}" \
     -o ./build/_output/bin/dynatrace-bootstrapper
 
-FROM public.ecr.aws/dynatrace/dynatrace-codemodules:1.299.73.20250109-153420 AS codemodules
+FROM --platform=$TARGETPLATFORM public.ecr.aws/dynatrace/dynatrace-codemodules:1.299.73.20250109-153420 AS codemodules
 
 # copy bootstrapper binary
 COPY --from=build /app/build/_output/bin /opt/dynatrace/oneagent/agent/lib64/
@@ -25,8 +25,8 @@ LABEL name="Dynatrace Bootstrapper" \
       vendor="Dynatrace LLC" \
       maintainer="Dynatrace LLC"
 
-      ENV USER_UID=1001 \
-          USER_NAME=dynatrace-bootstrapper
+ENV USER_UID=1001 \
+    USER_NAME=dynatrace-bootstrapper
 
 USER ${USER_UID}:${USER_UID}
 
