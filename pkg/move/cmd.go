@@ -42,7 +42,7 @@ func Execute(fs afero.Afero) error {
 	}
 
 	if workFolder != "" {
-		copy = atomic(copy)
+		copy = atomic(workFolder, copy)
 	}
 
 	return copy(fs, sourceFolder, targetFolder)

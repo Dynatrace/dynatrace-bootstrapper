@@ -37,6 +37,7 @@ func mockCopyFuncWithAtomicCheck(t *testing.T, isSuccessful bool) copyFunc {
 func TestAtomic(t *testing.T) {
 	source := "/source"
 	target := "/target"
+	work := "/work"
 
 	t.Run("success -> target is present", func(t *testing.T) {
 		fs := afero.Afero{Fs: afero.NewMemMapFs()}
@@ -45,7 +46,7 @@ func TestAtomic(t *testing.T) {
 		err := fs.MkdirAll(source, 0755)
 		assert.NoError(t, err)
 
-		atomicCopy := atomic(mockCopyFuncWithAtomicCheck(t, true))
+		atomicCopy := atomic(work, mockCopyFuncWithAtomicCheck(t, true))
 
 		err = atomicCopy(fs, source, target)
 		assert.NoError(t, err)
@@ -66,9 +67,8 @@ func TestAtomic(t *testing.T) {
 	})
 	t.Run("fail -> target is not present", func(t *testing.T) {
 		fs := afero.Afero{Fs: afero.NewMemMapFs()}
-		workFolder = "/work"
 
-		atomicCopy := atomic(mockCopyFuncWithAtomicCheck(t, false))
+		atomicCopy := atomic(work, mockCopyFuncWithAtomicCheck(t, false))
 
 		err := atomicCopy(fs, source, target)
 		assert.Error(t, err)
