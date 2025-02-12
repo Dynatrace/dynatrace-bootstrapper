@@ -8,10 +8,10 @@ import (
 )
 
 func atomic(copy copyFunc) copyFunc {
-	return func(fs afero.Afero, from, to string) error {
+	return func(fs afero.Afero, from, to string) (err error) {
 		logrus.Infof("Setting up atomic operation from %s to %s", from, to)
 
-		err := fs.RemoveAll(workFolder)
+		err = fs.RemoveAll(workFolder)
 		if err != nil {
 			logrus.Errorf("Failed initial cleanup of workdir: %v", err)
 
@@ -24,6 +24,14 @@ func atomic(copy copyFunc) copyFunc {
 
 			return err
 		}
+
+		defer func(){
+			if err != nil {
+				if cleanupErr := fs.RemoveAll(workFolder); cleanupErr != nil {
+					logrus.Errorf("Failed cleanup of workdir after failure: %v", err)
+				}
+			}
+		}()
 
 		err = copy(fs, from, workFolder)
 		if err != nil {

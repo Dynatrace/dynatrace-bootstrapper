@@ -8,12 +8,10 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-const tmpWorkFolder = "/work/tmp"
-
 func mockCopyFunc(isSuccessful bool) copyFunc {
-	return func(fs afero.Afero, _, _ string) error {
+	return func(fs afero.Afero, _, targetFolder string) error {
 		if isSuccessful {
-			_ = fs.MkdirAll(tmpWorkFolder, 0755)
+			_ = fs.MkdirAll(targetFolder, 0755)
 			return nil
 		}
 
@@ -38,6 +36,10 @@ func TestAtomic(t *testing.T) {
 		exists, err := fs.DirExists(workFolder)
 		assert.NoError(t, err)
 		assert.False(t, exists)
+
+		exists, err = fs.DirExists(targetFolder)
+		assert.NoError(t, err)
+		assert.True(t, exists)
 	})
 	t.Run("fail -> targetFolder is not present", func(t *testing.T) {
 		fs := afero.Afero{Fs: afero.NewMemMapFs()}
@@ -52,6 +54,10 @@ func TestAtomic(t *testing.T) {
 		assert.Equal(t, "some mock error", err.Error())
 
 		exists, err := fs.DirExists(workFolder)
+		assert.NoError(t, err)
+		assert.False(t, exists)
+
+		exists, err = fs.DirExists(targetFolder)
 		assert.NoError(t, err)
 		assert.False(t, exists)
 	})
