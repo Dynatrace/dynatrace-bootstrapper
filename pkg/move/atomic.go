@@ -17,10 +17,6 @@ func atomic(copy copyFunc) copyFunc {
 
 			return err
 		}
-		defer func(){
-			// first remove is there for safety in case of unexpected error, this for the proper cleanup
-			_ = fs.RemoveAll(workFolder)
-		}()
 
 		err = fs.MkdirAll(workFolder, os.ModePerm)
 		if err != nil {
@@ -28,13 +24,6 @@ func atomic(copy copyFunc) copyFunc {
 
 			return err
 		}
-
-		defer func() {
-			err := fs.RemoveAll(workFolder)
-			if err != nil {
-				logrus.Errorf("Failed to do cleanup after run: %v", err)
-			}
-		}()
 
 		err = copy(fs, from, workFolder)
 		if err != nil {
