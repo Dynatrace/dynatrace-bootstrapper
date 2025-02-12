@@ -24,18 +24,20 @@ type FileEntry struct {
 	MD5     string `json:"md5"`
 }
 
-func copyByTechnology(fs afero.Afero) error {
-	logrus.Infof("Starting to copy (filtered) from %s to %s", sourceFolder, targetFolder)
+var _ copyFunc = copyByTechnology
 
-	filteredPaths, err := filterFilesByTechnology(fs, sourceFolder, strings.Split(technology, ","))
+func copyByTechnology(fs afero.Afero, from string, to string) error {
+	logrus.Infof("Starting to copy (filtered) from %s to %s", from, to)
+
+	filteredPaths, err := filterFilesByTechnology(fs, from, strings.Split(technology, ","))
 	if err != nil {
 		return err
 	}
 
 	for _, path := range filteredPaths {
-		targetFile := filepath.Join(targetFolder, strings.Split(path, sourceFolder)[1])
+		targetFile := filepath.Join(to, strings.Split(path, from)[1])
 
-		sourceStatMode, err := fs.Stat(sourceFolder)
+		sourceStatMode, err := fs.Stat(from)
 		if err != nil {
 			logrus.Errorf("Error checking stat mode from source folder: %v", err)
 

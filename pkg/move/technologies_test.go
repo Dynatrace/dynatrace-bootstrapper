@@ -15,9 +15,6 @@ func TestCopyFolderWithTechnologyFiltering(t *testing.T) {
 	sourceDir := "/source"
 	targetDir := "/target"
 
-	sourceFolder = sourceDir
-	targetFolder = targetDir
-
 	_ = fs.MkdirAll(sourceDir, 0755)
 	_ = fs.MkdirAll(targetDir, 0755)
 
@@ -51,7 +48,7 @@ func TestCopyFolderWithTechnologyFiltering(t *testing.T) {
 		})
 
 		technology = "java"
-		err := copyByTechnology(fs)
+		err := copyByTechnology(fs, sourceDir, targetDir)
 		require.NoError(t, err)
 
 		assertFileExists(t, fs, filepath.Join(targetDir, "fileA1.txt"))
@@ -66,7 +63,7 @@ func TestCopyFolderWithTechnologyFiltering(t *testing.T) {
 		})
 
 		technology = "java,python"
-		err := copyByTechnology(fs)
+		err := copyByTechnology(fs, sourceDir, targetDir)
 		require.NoError(t, err)
 
 		assertFileExists(t, fs, filepath.Join(targetDir, "fileA1.txt"))
@@ -81,7 +78,7 @@ func TestCopyFolderWithTechnologyFiltering(t *testing.T) {
 		})
 
 		technology = "php"
-		err := copyByTechnology(fs)
+		err := copyByTechnology(fs, sourceDir, targetDir)
 		require.NoError(t, err)
 
 		assertFileNotExists(t, fs, filepath.Join(targetDir, "fileA1.txt"))

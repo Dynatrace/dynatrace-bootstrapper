@@ -10,24 +10,26 @@ import (
 	"github.com/spf13/afero"
 )
 
-type copyFunc func(fs afero.Afero) error
+type copyFunc func(fs afero.Afero, from, to string) error
 
-func simpleCopy(fs afero.Afero) error {
-	logrus.Infof("Starting to copy (simple) from %s to %s", sourceFolder, targetFolder)
+var _ copyFunc = simpleCopy
 
-	err := copyFolder(fs, sourceFolder, targetFolder)
+func simpleCopy(fs afero.Afero, from, to string) error {
+	logrus.Infof("Starting to copy (simple) from %s to %s", from, to)
+
+	err := copyFolder(fs, from, to)
 	if err != nil {
 		logrus.Errorf("Error moving folder: %v", err)
 
 		return err
 	}
 
-	logrus.Infof("Successfully copied from %s to %s", sourceFolder, targetFolder)
+	logrus.Infof("Successfully copied from %s to %s", from, to)
 
 	return nil
 }
 
-func copyFolder(fs afero.Fs, from string, to string) error {
+func copyFolder(fs afero.Fs, from, to string) error {
 	fromInfo, err := fs.Stat(from)
 	if err != nil {
 		return errors.WithStack(err)
@@ -71,8 +73,8 @@ func copyFolder(fs afero.Fs, from string, to string) error {
 	return nil
 }
 
-func copyFile(fs afero.Fs, sourcePath string, destinationPath string) error {
-	sourceFile, err := fs.Open(sourcePath)
+func copyFile(fs afero.Fs, from string, to string) error {
+	sourceFile, err := fs.Open(from)
 	if err != nil {
 		return errors.WithStack(err)
 	}
@@ -83,7 +85,7 @@ func copyFile(fs afero.Fs, sourcePath string, destinationPath string) error {
 		return errors.WithStack(err)
 	}
 
-	destinationFile, err := fs.OpenFile(destinationPath, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, sourceInfo.Mode())
+	destinationFile, err := fs.OpenFile(to, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, sourceInfo.Mode())
 	if err != nil {
 		return errors.WithStack(err)
 	}

@@ -11,7 +11,7 @@ import (
 const tmpWorkFolder = "/work/tmp"
 
 func mockCopyFunc(isSuccessful bool) copyFunc {
-	return func(fs afero.Afero) error {
+	return func(fs afero.Afero, _, _ string) error {
 		if isSuccessful {
 			_ = fs.MkdirAll(tmpWorkFolder, 0755)
 			return nil
@@ -32,7 +32,7 @@ func TestAtomic(t *testing.T) {
 
 		atomicCopy := atomic(mockCopyFunc(true))
 
-		err = atomicCopy(fs)
+		err = atomicCopy(fs, sourceFolder, targetFolder)
 		assert.NoError(t, err)
 
 		exists, err := fs.DirExists(workFolder)
@@ -47,7 +47,7 @@ func TestAtomic(t *testing.T) {
 
 		atomicCopy := atomic(mockCopyFunc(false))
 
-		err := atomicCopy(fs)
+		err := atomicCopy(fs, sourceFolder, targetFolder)
 		assert.Error(t, err)
 		assert.Equal(t, "some mock error", err.Error())
 

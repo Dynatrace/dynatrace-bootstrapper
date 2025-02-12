@@ -45,5 +45,5 @@ func Execute(fs afero.Afero) error {
 		copy = atomic(copy)
 	}
 
-	return copy(fs)
+	return copy(fs, sourceFolder, targetFolder)
 }

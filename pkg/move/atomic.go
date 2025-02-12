@@ -8,8 +8,8 @@ import (
 )
 
 func atomic(copy copyFunc) copyFunc {
-	return func(fs afero.Afero) error {
-		logrus.Infof("Starting to copy (atomic) from %s to %s", sourceFolder, targetFolder)
+	return func(fs afero.Afero, from, to string) error {
+		logrus.Infof("Setting up atomic operation from %s to %s", from, to)
 
 		err := fs.RemoveAll(workFolder)
 		if err != nil {
@@ -32,14 +32,21 @@ func atomic(copy copyFunc) copyFunc {
 			}
 		}()
 
-		err = copy(fs)
+		err = copy(fs, from, workFolder)
+		if err != nil {
+			logrus.Errorf("Error copying folder: %v", err)
+
+			return err
+		}
+
+		err = fs.Rename(workFolder, to)
 		if err != nil {
 			logrus.Errorf("Error moving folder: %v", err)
 
 			return err
 		}
 
-		logrus.Infof("Successfully copied from %s to %s", sourceFolder, targetFolder)
+		logrus.Infof("Successfully finalized atomic operation from %s to %s", workFolder, to)
 
 		return nil
 	}
