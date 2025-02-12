@@ -13,18 +13,18 @@ import (
 func mockCopyFuncWithAtomicCheck(t *testing.T, isSuccessful bool) copyFunc {
 	t.Helper()
 
-	return func(fs afero.Afero, _, targetFolder string) error {
-		// according to the inner copyFunc, the targetFolder should be the workFolder
-		// the actual targetFolder will be created outside the copyFunc by the atomic wrapper using fs.Rename
-		require.Equal(t, workFolder, targetFolder)
+	return func(fs afero.Afero, _, target string) error {
+		// according to the inner copyFunc, the target should be the workFolder
+		// the actual target will be created outside the copyFunc by the atomic wrapper using fs.Rename
+		require.Equal(t, workFolder, target)
 
 		// the atomic wrapper should already have created the base workFolder
-		exists, err := fs.DirExists(targetFolder)
+		exists, err := fs.DirExists(target)
 		require.NoError(t, err)
 		require.True(t, exists)
 
 		if isSuccessful {
-			file, err := fs.Create(filepath.Join(targetFolder, "test.txt"))
+			file, err := fs.Create(filepath.Join(target, "test.txt"))
 			require.NoError(t, err)
 			file.Close()
 
@@ -35,49 +35,52 @@ func mockCopyFuncWithAtomicCheck(t *testing.T, isSuccessful bool) copyFunc {
 	}
 }
 func TestAtomic(t *testing.T) {
-	t.Run("success -> targetFolder is present", func(t *testing.T) {
+	source := "/source"
+	target := "/target"
+
+	t.Run("success -> target is present", func(t *testing.T) {
 		fs := afero.Afero{Fs: afero.NewMemMapFs()}
-		sourceFolder = "/source"
-		targetFolder = "/target"
 		workFolder = "/work"
 
-		err := fs.MkdirAll(sourceFolder, 0755)
+		err := fs.MkdirAll(source, 0755)
 		assert.NoError(t, err)
 
 		atomicCopy := atomic(mockCopyFuncWithAtomicCheck(t, true))
 
-		err = atomicCopy(fs, sourceFolder, targetFolder)
+		err = atomicCopy(fs, source, target)
 		assert.NoError(t, err)
 
-		isEmpty, err := fs.DirExists(workFolder)
-		assert.NoError(t, err)
-		assert.False(t, isEmpty)
-
-		isEmpty, err = fs.DirExists(targetFolder)
-		assert.NoError(t, err)
-		assert.True(t, isEmpty)
-
-		isEmpty, err = fs.IsEmpty(targetFolder)
-		assert.NoError(t, err)
-		assert.False(t, isEmpty)
-	})
-	t.Run("fail -> targetFolder is not present", func(t *testing.T) {
-		fs := afero.Afero{Fs: afero.NewMemMapFs()}
-		sourceFolder = "/source"
-		targetFolder = "/target"
-		workFolder = "/work"
-
-		atomicCopy := atomic(mockCopyFuncWithAtomicCheck(t, false))
-
-		err := atomicCopy(fs, sourceFolder, targetFolder)
-		assert.Error(t, err)
-		assert.Equal(t, "some mock error", err.Error())
+		require.NotEqual(t, workFolder, target)
 
 		exists, err := fs.DirExists(workFolder)
 		assert.NoError(t, err)
 		assert.False(t, exists)
 
-		exists, err = fs.DirExists(targetFolder)
+		exists, err = fs.DirExists(target)
+		assert.NoError(t, err)
+		assert.True(t, exists)
+
+		isEmpty, err := fs.IsEmpty(target)
+		assert.NoError(t, err)
+		assert.False(t, isEmpty)
+	})
+	t.Run("fail -> target is not present", func(t *testing.T) {
+		fs := afero.Afero{Fs: afero.NewMemMapFs()}
+		workFolder = "/work"
+
+		atomicCopy := atomic(mockCopyFuncWithAtomicCheck(t, false))
+
+		err := atomicCopy(fs, source, target)
+		assert.Error(t, err)
+		assert.Equal(t, "some mock error", err.Error())
+
+		require.NotEqual(t, workFolder, target)
+
+		exists, err := fs.DirExists(workFolder)
+		assert.NoError(t, err)
+		assert.False(t, exists)
+
+		exists, err = fs.DirExists(target)
 		assert.NoError(t, err)
 		assert.False(t, exists)
 	})
