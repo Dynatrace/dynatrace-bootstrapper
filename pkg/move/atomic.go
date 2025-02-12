@@ -17,6 +17,10 @@ func atomic(copy copyFunc) copyFunc {
 
 			return err
 		}
+		defer func(){
+			// first remove is there for safety in case of unexpected error, this for the proper cleanup
+			_ = fs.RemoveAll(workFolder)
+		}()
 
 		err = fs.MkdirAll(workFolder, os.ModePerm)
 		if err != nil {
