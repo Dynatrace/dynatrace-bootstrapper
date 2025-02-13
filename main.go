@@ -11,6 +11,16 @@ import (
 	"github.com/spf13/cobra"
 )
 
+const (
+	sourceFolderFlag = "source"
+	targetFolderFlag = "target"
+)
+
+var (
+	sourceFolder string
+	targetFolder string
+)
+
 func main() {
 	cmd := bootstrapper(afero.NewOsFs())
 
@@ -33,6 +43,14 @@ func bootstrapper(fs afero.Fs) *cobra.Command {
 	return cmd
 }
 
+func AddFlags(cmd *cobra.Command){
+	cmd.PersistentFlags().StringVar(&sourceFolder, sourceFolderFlag, "", "Base path where to copy the codemodule FROM.")
+	_ = cmd.MarkPersistentFlagRequired(sourceFolderFlag)
+
+	cmd.PersistentFlags().StringVar(&targetFolder, targetFolderFlag, "", "Base path where to copy the codemodule TO.")
+	_ = cmd.MarkPersistentFlagRequired(targetFolderFlag)
+}
+
 func run(fs afero.Fs) func(cmd *cobra.Command, _ []string) error {
 	return func(cmd *cobra.Command, _ []string) error {
 		version.Print()
@@ -46,11 +64,11 @@ func run(fs afero.Fs) func(cmd *cobra.Command, _ []string) error {
 			Fs: fs,
 		}
 
-		err = move.Execute(aferoFs)
+		err = move.Execute(aferoFs, sourceFolder, targetFolder)
 		if err != nil {
 			return err
 		}
 
-		return configure.Execute(aferoFs)
+		return configure.Execute(aferoFs, targetFolder)
 	}
 }

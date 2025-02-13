@@ -10,22 +10,21 @@ import (
 )
 
 func TestExecute(t *testing.T) {
+	sourceDir := "/source"
+	targetDir := "/target"
+
 	t.Run("package global vars are used", func(t *testing.T) {
 		fs := afero.Afero{Fs: afero.NewMemMapFs()}
 
 		// Create source directory and files
-		sourceDir := "/source"
-		targetDir := "/target"
 		workDir := "/work"
 		_ = fs.MkdirAll(sourceDir, 0755)
 		_ = afero.WriteFile(fs, sourceDir+"/file1.txt", []byte("file1 content"), 0644)
 		_ = afero.WriteFile(fs, sourceDir+"/file2.txt", []byte("file2 content"), 0644)
 
-		sourceFolder = sourceDir
-		targetFolder = targetDir
 		workFolder = workDir
 
-		err := Execute(fs)
+		err := Execute(fs, sourceDir, targetDir)
 		require.NoError(t, err)
 
 		// Check if the target directory and files exist
@@ -58,9 +57,6 @@ func TestExecute(t *testing.T) {
 	t.Run("execute with technology param", func(t *testing.T) {
 		fs := afero.Afero{Fs: afero.NewMemMapFs()}
 
-		sourceDir := "/source"
-		targetDir := "/target"
-
 		manifestContent := `{
 			"version": "1.0",
 			"technologies": {
@@ -83,11 +79,9 @@ func TestExecute(t *testing.T) {
 		_ = afero.WriteFile(fs, sourceDir+"/fileA1.txt", []byte("fileA1 content"), 0644)
 		_ = afero.WriteFile(fs, sourceDir+"/fileA2.txt", []byte("fileA2 content"), 0644)
 
-		sourceFolder = sourceDir
-		targetFolder = targetDir
 		technology = technologyList
 
-		err := Execute(fs)
+		err := Execute(fs, sourceDir, targetDir)
 		require.NoError(t, err)
 
 		// Check if the target directory and files exist

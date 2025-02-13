@@ -6,6 +6,7 @@ import (
 	"path/filepath"
 
 	fsutils "github.com/Dynatrace/dynatrace-bootstrapper/pkg/utils/fs"
+	"github.com/sirupsen/logrus"
 	"github.com/spf13/afero"
 )
 
@@ -17,7 +18,7 @@ const (
 
 )
 
-func Configure(fs afero.Afero, inputDir string, configDir string) error {
+func Configure(fs afero.Afero, inputDir, configDir string) error {
 	content, err := getFromFs(fs, inputDir)
 	if os.IsNotExist(err) {
 		return nil
@@ -25,6 +26,7 @@ func Configure(fs afero.Afero, inputDir string, configDir string) error {
 		return err
 	}
 
+	logrus.Infof("Configuring curl_options.conf, config-directory: %s", configDir)
 
 	return createFile(fs, configDir, content)
 }
