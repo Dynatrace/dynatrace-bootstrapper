@@ -3,11 +3,22 @@ package main
 import (
 	"os"
 
+	"github.com/Dynatrace/dynatrace-bootstrapper/pkg/configure"
 	"github.com/Dynatrace/dynatrace-bootstrapper/pkg/move"
 	"github.com/Dynatrace/dynatrace-bootstrapper/pkg/version"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/afero"
 	"github.com/spf13/cobra"
+)
+
+const (
+	sourceFolderFlag       = "source"
+	targetFolderFlag       = "target"
+)
+
+var (
+	sourceFolder        string
+	targetFolder        string
 )
 
 func main() {
@@ -20,13 +31,24 @@ func main() {
 	}
 }
 
+func AddFlags(cmd *cobra.Command) {
+	cmd.PersistentFlags().StringVar(&sourceFolder, sourceFolderFlag, "", "Base path where to copy the codemodule FROM.")
+	_ = cmd.MarkPersistentFlagRequired(sourceFolderFlag)
+
+	cmd.PersistentFlags().StringVar(&targetFolder, targetFolderFlag, "", "Base path where to copy the codemodule TO.")
+	_ = cmd.MarkPersistentFlagRequired(targetFolderFlag)
+
+}
+
 func bootstrapper(fs afero.Fs) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:  "dynatrace-bootstrapper",
 		RunE: run(fs),
 	}
 
+	AddFlags(cmd)
 	move.AddFlags(cmd)
+	configure.AddFlags(cmd)
 
 	return cmd
 }
@@ -40,8 +62,15 @@ func run(fs afero.Fs) func(cmd *cobra.Command, _ []string) error {
 			return err
 		}
 
-		return move.Execute(afero.Afero{
+		aferoFs := afero.Afero{
 			Fs: fs,
-		})
+		}
+
+		err = move.Execute(aferoFs, sourceFolder, targetFolder)
+		if err != nil {
+			return err
+		}
+
+		return configure.Execute(aferoFs, targetFolder)
 	}
 }
