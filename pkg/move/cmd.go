@@ -6,17 +6,23 @@ import (
 )
 
 const (
-	sourceFolderFlag = "source"
-	targetFolderFlag = "target"
-	workFolderFlag   = "work"
-	technologyFlag   = "technology"
+	sourceFolderFlag       = "source"
+	targetFolderFlag       = "target"
+	workFolderFlag         = "work"
+	technologyFlag         = "technology"
+	configDirFlag          = "config-directory"
+	attributeFlag          = "attribute"
+	attributeContainerFlag = "attribute-container"
 )
 
 var (
-	sourceFolder string
-	targetFolder string
-	workFolder   string
-	technology   string
+	sourceFolder        string
+	targetFolder        string
+	workFolder          string
+	technology          string
+	configDirectory     string
+	attribute           []string
+	attributeContainers []string
 )
 
 func AddFlags(cmd *cobra.Command) {
@@ -30,11 +36,24 @@ func AddFlags(cmd *cobra.Command) {
 
 	cmd.PersistentFlags().StringVar(&technology, technologyFlag, "", "(Optional) Comma-separated list of technologies to filter files.")
 
+	cmd.PersistentFlags().StringVar(&configDirectory, configDirFlag, "", "(Optional) Path where enrichment/configuration files will be written.")
+
+	cmd.PersistentFlags().StringArrayVar(&attribute, attributeFlag, []string{}, "(Optional) Pod-specific attributes in key=value format.")
+
+	cmd.PersistentFlags().StringArrayVar(&attributeContainers, attributeContainerFlag, []string{}, "(Optional) Container-specific attributes in JSON format.")
+
 }
 
 // Execute moves the contents of a folder to another via copying.
 // This could be a simple os.Rename, however that will not work if the source and target are on different disk.
 func Execute(fs afero.Afero) error {
+	if configDirectory != "" {
+		err := writeConfigFiles(fs)
+		if err != nil {
+			return err
+		}
+	}
+
 	copy := simpleCopy
 
 	if technology != "" {
