@@ -5,6 +5,7 @@ import (
 	"path/filepath"
 	"testing"
 
+	"github.com/go-logr/logr"
 	"github.com/spf13/afero"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -13,7 +14,7 @@ import (
 func mockCopyFuncWithAtomicCheck(t *testing.T, isSuccessful bool) copyFunc {
 	t.Helper()
 
-	return func(fs afero.Afero, _, target string) error {
+	return func(log logr.Logger, fs afero.Afero, _, target string) error {
 		// according to the inner copyFunc, the target should be the workFolder
 		// the actual target will be created outside the copyFunc by the atomic wrapper using fs.Rename
 		require.Equal(t, workFolder, target)
@@ -48,7 +49,7 @@ func TestAtomic(t *testing.T) {
 
 		atomicCopy := atomic(work, mockCopyFuncWithAtomicCheck(t, true))
 
-		err = atomicCopy(fs, source, target)
+		err = atomicCopy(testLog, fs, source, target)
 		assert.NoError(t, err)
 
 		require.NotEqual(t, workFolder, target)
@@ -70,7 +71,7 @@ func TestAtomic(t *testing.T) {
 
 		atomicCopy := atomic(work, mockCopyFuncWithAtomicCheck(t, false))
 
-		err := atomicCopy(fs, source, target)
+		err := atomicCopy(testLog, fs, source, target)
 		assert.Error(t, err)
 		assert.Equal(t, "some mock error", err.Error())
 

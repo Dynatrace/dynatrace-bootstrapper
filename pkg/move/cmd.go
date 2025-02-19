@@ -1,6 +1,7 @@
 package move
 
 import (
+	"github.com/go-logr/logr"
 	"github.com/spf13/afero"
 	"github.com/spf13/cobra"
 )
@@ -24,7 +25,7 @@ func AddFlags(cmd *cobra.Command) {
 
 // Execute moves the contents of a folder to another via copying.
 // This could be a simple os.Rename, however that will not work if the source and target are on different disk.
-func Execute(fs afero.Afero, from, to string) error {
+func Execute(log logr.Logger, fs afero.Afero, from, to string) error {
 	copy := simpleCopy
 
 	if technology != "" {
@@ -35,5 +36,5 @@ func Execute(fs afero.Afero, from, to string) error {
 		copy = atomic(workFolder, copy)
 	}
 
-	return copy(fs, from, to)
+	return copy(log, fs, from, to)
 }

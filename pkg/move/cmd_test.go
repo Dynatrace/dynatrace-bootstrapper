@@ -2,21 +2,25 @@ package move
 
 import (
 	"fmt"
-	"path/filepath"
 	"testing"
 
+	"github.com/go-logr/zapr"
 	"github.com/spf13/afero"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"go.uber.org/zap"
 )
 
+var testLog = zapr.NewLogger(zap.NewExample())
+
 func TestExecute(t *testing.T) {
+	sourceDir := "/source"
+	targetDir := "/target"
+
 	t.Run("package global vars are used", func(t *testing.T) {
 		fs := afero.Afero{Fs: afero.NewMemMapFs()}
 
 		// Create source directory and files
-		sourceDir := "/source"
-		targetDir := "/target"
 		workDir := "/work"
 		_ = fs.MkdirAll(sourceDir, 0755)
 		_ = afero.WriteFile(fs, sourceDir+"/file1.txt", []byte("file1 content"), 0644)
@@ -24,7 +28,7 @@ func TestExecute(t *testing.T) {
 
 		workFolder = workDir
 
-		err := Execute(fs, sourceDir, targetDir)
+		err := Execute(testLog, fs, sourceDir, targetDir)
 		require.NoError(t, err)
 
 		// Check if the target directory and files exist
@@ -57,9 +61,6 @@ func TestExecute(t *testing.T) {
 	t.Run("execute with technology param", func(t *testing.T) {
 		fs := afero.Afero{Fs: afero.NewMemMapFs()}
 
-		sourceDir := "/source"
-		targetDir := "/target"
-
 		manifestContent := `{
 			"version": "1.0",
 			"technologies": {
@@ -84,7 +85,7 @@ func TestExecute(t *testing.T) {
 
 		technology = technologyList
 
-		err := Execute(fs, sourceDir, targetDir)
+		err := Execute(testLog, fs, sourceDir, targetDir)
 		require.NoError(t, err)
 
 		// Check if the target directory and files exist
@@ -124,42 +125,4 @@ func assertFileNotExists(t *testing.T, fs afero.Fs, path string) {
 	exists, err := afero.Exists(fs, path)
 	assert.NoError(t, err)
 	assert.False(t, exists, fmt.Sprintf("file should not exist: %s", path))
-}
-
-func checkFolder(t *testing.T, fs afero.Fs, src, dst string) {
-	srcFiles, err := afero.ReadDir(fs, src)
-	require.NoError(t, err)
-	dstFiles, err := afero.ReadDir(fs, dst)
-	require.NoError(t, err)
-	require.Len(t, dstFiles, len(srcFiles))
-
-	for i := range srcFiles {
-		srcName := srcFiles[i].Name()
-		dstName := dstFiles[i].Name()
-		require.Equal(t, srcName, dstName)
-
-		srcPath := filepath.Join(src, srcName)
-		dstPath := filepath.Join(dst, dstName)
-
-		srcInfo, err := fs.Stat(srcPath)
-		require.NoError(t, err)
-
-		dstInfo, err := fs.Stat(dstPath)
-		require.NoError(t, err)
-
-		assert.Equal(t, srcInfo.Mode(), dstInfo.Mode())
-
-		if srcInfo.IsDir() {
-			assert.True(t, dstInfo.IsDir())
-			checkFolder(t, fs, srcPath, dstPath)
-		} else {
-			srcData, err := afero.ReadFile(fs, srcPath)
-			require.NoError(t, err)
-
-			dstData, err := afero.ReadFile(fs, dstPath)
-			require.NoError(t, err)
-
-			assert.Equal(t, srcData, dstData)
-		}
-	}
 }

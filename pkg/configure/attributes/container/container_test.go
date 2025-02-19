@@ -24,19 +24,19 @@ func TestParseAttributes(t *testing.T) {
 			},
 		}
 
-		result, err := ParseAttributes()
+		result, err := parseAttributes(attributes)
 		require.NoError(t, err)
 		assert.Equal(t, expected, result)
 	})
 	t.Run("empty input => should return empty list", func(t *testing.T) {
 		attributes = []string{}
-		result, err := ParseAttributes()
+		result, err := parseAttributes(attributes)
 		require.NoError(t, err)
 		assert.Empty(t, result)
 	})
 	t.Run("invalid JSON format => should return an error", func(t *testing.T) {
 		attributes = []string{"invalid_json"}
-		result, err := ParseAttributes()
+		result, err := parseAttributes(attributes)
 		require.Error(t, err)
 		assert.Nil(t, result)
 	})
@@ -58,7 +58,7 @@ func TestParseAttributes(t *testing.T) {
 			},
 		}
 
-		result, err := ParseAttributes()
+		result, err := parseAttributes(attributes)
 		require.Error(t, err)
 		assert.NotEqual(t, expected, result)
 		assert.Nil(t, result)
