@@ -2,7 +2,6 @@ package container
 
 import (
 	"encoding/json"
-	"strings"
 
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
@@ -32,30 +31,25 @@ type Attributes struct {
 	ContainerName string `json:"k8s.container.name"`
 }
 
-func ParseAttributes() (*Attributes, error) {
-	return parseAttributes(attributes)
+func ParseAttributes() ([]Attributes, error) {
+	var attributeList []Attributes
+	for _, attr := range attributes {
+		parsedAttr, err := parseAttributes(attr)
+		if err != nil {
+			return nil, err
+		}
+
+		attributeList = append(attributeList, *parsedAttr)
+	}
+	return attributeList, nil
 }
 
-func parseAttributes(rawAttributes []string) (*Attributes, error) {
-	logrus.Infof("Starting to parse container attributes for: %s", rawAttributes)
-
-	rawMap := make(map[string]string)
-
-	for _, attr := range rawAttributes {
-		parts := strings.Split(attr, "=")
-		if len(parts) == 2 {
-			rawMap[parts[0]] = parts[1]
-		}
-	}
-
-	raw, err := json.Marshal(rawMap)
-	if err != nil {
-		return nil, err
-	}
+func parseAttributes(rawAttribute string) (*Attributes, error) {
+	logrus.Infof("Starting to parse container attributes for: %s", rawAttribute)
 
 	var result Attributes
 
-	err = json.Unmarshal(raw, &result)
+	err := json.Unmarshal([]byte(rawAttribute), &result)
 	if err != nil {
 		return nil, err
 	}

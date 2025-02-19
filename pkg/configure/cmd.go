@@ -1,8 +1,12 @@
 package configure
 
 import (
+	"path/filepath"
+
 	"github.com/Dynatrace/dynatrace-bootstrapper/pkg/configure/attributes/container"
 	"github.com/Dynatrace/dynatrace-bootstrapper/pkg/configure/attributes/pod"
+	"github.com/Dynatrace/dynatrace-bootstrapper/pkg/configure/config_files"
+	"github.com/sirupsen/logrus"
 	"github.com/spf13/afero"
 	"github.com/spf13/cobra"
 )
@@ -28,14 +32,33 @@ func Execute(fs afero.Afero, to string) error {
 		return nil
 	}
 
+	path := filepath.Join(to, configDirectory)
+
 	podAttr, err := pod.ParseAttributes()
 	if err != nil {
 		return err
 	}
 
-	containerAttr, err := container.ParseAttributes()
+	containerAttrs, err := container.ParseAttributes()
 	if err != nil {
 		return err
+	}
+
+	logrus.Info("Starting to configure enrichment files")
+
+	for _, containerAttr := range containerAttrs {
+		err = config_files.ConfigureEnrichmentFiles(fs, path, *podAttr, containerAttr.ContainerName)
+		if err != nil {
+			logrus.Infof("Failed to configure the enrichment files, config-directory: %s", path)
+			return err
+		}
+
+		err = config_files.ConfigureContainerConfFile(fs, path, containerAttr)
+		if err != nil {
+			logrus.Infof("Failed to configure the container-conf files, config-directory: %s", path)
+			return err
+		}
+
 	}
 
 	return nil
