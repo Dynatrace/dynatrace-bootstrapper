@@ -49,12 +49,15 @@ func ConfigureEnrichmentFiles(fs afero.Afero, configDirectory string, podAttr po
 	if podAttr.ClusterUId != "" {
 		contentJson.Raw["dt.kubernetes.cluster.id"] = podAttr.ClusterUId
 	}
+
 	if podAttr.WorkloadKind != "" {
 		contentJson.Raw["dt.kubernetes.workload.kind"] = podAttr.WorkloadKind
 	}
+
 	if podAttr.WorkloadName != "" {
 		contentJson.Raw["dt.kubernetes.workload.name"] = podAttr.WorkloadName
 	}
+
 	if containerName != "" {
 		contentJson.Raw["k8s.container.name"] = containerName
 	}
@@ -118,6 +121,7 @@ func ConfigureContainerConfFile(fs afero.Afero, configDirectory string, containe
 	}
 
 	var containerConfContent strings.Builder
+
 	prepareContainerConfContent(&containerConfContent, content, containerAttr.ImageInfo)
 
 	err = createConfigFile(fs, filepath.Join(configDirectory, containerAttr.ContainerName, oneAgentDir, containerConfFile), containerConfContent.String())

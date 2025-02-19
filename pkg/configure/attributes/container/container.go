@@ -33,6 +33,7 @@ type Attributes struct {
 
 func ParseAttributes() ([]Attributes, error) {
 	var attributeList []Attributes
+
 	for _, attr := range attributes {
 		parsedAttr, err := parseAttributes(attr)
 		if err != nil {
@@ -41,6 +42,7 @@ func ParseAttributes() ([]Attributes, error) {
 
 		attributeList = append(attributeList, *parsedAttr)
 	}
+
 	return attributeList, nil
 }
 

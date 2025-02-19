@@ -21,10 +21,10 @@ func AddFlags(cmd *cobra.Command) {
 }
 
 type Attributes struct {
+	Raw map[string]string
 	PodInfo
 	WorkloadInfo
 	ClusterInfo
-	Raw map[string]string
 }
 
 type PodInfo struct {
