@@ -39,6 +39,27 @@ The `dynatrace-bootstrapper` is a small CLI binary built into a [Dynatrace CodeM
 - This is an **optional** arg
 - The `--technology` arg defines the paths associated to the given technology in the `manifest.json` file. Only those files will be copied that match the technology. It is a comma-separated list.
 
+#### `--config-dir`
+
+*Example*: `--config-dir="/example/config/dir"`
+
+- This is an **optional** arg
+- The `--config-dir` arg defines the path where `enrichment` and `config` files will be created in.
+
+#### `--attribute`
+
+*Example*: `--attribute="k8s.pod.name=test"`
+
+- This is an **optional** arg
+- The `--attribute` arg defines the passed in Pod attributes that will be ultimately stored in the files that are stored in the `enrichment` directory. It is a key value pair.
+
+#### `--attribute-container`
+
+*Example*: `--technology="{k8s.container.name=app, container_image.registry=gcr.io, container_image.repository=test}"`
+
+- This is an **optional** arg
+- The `--attribute-container` arg defines the passed in Container attributes that will be ultimately stored in the files that are stored in the `oneagent` directory. It is a JSON formatted string.
+
 ## Development
 
 - To run tests: `make test`
