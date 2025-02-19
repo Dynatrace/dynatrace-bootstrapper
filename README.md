@@ -39,12 +39,12 @@ The `dynatrace-bootstrapper` is a small CLI binary built into a [Dynatrace CodeM
 - This is an **optional** arg
 - The `--technology` arg defines the paths associated to the given technology in the `manifest.json` file. Only those files will be copied that match the technology. It is a comma-separated list.
 
-#### `--config-dir`
+#### `--config-directory`
 
-*Example*: `--config-dir="/example/config/dir"`
+*Example*: `--config-directory="/example/config/dir"`
 
 - This is an **optional** arg
-- The `--config-dir` arg defines the path where `enrichment` and `config` files will be created in.
+- The `--config-directory` arg defines the path where `enrichment` and `config` files will be created in.
 
 #### `--attribute`
 
