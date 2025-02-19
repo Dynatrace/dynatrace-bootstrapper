@@ -12,13 +12,13 @@ import (
 )
 
 const (
-	sourceFolderFlag       = "source"
-	targetFolderFlag       = "target"
+	sourceFolderFlag = "source"
+	targetFolderFlag = "target"
 )
 
 var (
-	sourceFolder        string
-	targetFolder        string
+	sourceFolder string
+	targetFolder string
 )
 
 func main() {
@@ -71,6 +71,6 @@ func run(fs afero.Fs) func(cmd *cobra.Command, _ []string) error {
 			return err
 		}
 
-		return configure.Execute(aferoFs, targetFolder)
+		return configure.Execute(aferoFs)
 	}
 }

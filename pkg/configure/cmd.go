@@ -1,8 +1,6 @@
 package configure
 
 import (
-	"path/filepath"
-
 	"github.com/Dynatrace/dynatrace-bootstrapper/pkg/configure/attributes/container"
 	"github.com/Dynatrace/dynatrace-bootstrapper/pkg/configure/attributes/pod"
 	"github.com/Dynatrace/dynatrace-bootstrapper/pkg/configure/config_files"
@@ -27,12 +25,10 @@ func AddFlags(cmd *cobra.Command) {
 
 }
 
-func Execute(fs afero.Afero, to string) error {
+func Execute(fs afero.Afero) error {
 	if configDirectory == "" {
 		return nil
 	}
-
-	path := filepath.Join(to, configDirectory)
 
 	podAttr, err := pod.ParseAttributes()
 	if err != nil {
@@ -47,15 +43,15 @@ func Execute(fs afero.Afero, to string) error {
 	logrus.Info("Starting to configure enrichment files")
 
 	for _, containerAttr := range containerAttrs {
-		err = config_files.ConfigureEnrichmentFiles(fs, path, *podAttr, containerAttr.ContainerName)
+		err = config_files.ConfigureEnrichmentFiles(fs, configDirectory, *podAttr, containerAttr.ContainerName)
 		if err != nil {
-			logrus.Infof("Failed to configure the enrichment files, config-directory: %s", path)
+			logrus.Infof("Failed to configure the enrichment files, config-directory: %s", configDirectory)
 			return err
 		}
 
-		err = config_files.ConfigureContainerConfFile(fs, path, containerAttr)
+		err = config_files.ConfigureContainerConfFile(fs, configDirectory, containerAttr)
 		if err != nil {
-			logrus.Infof("Failed to configure the container-conf files, config-directory: %s", path)
+			logrus.Infof("Failed to configure the container-conf files, config-directory: %s", configDirectory)
 			return err
 		}
 
