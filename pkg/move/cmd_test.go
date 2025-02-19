@@ -22,11 +22,9 @@ func TestExecute(t *testing.T) {
 		_ = afero.WriteFile(fs, sourceDir+"/file1.txt", []byte("file1 content"), 0644)
 		_ = afero.WriteFile(fs, sourceDir+"/file2.txt", []byte("file2 content"), 0644)
 
-		sourceFolder = sourceDir
-		targetFolder = targetDir
 		workFolder = workDir
 
-		err := Execute(fs)
+		err := Execute(fs, sourceDir, targetDir)
 		require.NoError(t, err)
 
 		// Check if the target directory and files exist
@@ -84,11 +82,9 @@ func TestExecute(t *testing.T) {
 		_ = afero.WriteFile(fs, sourceDir+"/fileA1.txt", []byte("fileA1 content"), 0644)
 		_ = afero.WriteFile(fs, sourceDir+"/fileA2.txt", []byte("fileA2 content"), 0644)
 
-		sourceFolder = sourceDir
-		targetFolder = targetDir
 		technology = technologyList
 
-		err := Execute(fs)
+		err := Execute(fs, sourceDir, targetDir)
 		require.NoError(t, err)
 
 		// Check if the target directory and files exist
