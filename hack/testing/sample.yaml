@@ -48,6 +48,8 @@ spec:
         - --attribute=k8s.workload.kind=test-workload-kind
         - --attribute=k8s.workload.name=test-workload-name
         - --attribute=k8s.cluster.uid=test-cluster-uid
+        - --attribute=user.defined.1=test-user-defined-1
+        - --attribute=user.defined.2=test-user-defined-2
         - --attribute=dt.entity.kubernetes_cluster=test-entity-cluster
         - --attribute=k8s.node.name=test-node-name
         - --attribute-container={"k8s.container.name":"app", "container_image.registry":"gcr.io", "container_image.repository":"testrepo", "container_image.tags":"testtag", "container_image.digest":"testdigest"}
