@@ -87,5 +87,7 @@ func (pmc ProcConf) Merge(input ProcConf) ProcConf {
 		}
 	}
 
-	return FromMap(source)
+	updated := FromMap(source)
+	updated.Revision = input.Revision
+	return updated
 }

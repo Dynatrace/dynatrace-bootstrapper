@@ -1,10 +1,10 @@
 package ruxit
 
 import (
-	"encoding/json"
 	"strings"
 	"testing"
 
+	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
@@ -86,10 +86,9 @@ wincInjection off
 `
 )
 
-func TestString(t *testing.T) {
-	var ruxit ProcConf
-
-	require.NoError(t, json.Unmarshal([]byte(expectedJson), &ruxit))
+func TestConversions(t *testing.T) {
+	ruxit, err := FromJson(strings.NewReader(expectedJson))
+	require.NoError(t, err)
 
 	rawString := ruxit.ToString()
 	require.Equal(t, expectedConf, rawString)
@@ -103,4 +102,91 @@ func TestString(t *testing.T) {
 	require.Equal(t, expectedConf, rawString2)
 	require.Equal(t, ruxit.ToMap(), ruxit2.ToMap())
 	require.ElementsMatch(t, FromMap(ruxit.ToMap()).Properties, FromMap(ruxit2.ToMap()).Properties)
+}
+
+func TestMerge(t *testing.T) {
+	t.Run("empty + override == override", func(t *testing.T) {
+		source := ProcConf{}
+		override := ProcConf{
+			Properties: []Property{
+				{
+					Section: "test",
+					Key:     "key",
+					Value:   "value",
+				},
+			},
+			Revision: 1,
+		}
+
+		merged := source.Merge(override)
+
+		assert.Equal(t, override, merged)
+	})
+	t.Run("add", func(t *testing.T) {
+		expectedProps := []Property{
+			{
+				Section: "test",
+				Key:     "key1",
+				Value:   "value1",
+			},
+			{
+				Section: "test",
+				Key:     "key2",
+				Value:   "value2",
+			},
+		}
+
+		source := ProcConf{
+			Properties: []Property{
+				expectedProps[0],
+			},
+			Revision: 0,
+		}
+		override := ProcConf{
+			Properties: []Property{
+				expectedProps[1],
+			},
+			Revision: 1,
+		}
+
+		merged := source.Merge(override)
+
+		assert.Equal(t, override.Revision, merged.Revision)
+		assert.ElementsMatch(t, expectedProps, merged.Properties)
+	})
+
+	t.Run("override + add", func(t *testing.T) {
+		expectedProps := []Property{
+			{
+				Section: "test",
+				Key:     "key1",
+				Value:   "value1",
+			},
+			{
+				Section: "test",
+				Key:     "key2",
+				Value:   "value2",
+			},
+		}
+
+		source := ProcConf{
+			Properties: []Property{
+				{
+					Section: expectedProps[0].Section,
+					Key: expectedProps[0].Key,
+					Value: "old value",
+				},
+			},
+			Revision: 0,
+		}
+		override := ProcConf{
+			Properties: expectedProps,
+			Revision: 1,
+		}
+
+		merged := source.Merge(override)
+
+		assert.Equal(t, override.Revision, merged.Revision)
+		assert.ElementsMatch(t, expectedProps, merged.Properties)
+	})
 }
