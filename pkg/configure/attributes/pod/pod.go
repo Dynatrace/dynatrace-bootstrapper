@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"strings"
 
-	"github.com/sirupsen/logrus"
+	"github.com/Dynatrace/dynatrace-bootstrapper/pkg/utils/structs"
 	"github.com/spf13/cobra"
 )
 
@@ -21,10 +21,14 @@ func AddFlags(cmd *cobra.Command) {
 }
 
 type Attributes struct {
-	Raw map[string]string
-	PodInfo
-	WorkloadInfo
-	ClusterInfo
+	UserDefined  map[string]string `json:"-"`
+	PodInfo      `json:",inline"`
+	WorkloadInfo `json:",inline"`
+	ClusterInfo  `json:",inline"`
+}
+
+func (attr Attributes) ToMap() (map[string]string, error) {
+	return structs.ToMap(attr)
 }
 
 type PodInfo struct {
@@ -43,13 +47,11 @@ type ClusterInfo struct {
 	DTClusterEntity string `json:"dt.entity.kubernetes_cluster"`
 }
 
-func ParseAttributes() (*Attributes, error) {
+func ParseAttributes() (Attributes, error) {
 	return parseAttributes(attributes)
 }
 
-func parseAttributes(rawAttributes []string) (*Attributes, error) {
-	logrus.Infof("Starting to parse pod attributes for: %s", rawAttributes)
-
+func parseAttributes(rawAttributes []string) (Attributes, error) {
 	rawMap := make(map[string]string)
 
 	for _, attr := range rawAttributes {
@@ -61,17 +63,35 @@ func parseAttributes(rawAttributes []string) (*Attributes, error) {
 
 	raw, err := json.Marshal(rawMap)
 	if err != nil {
-		return nil, err
+		return Attributes{}, err
 	}
 
 	var result Attributes
 
 	err = json.Unmarshal(raw, &result)
 	if err != nil {
-		return nil, err
+		return Attributes{}, err
 	}
 
-	result.Raw = rawMap
+	err = filterOutUserDefined(rawMap, result)
+	if err != nil {
+		return Attributes{}, err
+	}
 
-	return &result, nil
+	result.UserDefined = rawMap
+
+	return result, nil
+}
+
+func filterOutUserDefined(rawInput map[string]string, parsedInput Attributes) error {
+	parsedMap, err := parsedInput.ToMap()
+	if err != nil {
+		return err
+	}
+
+	for key := range parsedMap {
+		delete(rawInput, key)
+	}
+
+	return nil
 }

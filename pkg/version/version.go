@@ -1,7 +1,7 @@
 package version
 
 import (
-	"github.com/sirupsen/logrus"
+	"github.com/go-logr/logr"
 )
 
 var (
@@ -19,6 +19,6 @@ var (
 	BuildDate = ""
 )
 
-func Print() {
-	logrus.Infof("name: %s, version: %s, commit: %s, build_date: %s", AppName, Version, Commit, BuildDate)
+func Print(log logr.Logger) {
+	log.Info("version info", "name", AppName, "version", Version, "commit", Commit, "build_date", BuildDate)
 }

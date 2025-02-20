@@ -5,8 +5,9 @@ import (
 	"path/filepath"
 	"strings"
 
+	fsutils "github.com/Dynatrace/dynatrace-bootstrapper/pkg/utils/fs"
+	"github.com/go-logr/logr"
 	"github.com/pkg/errors"
-	"github.com/sirupsen/logrus"
 	"github.com/spf13/afero"
 )
 
@@ -26,36 +27,36 @@ type FileEntry struct {
 
 var _ copyFunc = copyByTechnology
 
-func copyByTechnology(fs afero.Afero, from string, to string) error {
-	logrus.Infof("Starting to copy (filtered) from %s to %s", from, to)
+func copyByTechnology(log logr.Logger, fs afero.Afero, from string, to string) error {
+	log.Info("starting to copy (filtered)", "from", from, "to", to)
 
-	filteredPaths, err := filterFilesByTechnology(fs, from, strings.Split(technology, ","))
+	filteredPaths, err := filterFilesByTechnology(log, fs, from, strings.Split(technology, ","))
 	if err != nil {
 		return err
 	}
 
-	for _, path := range filteredPaths {
-		targetFile := filepath.Join(to, strings.Split(path, from)[1])
+	for _, sourceFilePath := range filteredPaths {
+		targetFilePath := filepath.Join(to, strings.Split(sourceFilePath, from)[1])
 
 		sourceStatMode, err := fs.Stat(from)
 		if err != nil {
-			logrus.Errorf("Error checking stat mode from source folder: %v", err)
+			log.Error(err, "error checking stat mode from source folder")
 
 			return err
 		}
 
-		err = fs.MkdirAll(filepath.Dir(targetFile), sourceStatMode.Mode())
+		err = fs.MkdirAll(filepath.Dir(targetFilePath), sourceStatMode.Mode())
 		if err != nil {
-			logrus.Errorf("Error creating target folder: %v", err)
+			log.Error(err, "error creating target folder")
 
 			return err
 		}
 
-		logrus.Infof("Copying file %s to %s", path, targetFile)
+		log.V(1).Info("copying file %s to %s", "from", sourceFilePath, "to", targetFilePath)
 
-		err = copyFile(fs, path, targetFile)
+		err = fsutils.CopyFile(fs, sourceFilePath, targetFilePath)
 		if err != nil {
-			logrus.Errorf("Error copying file: %v", err)
+			log.Error(err, "error copying file")
 
 			return err
 		}
@@ -64,7 +65,7 @@ func copyByTechnology(fs afero.Afero, from string, to string) error {
 	return nil
 }
 
-func filterFilesByTechnology(fs afero.Afero, source string, technologies []string) ([]string, error) {
+func filterFilesByTechnology(log logr.Logger, fs afero.Afero, source string, technologies []string) ([]string, error) {
 	manifestPath := filepath.Join(source, "manifest.json")
 
 	manifestFile, err := fs.ReadFile(manifestPath)
@@ -82,12 +83,12 @@ func filterFilesByTechnology(fs afero.Afero, source string, technologies []strin
 	for _, tech := range technologies {
 		techData, exists := manifest.Technologies[tech]
 		if !exists {
-			logrus.Warnf("Technology %s not found", tech)
+			log.Info("technology not found", "tech", tech)
 			continue
 		}
 
 		for arch, files := range techData {
-			logrus.Infof("Collecting files for technology %s for arch %s", tech, arch)
+			log.V(1).Info("collecting files for technology", "tech", tech, "arch", arch)
 
 			for _, file := range files {
 				paths = append(paths, filepath.Join(source, file.Path))

@@ -48,7 +48,7 @@ func TestCopyFolderWithTechnologyFiltering(t *testing.T) {
 		})
 
 		technology = "java"
-		err := copyByTechnology(fs, sourceDir, targetDir)
+		err := copyByTechnology(testLog, fs, sourceDir, targetDir)
 		require.NoError(t, err)
 
 		assertFileExists(t, fs, filepath.Join(targetDir, "fileA1.txt"))
@@ -63,7 +63,7 @@ func TestCopyFolderWithTechnologyFiltering(t *testing.T) {
 		})
 
 		technology = "java,python"
-		err := copyByTechnology(fs, sourceDir, targetDir)
+		err := copyByTechnology(testLog, fs, sourceDir, targetDir)
 		require.NoError(t, err)
 
 		assertFileExists(t, fs, filepath.Join(targetDir, "fileA1.txt"))
@@ -78,7 +78,7 @@ func TestCopyFolderWithTechnologyFiltering(t *testing.T) {
 		})
 
 		technology = "php"
-		err := copyByTechnology(fs, sourceDir, targetDir)
+		err := copyByTechnology(testLog, fs, sourceDir, targetDir)
 		require.NoError(t, err)
 
 		assertFileNotExists(t, fs, filepath.Join(targetDir, "fileA1.txt"))
@@ -115,7 +115,7 @@ func TestFilterFilesByTechnology(t *testing.T) {
 	_ = afero.WriteFile(fs, filepath.Join(sourceDir, "fileB1.txt"), []byte("b1 content"), 0644)
 
 	t.Run("filter single technology", func(t *testing.T) {
-		paths, err := filterFilesByTechnology(fs, sourceDir, []string{"java"})
+		paths, err := filterFilesByTechnology(testLog, fs, sourceDir, []string{"java"})
 		require.NoError(t, err)
 		assert.ElementsMatch(t, []string{
 			filepath.Join(sourceDir, "fileA1.txt"),
@@ -123,7 +123,7 @@ func TestFilterFilesByTechnology(t *testing.T) {
 		}, paths)
 	})
 	t.Run("filter multiple technologies", func(t *testing.T) {
-		paths, err := filterFilesByTechnology(fs, sourceDir, []string{"java", "python"})
+		paths, err := filterFilesByTechnology(testLog, fs, sourceDir, []string{"java", "python"})
 		require.NoError(t, err)
 		assert.ElementsMatch(t, []string{
 			filepath.Join(sourceDir, "fileA1.txt"),
@@ -132,13 +132,13 @@ func TestFilterFilesByTechnology(t *testing.T) {
 		}, paths)
 	})
 	t.Run("not filter non-existing technology", func(t *testing.T) {
-		paths, err := filterFilesByTechnology(fs, sourceDir, []string{"php"})
+		paths, err := filterFilesByTechnology(testLog, fs, sourceDir, []string{"php"})
 		require.NoError(t, err)
 		assert.Empty(t, paths)
 	})
 	t.Run("filter with missing manifest", func(t *testing.T) {
 		fs := afero.Afero{Fs: afero.NewMemMapFs()}
-		paths, err := filterFilesByTechnology(fs, sourceDir, []string{"java"})
+		paths, err := filterFilesByTechnology(testLog, fs, sourceDir, []string{"java"})
 		require.Error(t, err)
 		assert.Nil(t, paths)
 	})
