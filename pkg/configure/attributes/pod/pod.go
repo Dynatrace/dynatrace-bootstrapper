@@ -21,6 +21,7 @@ func AddFlags(cmd *cobra.Command) {
 }
 
 type Attributes struct {
+	UserDefined  map[string]string `json:"-"`
 	PodInfo      `json:",inline"`
 	WorkloadInfo `json:",inline"`
 	ClusterInfo  `json:",inline"`
@@ -72,5 +73,25 @@ func parseAttributes(rawAttributes []string) (Attributes, error) {
 		return Attributes{}, err
 	}
 
+	err = filterOutUserDefined(rawMap, result)
+	if err != nil {
+		return Attributes{}, err
+	}
+
+	result.UserDefined = rawMap
+
 	return result, nil
+}
+
+func filterOutUserDefined(rawInput map[string]string, parsedInput Attributes) error {
+	parsedMap, err := parsedInput.ToMap()
+	if err != nil {
+		return err
+	}
+
+	for key := range parsedMap {
+		delete(rawInput, key)
+	}
+
+	return nil
 }

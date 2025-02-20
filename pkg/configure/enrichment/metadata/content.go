@@ -2,6 +2,7 @@ package metadata
 
 import (
 	"encoding/json"
+	"maps"
 	"strings"
 
 	"github.com/Dynatrace/dynatrace-bootstrapper/pkg/configure/attributes/container"
@@ -24,11 +25,23 @@ type content struct {
 }
 
 func (c content) toMap() (map[string]string, error) {
-	return structs.ToMap(c)
+	baseMap, err := structs.ToMap(c)
+	if err != nil {
+		return nil, err
+	}
+
+	maps.Copy(baseMap, c.Attributes.UserDefined)
+
+	return baseMap, nil
 }
 
 func (c content) toJson() ([]byte, error) {
-	raw, err := json.Marshal(c)
+	rawMap, err := c.ToMap() // needed to make the pod.Attributes.UserDefined visible
+	if err != nil {
+		return nil, err
+	}
+
+	raw, err := json.Marshal(rawMap)
 	if err != nil {
 		return nil, errors.WithStack(err)
 	}
