@@ -5,6 +5,7 @@ import (
 
 	"github.com/Dynatrace/dynatrace-bootstrapper/pkg/configure/attributes/container"
 	"github.com/Dynatrace/dynatrace-bootstrapper/pkg/configure/attributes/pod"
+	"github.com/Dynatrace/dynatrace-bootstrapper/pkg/configure/enrichment/endpoint"
 	"github.com/Dynatrace/dynatrace-bootstrapper/pkg/configure/enrichment/metadata"
 	"github.com/Dynatrace/dynatrace-bootstrapper/pkg/configure/oneagent/ca"
 	"github.com/Dynatrace/dynatrace-bootstrapper/pkg/configure/oneagent/conf"
@@ -76,12 +77,21 @@ func Execute(log logr.Logger, fs afero.Afero, targetDir string) error {
 		err = metadata.Configure(log, fs, containerConfigDir, podAttr, containerAttr)
 		if err != nil {
 			log.Info("failed to configure the enrichment files", "config-directory", containerConfigDir)
+
+			return err
+		}
+
+		err = endpoint.Configure(log, fs, inputFolder, containerConfigDir)
+		if err != nil {
+			log.Info("failed to configure the endpoint.properties", "config-directory", configFolder)
+
 			return err
 		}
 
 		err = conf.Configure(log, fs, containerConfigDir, containerAttr, podAttr)
 		if err != nil {
 			log.Info("failed to configure the container-conf files", "config-directory", containerConfigDir)
+
 			return err
 		}
 
