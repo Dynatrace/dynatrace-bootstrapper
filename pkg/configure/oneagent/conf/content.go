@@ -8,7 +8,7 @@ import (
 	"github.com/Dynatrace/dynatrace-bootstrapper/pkg/utils/structs"
 )
 
-type content struct {
+type fileContent struct {
 	PodName                 string `json:"k8s_fullpodname"`
 	PodUID                  string `json:"k8s_poduid"`
 	PodNamespace            string `json:"k8s_namespace"`
@@ -18,11 +18,11 @@ type content struct {
 	ImageName               string `json:"imageName"`
 }
 
-func (c content) toMap() (map[string]string, error) {
+func (c fileContent) toMap() (map[string]string, error) {
 	return structs.ToMap(c)
 }
 
-func (c content) toString() (string, error) {
+func (c fileContent) toString() (string, error) {
 	var confContent strings.Builder
 
 	contentMap, err := c.toMap()
@@ -43,8 +43,8 @@ func (c content) toString() (string, error) {
 	return confContent.String(), nil
 }
 
-func fromAttributes(containerAttr container.Attributes, podAttr pod.Attributes) content {
-	return content{
+func fromAttributes(containerAttr container.Attributes, podAttr pod.Attributes) fileContent {
+	return fileContent{
 		PodName:                 podAttr.PodName,
 		PodUID:                  podAttr.PodUid,
 		PodNamespace:            podAttr.NamespaceName,

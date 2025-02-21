@@ -11,7 +11,7 @@ import (
 	"github.com/pkg/errors"
 )
 
-type content struct {
+type fileContent struct {
 	pod.Attributes `json:",inline"`
 
 	ContainerName string `json:"k8s.container.name"`
@@ -24,7 +24,7 @@ type content struct {
 	DTWorkloadName string `json:"dt.kubernetes.workload.name,omitempty"`
 }
 
-func (c content) toMap() (map[string]string, error) {
+func (c fileContent) toMap() (map[string]string, error) {
 	baseMap, err := structs.ToMap(c)
 	if err != nil {
 		return nil, err
@@ -35,7 +35,7 @@ func (c content) toMap() (map[string]string, error) {
 	return baseMap, nil
 }
 
-func (c content) toJson() ([]byte, error) {
+func (c fileContent) toJson() ([]byte, error) {
 	rawMap, err := c.ToMap() // needed to make the pod.Attributes.UserDefined visible
 	if err != nil {
 		return nil, err
@@ -49,7 +49,7 @@ func (c content) toJson() ([]byte, error) {
 	return raw, nil
 }
 
-func (c content) toProperties() (string, error) {
+func (c fileContent) toProperties() (string, error) {
 	var confContent strings.Builder
 
 	contentMap, err := c.toMap()
@@ -67,8 +67,8 @@ func (c content) toProperties() (string, error) {
 	return confContent.String(), nil
 }
 
-func fromAttributes(containerAttr container.Attributes, podAttr pod.Attributes) content {
-	return content{
+func fromAttributes(containerAttr container.Attributes, podAttr pod.Attributes) fileContent {
+	return fileContent{
 		Attributes:     podAttr,
 		ContainerName:  containerAttr.ContainerName,
 		DTClusterID:    podAttr.ClusterUId,
