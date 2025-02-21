@@ -51,6 +51,8 @@ func FromJson(reader io.Reader) (ProcConf, error) {
 func FromConf(reader io.Reader) (ProcConf, error) {
 	var result []Property
 
+	const whiteSpace = "\t\n\v\f\r "
+
 	scanner := bufio.NewScanner(reader)
 	currentSection := ""
 
@@ -60,16 +62,16 @@ func FromConf(reader io.Reader) (ProcConf, error) {
 
 		switch {
 		case header != "":
-			currentSection = strings.Trim(header, "\t\n\v\f\r ")
+			currentSection = strings.Trim(header, whiteSpace)
 		case line != "" && !strings.HasPrefix(line, "#"):
 			splitLine := strings.Split(line, " ")
 			prop := Property{
 				Section: currentSection,
-				Key:     strings.Trim(splitLine[0], "\t\n\v\f\r "),
+				Key:     strings.Trim(splitLine[0], whiteSpace),
 			}
 
 			if len(splitLine) == 2 {
-				prop.Value = strings.Trim(splitLine[1], "\t\n\v\f\r ")
+				prop.Value = strings.Trim(splitLine[1], whiteSpace)
 			}
 
 			result = append(result, prop)

@@ -11,14 +11,14 @@ import (
 )
 
 const (
-	ruxitAgentProcPath       = "agent/conf/ruxitagentproc.conf"
-	sourceRuxitAgentProcPath = "agent/conf/_ruxitagentproc.conf"
+	RuxitAgentProcPath             = "agent/conf/ruxitagentproc.conf"
+	originalCopyRuxitAgentProcPath = "agent/conf/_ruxitagentproc.conf"
 )
 
 func UpdateInPlace(log logr.Logger, fs afero.Fs, targetDir string, conf ruxit.ProcConf) error {
 	log.Info("updating ruxitagentproc.conf", "targetDir", targetDir)
-	destConfPath := filepath.Join(targetDir, ruxitAgentProcPath)
-	sourceConfPath := filepath.Join(targetDir, sourceRuxitAgentProcPath)
+	destConfPath := filepath.Join(targetDir, RuxitAgentProcPath)
+	sourceConfPath := filepath.Join(targetDir, originalCopyRuxitAgentProcPath)
 
 	return safeMerge(log, fs, sourceConfPath, destConfPath, conf)
 }

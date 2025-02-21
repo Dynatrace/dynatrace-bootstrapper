@@ -107,7 +107,7 @@ func Execute(log logr.Logger, fs afero.Afero, targetDir string) error {
 		}
 	}
 
-	log.Info("finished to configuration", "config-directory", configFolder, "input-directory", inputFolder)
+	log.Info("finished configuration", "config-directory", configFolder, "input-directory", inputFolder)
 
 	return nil
 }
