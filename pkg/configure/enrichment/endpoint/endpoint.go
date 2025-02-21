@@ -26,7 +26,6 @@ func Configure(log logr.Logger, fs afero.Afero, inputDir, configDir string) erro
 		return err
 	}
 
-
 	propertiesFileName := filepath.Join(configDir, configBasePath, InputFileName)
 
 	err = fsutils.CreateFile(fs, propertiesFileName, properties)

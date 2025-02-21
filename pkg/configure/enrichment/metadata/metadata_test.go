@@ -1,6 +1,7 @@
-package conf
+package metadata
 
 import (
+	"fmt"
 	"path/filepath"
 	"testing"
 
@@ -17,40 +18,50 @@ var testLog = zapr.NewLogger(zap.NewExample())
 
 func TestConfigure(t *testing.T) {
 	podAttr := pod.Attributes{
+		UserDefined: map[string]string{
+			"beep": "boop",
+			"tip":  "top",
+		},
 		PodInfo: pod.PodInfo{
 			PodName:       "podname",
 			PodUid:        "poduid",
 			NamespaceName: "namespacename",
 		},
 		ClusterInfo: pod.ClusterInfo{
-			ClusterUId: "clusteruid",
+			ClusterUId:      "clusteruid",
+			DTClusterEntity: "dtclusterentity",
+		},
+		WorkloadInfo: pod.WorkloadInfo{
+			WorkloadKind: "workloadkind",
+			WorkloadName: "workloadname",
 		},
 	}
 	containerAttr := container.Attributes{
 		ContainerName: "containername",
-		ImageInfo: container.ImageInfo{
-			Registry:    "registry",
-			Repository:  "repository",
-			Tag:         "tag",
-			ImageDigest: "imagedigest",
-		},
 	}
 	configDir := "path/conf"
 
 	t.Run("success", func(t *testing.T) {
 		fs := afero.Afero{Fs: afero.NewMemMapFs()}
 
-		err := Configure(testLog, fs, configDir, containerAttr, podAttr)
+		err := Configure(testLog, fs, configDir, podAttr, containerAttr)
 		require.NoError(t, err)
 
 		expectedContent, err := fromAttributes(containerAttr, podAttr).toMap()
 		require.NoError(t, err)
 
-		content, err := fs.ReadFile(filepath.Join(configDir, configPath))
+		jsonContent, err := fs.ReadFile(filepath.Join(configDir, jsonFilePath))
 		require.NoError(t, err)
 
 		for key, value := range expectedContent {
-			assert.Contains(t, string(content), key+" "+value)
+			assert.Contains(t, string(jsonContent), fmt.Sprintf("\"%s\":\"%s\"", key, value))
+		}
+
+		propsContent, err := fs.ReadFile(filepath.Join(configDir, propertiesFilePath))
+		require.NoError(t, err)
+
+		for key, value := range expectedContent {
+			assert.Contains(t, string(propsContent), key+"="+value)
 		}
 	})
 }

@@ -2,22 +2,15 @@ package container
 
 import (
 	"encoding/json"
+	"fmt"
 
 	"github.com/Dynatrace/dynatrace-bootstrapper/pkg/utils/structs"
-	"github.com/spf13/cobra"
+	"github.com/pkg/errors"
 )
 
 const (
-	flagKey = "attribute-container"
+	Flag = "attribute-container"
 )
-
-var (
-	attributes []string
-)
-
-func AddFlags(cmd *cobra.Command) {
-	cmd.PersistentFlags().StringArrayVar(&attributes, flagKey, []string{}, "(Optional) Container-specific attributes in JSON format.")
-}
 
 type Attributes struct {
 	ImageInfo     `json:",inline"`
@@ -28,11 +21,7 @@ func (attr Attributes) ToMap() (map[string]string, error) {
 	return structs.ToMap(attr)
 }
 
-func ParseAttributes() ([]Attributes, error) {
-	return parseAttributes(attributes)
-}
-
-func parseAttributes(rawAttributes []string) ([]Attributes, error) {
+func ParseAttributes(rawAttributes []string) ([]Attributes, error) {
 	var attributeList []Attributes
 
 	for _, attr := range rawAttributes {
@@ -45,6 +34,22 @@ func parseAttributes(rawAttributes []string) ([]Attributes, error) {
 	}
 
 	return attributeList, nil
+}
+
+// ToArgs is a helper func to convert an []container.Attributes to a list of args that can be put into a Pod Template
+func ToArgs(attributes []Attributes) ([]string, error) {
+	var args []string
+
+	for _, attr := range attributes {
+		jsonAttr, err := json.Marshal(attr)
+		if err != nil {
+			return nil, errors.WithStack(err)
+		}
+
+		args = append(args, fmt.Sprintf("--%s=%s", Flag, string(jsonAttr)))
+	}
+
+	return args, nil
 }
 
 func parse(rawAttribute string) (*Attributes, error) {

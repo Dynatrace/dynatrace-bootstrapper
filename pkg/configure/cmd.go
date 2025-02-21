@@ -20,13 +20,16 @@ import (
 const (
 	inputFolderFlag  = "input-directory"
 	configFolderFlag = "config-directory"
-	installPathFlap  = "install-path"
+	installPathFlag  = "install-path"
 )
 
 var (
 	inputFolder  string
 	configFolder string
 	installPath  = "/opt/dynatrace/oneagent"
+
+	podAttributes       []string
+	containerAttributes []string
 )
 
 func AddFlags(cmd *cobra.Command) {
@@ -34,10 +37,11 @@ func AddFlags(cmd *cobra.Command) {
 
 	cmd.PersistentFlags().StringVar(&configFolder, configFolderFlag, "", "(Optional) Base path where to put the configuration files.")
 
-	cmd.PersistentFlags().StringVar(&installPath, installPathFlap, "/opt/dynatrace/oneagent", "(Optional) Base path where the agent binary will be put.")
+	cmd.PersistentFlags().StringVar(&installPath, installPathFlag, "/opt/dynatrace/oneagent", "(Optional) Base path where the agent binary will be put.")
 
-	container.AddFlags(cmd)
-	pod.AddFlags(cmd)
+	cmd.PersistentFlags().StringArrayVar(&containerAttributes, container.Flag, []string{}, "(Optional) Container-specific attributes in JSON format.")
+
+	cmd.PersistentFlags().StringArrayVar(&podAttributes, pod.Flag, []string{}, "(Optional) Pod-specific attributes in key=value format.")
 }
 
 func Execute(log logr.Logger, fs afero.Afero, targetDir string) error {
@@ -61,12 +65,12 @@ func Execute(log logr.Logger, fs afero.Afero, targetDir string) error {
 		return err
 	}
 
-	podAttr, err := pod.ParseAttributes()
+	podAttr, err := pod.ParseAttributes(podAttributes)
 	if err != nil {
 		return err
 	}
 
-	containerAttrs, err := container.ParseAttributes()
+	containerAttrs, err := container.ParseAttributes(containerAttributes)
 	if err != nil {
 		return err
 	}

@@ -2,23 +2,15 @@ package pod
 
 import (
 	"encoding/json"
+	"fmt"
 	"strings"
 
 	"github.com/Dynatrace/dynatrace-bootstrapper/pkg/utils/structs"
-	"github.com/spf13/cobra"
 )
 
 const (
-	flagKey = "attribute"
+	Flag = "attribute"
 )
-
-var (
-	attributes []string
-)
-
-func AddFlags(cmd *cobra.Command) {
-	cmd.PersistentFlags().StringArrayVar(&attributes, flagKey, []string{}, "(Optional) Pod-specific attributes in key=value format.")
-}
 
 type Attributes struct {
 	UserDefined  map[string]string `json:"-"`
@@ -47,11 +39,7 @@ type ClusterInfo struct {
 	DTClusterEntity string `json:"dt.entity.kubernetes_cluster"`
 }
 
-func ParseAttributes() (Attributes, error) {
-	return parseAttributes(attributes)
-}
-
-func parseAttributes(rawAttributes []string) (Attributes, error) {
+func ParseAttributes(rawAttributes []string) (Attributes, error) {
 	rawMap := make(map[string]string)
 
 	for _, attr := range rawAttributes {
@@ -94,4 +82,32 @@ func filterOutUserDefined(rawInput map[string]string, parsedInput Attributes) er
 	}
 
 	return nil
+}
+
+// ToArgs is a helper func to convert an pod.Attributes to a list of args that can be put into a Pod Template
+func ToArgs(attributes Attributes) ([]string, error) {
+	var args []string
+
+	attrMap, err := attributes.ToMap()
+	if err != nil {
+		return nil, err
+	}
+
+	for key, value := range attrMap {
+		if value == "" {
+			continue
+		}
+
+		args = append(args, fmt.Sprintf("--%s=%s=%s", Flag, key, value))
+	}
+
+	for key, value := range attributes.UserDefined {
+		if value == "" {
+			continue
+		}
+
+		args = append(args, fmt.Sprintf("--%s=%s=%s", Flag, key, value))
+	}
+
+	return args, nil
 }

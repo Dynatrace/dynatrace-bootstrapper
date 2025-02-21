@@ -36,7 +36,7 @@ func (c fileContent) toMap() (map[string]string, error) {
 }
 
 func (c fileContent) toJson() ([]byte, error) {
-	rawMap, err := c.ToMap() // needed to make the pod.Attributes.UserDefined visible
+	rawMap, err := c.toMap() // needed to make the pod.Attributes.UserDefined visible
 	if err != nil {
 		return nil, err
 	}

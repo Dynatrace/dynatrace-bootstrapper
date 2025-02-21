@@ -173,15 +173,15 @@ func TestMerge(t *testing.T) {
 			Properties: []Property{
 				{
 					Section: expectedProps[0].Section,
-					Key: expectedProps[0].Key,
-					Value: "old value",
+					Key:     expectedProps[0].Key,
+					Value:   "old value",
 				},
 			},
 			Revision: 0,
 		}
 		override := ProcConf{
 			Properties: expectedProps,
-			Revision: 1,
+			Revision:   1,
 		}
 
 		merged := source.Merge(override)
