@@ -65,6 +65,14 @@ The `dynatrace-bootstrapper` is a small CLI binary built into a [Dynatrace CodeM
     - `activegate.pem`: A file containing the **certificates** used by the CodeModule for all its communication with the ActiveGate (proxy communication's **NOT** included).
       - Used to create the `<config-directory>/<container-name>/oneagent/agent/customkeys/custom.pem`.
       - Is concatenated with the `trusted.pem` if both is present.
+    - `endpoint.properties`: A file containing the necessary info so the metadata-enrichment metrics can be ingested properly
+      - Used to create the `<config-directory>/<container-name>/enrichment/endpoint/endpoint.properties`.
+      - Example:
+
+      ```conf
+      DT_METRICS_INGEST_URL=http://test-activegate.dynatrace/e/tenant/api/v2/metrics/ingest
+      DT_METRICS_INGEST_API_TOKEN=<data-ingest-token>
+      ```
 
 #### `--install-path`
 
