@@ -1,5 +1,5 @@
-name: Build Docker Image
-description: Builds the bootstrapper docker image
+name: Build-Push Image
+description: Builds the bootstrapper image
 inputs:
   platform:
     description: The platform for which the image will be built
@@ -13,10 +13,6 @@ inputs:
 runs:
   using: "composite"
   steps:
-    - name: Set up QEMU
-      uses: docker/setup-qemu-action@53851d14592bedcffcf25ea515637cff71ef929a # v3.3.0
-    - name: Set up Docker Buildx
-      uses: docker/setup-buildx-action@6524bf65af31da8d45b59e8c27de4bd072b392f5 # v3.8.0
     - name: Set up Golang
       uses: actions/setup-go@3041bf56c941b39c61721a86cd11f3bb1338122a # v5.2.0
       with:
@@ -27,22 +23,13 @@ runs:
       run: |
         hack/build/ci/prepare-build-variables.sh
     - name: Build target
-      uses: docker/build-push-action@b32b51a8eda65d6793cd0494a773d4f6bcef32dc # v6.11.0
+      uses: redhat-actions/buildah-build@v2
       with:
-        builder: ${{ steps.buildx.outputs.name }}
-        build-args: |
-          GO_LINKER_ARGS=${{ steps.prep.outputs.go_linker_args }}
-        context: .
-        file: ./Dockerfile
+        oci: true
+        containerfiles: |
+         ./Dockerfile
         platforms: linux/${{ inputs.platform }}
         push: false
         tags: bootstrapper-${{ inputs.platform }}:${{ inputs.image-tag }}
         labels: ${{ inputs.labels }}
-        outputs: type=docker,dest=/tmp/bootstrapper-${{ inputs.platform }}.tar
-    - name: Upload artifact
-      uses: actions/upload-artifact@65c4c4a1ddee5b72f698fdd19549f0f0fb45cf08 # v4.6.0
-      with:
-        name: bootstrapper-${{ inputs.platform }}
-        path: /tmp/bootstrapper-${{ inputs.platform }}.tar
-        retention-days: 1
 
