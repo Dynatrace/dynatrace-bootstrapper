@@ -14,7 +14,8 @@ permissions:
 
 env:
   IMAGE_REGISTRY: "quay.io"
-  IMAGE_REPOSITORY: "dynatrace/dynatrace-bootstrapper"
+  IMAGE_NAMESPACE: "dynatrace"
+  IMAGE_NAME: "dynatrace-bootstrapper"
 
 jobs:
   tests:
@@ -78,7 +79,7 @@ jobs:
         uses: docker/metadata-action@369eb591f429131d6889c46b94e711f089e6ca96 # v5.6.1
         id: meta
         with:
-          images: ${{ env.IMAGE_REPOSITORY }}
+          images: ${{ env.IMAGE_NAMESPACE }}/${{ env.IMAGE_NAME }}
           tags: ${{ steps.prep.outputs.docker_image_tag }}
           labels: |
             ${{ steps.prep.outputs.docker_image_labels }}
@@ -91,7 +92,7 @@ jobs:
           # More info: https://github.com/actions/runner/issues/480#issuecomment-1021278915
 
           echo "registry=${{ env.IMAGE_REGISTRY }}" >> "$GITHUB_OUTPUT"
-          echo "repository=${{ env.IMAGE_REPOSITORY }}" >> "$GITHUB_OUTPUT"
+          echo "repository=${{ env.IMAGE_NAMESPACE }}/${{ env.IMAGE_NAME }}" >> "$GITHUB_OUTPUT"
     outputs:
       labels: ${{ steps.meta.outputs.labels }}
       version: ${{ steps.prep.outputs.docker_image_tag }}
@@ -102,9 +103,6 @@ jobs:
     name: Build and push images
     runs-on: ubuntu-latest
     needs: [prepare]
-    strategy:
-      matrix:
-        platform: [amd64, arm64, ppc64le, s390x]
     if: ${{ !github.event.pull_request.head.repo.fork }}
     steps:
       - name: Checkout
@@ -120,17 +118,17 @@ jobs:
           oci: true
           containerfiles: |
            ./Dockerfile
-          platforms: linux/${{ matrix.platform }}
-          image: ${{ env.IMAGE_REGISTRY }}/${{ env.IMAGE_REPOSITORY }}
-          tags: ${{ needs.prepare.outputs.version }}-${{ matrix.platform }}
+          archs: amd64, arm64, ppc64le, s390x
+          image: ${{ env.IMAGE_NAME }}
+          tags: ${{ needs.prepare.outputs.version }}
           labels: ${{ needs.prepare.outputs.labels }}
       - name: Push To quay.io
         id: push-to-quay
         uses: redhat-actions/push-to-registry@5ed88d269cf581ea9ef6dd6806d01562096bee9c # v2.8
         with:
-          image: ${{ env.IMAGE_REGISTRY }}/${{ env.IMAGE_REPOSITORY }}
+          image: ${{ steps.build-image.outputs.image }}
           tags: ${{ steps.build-image.outputs.tags }}
-          registry: ${{ env.IMAGE_REGISTRY }}
+          registry: ${{ env.IMAGE_REGISTRY }}/${{ env.IMAGE_NAMESPACE }}
           username: ${{ secrets.QUAY_USERNAME }}
           password: ${{ secrets.QUAY_PASSWORD }}
 
