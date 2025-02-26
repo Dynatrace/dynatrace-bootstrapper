@@ -1,0 +1,106 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    {{- include "testing-sample.labels" . | nindent 4}}
+  name: bootstrapper-test
+  namespace: {{ .Release.Namespace }}
+spec:
+  replicas: {{ .Values.replicas | default 1 }}
+  selector:
+    matchLabels:
+      {{- include "testing-sample.selectorLabels" . | nindent 6}}
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        {{- include "testing-sample.labels" . | nindent 8 }}
+    spec:
+      serviceAccountName: bootstrap-php-glibc
+      initContainers:
+      - args:
+         {{- toYaml .Values.args | nindent 8 }}
+        image: {{ .Values.image.repository }}:{{ .Values.image.tag }}
+        imagePullPolicy: {{ .Values.image.pullPolicy }}
+        name: codemodule-download
+        resources: {}
+        securityContext:
+          readOnlyRootFilesystem: true
+          runAsUser: 0
+          seLinuxOptions:
+            level: s0
+          seccompProfile:
+            type: RuntimeDefault
+        terminationMessagePath: /dev/termination-log
+        terminationMessagePolicy: File
+        volumeMounts:
+        - mountPath: /mnt/bin
+          name: dynatrace-codemodules
+          subPath: bin
+        - mountPath: /mnt/config
+          name: dynatrace-codemodules
+          subPath: config
+        - name: input-secret
+          readOnly: true
+          mountPath: /mnt/input
+      containers:
+      - image: docker.io/php:fpm-stretch
+        imagePullPolicy: Always
+        livenessProbe:
+          failureThreshold: 3
+          tcpSocket:
+            port: 9000
+          initialDelaySeconds: 600
+          periodSeconds: 30
+          successThreshold: 1
+          timeoutSeconds: 2
+        name: app
+        volumeMounts:
+        - mountPath: /opt/dynatrace/oneagent
+          subPath: bin
+          name: dynatrace-codemodules
+        - mountPath: /etc/ld.so.preload
+          subPath: config/oneagent/ld.so.preload
+          name: dynatrace-codemodules
+        - mountPath: /var/lib/dynatrace
+          subPath: config/app
+          name: dynatrace-codemodules
+        ports:
+          - containerPort: 9000
+            protocol: TCP
+        readinessProbe:
+          failureThreshold: 3
+          tcpSocket:
+            port: 9000
+          periodSeconds: 10
+          successThreshold: 1
+          timeoutSeconds: 1
+        resources:
+          requests:
+            cpu: 10m
+            memory: 64Mi
+          limits:
+            cpu: 10m
+            memory: 128Mi
+      restartPolicy: Always
+      tolerations:
+        - key: kubernetes.io/arch
+          value: arm64
+          effect: NoSchedule
+        - key: kubernetes.io/arch
+          value: amd64
+          effect: NoSchedule
+      securityContext:
+        runAsUser: 0
+        runAsGroup: 0
+        fsGroup: 2000
+      terminationGracePeriodSeconds: 30
+      imagePullSecrets:
+        {{ .Values.image.pullSecrets }}
+      volumes:
+      - emptyDir: {}
+        name: dynatrace-codemodules
+      - name: input-secret
+        secret:
+          secretName: bootstrapper-input-secret
