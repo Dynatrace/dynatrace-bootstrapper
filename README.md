@@ -108,3 +108,25 @@ The `dynatrace-bootstrapper` is a small CLI binary built into a [Dynatrace CodeM
 - The flag `--debug` enables debug logs.
 - Create new debug logs via `log.V(1).Info(...)`
   - The logging levels between `zap` and `logr` is different, so we had to get creative.
+
+### How to test (in K8s)
+
+#### helm-sample
+
+A a Helm chart for a small PHP sample app, with the bootsrapper as it's `initContainer`, as it is expected to be used.
+
+To deploy it in your cluster (where your `KUBECONFIG` is pointing) with the `image` of the current branch (considering that the `image` was built via `make build`):
+
+- `make deploy`
+
+To remove it from your cluster:
+
+- `make undeploy`
+
+##### Custom values
+
+You can use the `make deploy/custom`
+
+- This will use the `hack/testing/helm-sample/_values.yaml` as the values.
+  - This file is ignored by git, so you can safely put whatever you want into it.
+- The `image` will still be set according to what `make build` would create.
