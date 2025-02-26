@@ -29,7 +29,6 @@ runs:
         containerfiles: |
          ./Dockerfile
         platforms: linux/${{ inputs.platform }}
-        push: true
         tags: bootstrapper-${{ inputs.platform }}:${{ inputs.image-tag }}
         labels: ${{ inputs.labels }}
 
