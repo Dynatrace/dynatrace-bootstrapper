@@ -18,11 +18,13 @@ const (
 	sourceFolderFlag = "source"
 	targetFolderFlag = "target"
 	debugFlag        = "debug"
+	silentFlag       = "silent"
 )
 
 var (
-	log     logr.Logger
-	isDebug bool
+	log      logr.Logger
+	isDebug  bool
+	isSilent bool
 
 	sourceFolder string
 	targetFolder string
@@ -59,6 +61,7 @@ func AddFlags(cmd *cobra.Command) {
 	_ = cmd.MarkPersistentFlagRequired(targetFolderFlag)
 
 	cmd.PersistentFlags().BoolVar(&isDebug, debugFlag, false, "Enables debug logs.")
+	cmd.PersistentFlags().BoolVar(&isSilent, silentFlag, false, "Always return exit code 0, even on error")
 }
 
 func run(fs afero.Fs) func(cmd *cobra.Command, _ []string) error {
@@ -69,21 +72,29 @@ func run(fs afero.Fs) func(cmd *cobra.Command, _ []string) error {
 		}
 		version.Print(log)
 
-		err := cmd.ValidateRequiredFlags()
-		if err != nil {
-			return err
-		}
-
 		aferoFs := afero.Afero{
 			Fs: fs,
 		}
 
-		err = move.Execute(log, aferoFs, sourceFolder, targetFolder)
+		err := move.Execute(log, aferoFs, sourceFolder, targetFolder)
 		if err != nil {
+			if isSilent {
+				log.Error(err, "error during moving, silent fail is enabled")
+				return nil
+			}
 			return err
 		}
 
-		return configure.Execute(log, aferoFs, targetFolder)
+		err = configure.Execute(log, aferoFs, targetFolder)
+		if err != nil {
+			if isSilent {
+				log.Error(err, "error during configuration, silent fail is enabled")
+				return nil
+			}
+			return err
+		}
+
+		return nil
 	}
 }
 
