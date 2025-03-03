@@ -80,6 +80,7 @@ func run(fs afero.Fs) func(cmd *cobra.Command, _ []string) error {
 		if err != nil {
 			if isSilent {
 				log.Error(err, "error during moving, silent fail is enabled")
+
 				return nil
 			}
 			return err
@@ -89,6 +90,7 @@ func run(fs afero.Fs) func(cmd *cobra.Command, _ []string) error {
 		if err != nil {
 			if isSilent {
 				log.Error(err, "error during configuration, silent fail is enabled")
+
 				return nil
 			}
 			return err
