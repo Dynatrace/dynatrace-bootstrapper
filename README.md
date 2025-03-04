@@ -97,9 +97,9 @@ The `dynatrace-bootstrapper` is a small CLI binary built into a [Dynatrace CodeM
 - This is an **optional** arg
 - The `--attribute-container` arg defines the passed in Container attributes that will be used to configure the metadata-enrichment and injected CodeModule. It is a JSON formatted string.
 
-#### `--silent`
+#### `--suppress-error`
 
-*Example*: `--silent=true`
+*Example*: `--suppress-error=true` or `--suppress-error`
 
 - This is an **optional** arg
   - Defaults to `false`
@@ -107,7 +107,7 @@ The `dynatrace-bootstrapper` is a small CLI binary built into a [Dynatrace CodeM
 
 #### `--debug`
 
-*Example*: `--debug=true`
+*Example*: `--debug=true` or `--debug`
 
 - This is an **optional** arg
   - Defaults to `false`

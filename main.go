@@ -15,16 +15,16 @@ import (
 )
 
 const (
-	sourceFolderFlag = "source"
-	targetFolderFlag = "target"
-	debugFlag        = "debug"
-	silentFlag       = "silent"
+	SourceFolderFlag   = "source"
+	TargetFolderFlag   = "target"
+	DebugFlag          = "debug"
+	SuppressErrorsFlag = "suppress-error"
 )
 
 var (
-	log      logr.Logger
-	isDebug  bool
-	isSilent bool
+	log                 logr.Logger
+	isDebug             bool
+	areErrorsSuppressed bool
 
 	sourceFolder string
 	targetFolder string
@@ -54,14 +54,17 @@ func bootstrapper(fs afero.Fs) *cobra.Command {
 }
 
 func AddFlags(cmd *cobra.Command) {
-	cmd.PersistentFlags().StringVar(&sourceFolder, sourceFolderFlag, "", "Base path where to copy the codemodule FROM.")
-	_ = cmd.MarkPersistentFlagRequired(sourceFolderFlag)
+	cmd.PersistentFlags().StringVar(&sourceFolder, SourceFolderFlag, "", "Base path where to copy the codemodule FROM.")
+	_ = cmd.MarkPersistentFlagRequired(SourceFolderFlag)
 
-	cmd.PersistentFlags().StringVar(&targetFolder, targetFolderFlag, "", "Base path where to copy the codemodule TO.")
-	_ = cmd.MarkPersistentFlagRequired(targetFolderFlag)
+	cmd.PersistentFlags().StringVar(&targetFolder, TargetFolderFlag, "", "Base path where to copy the codemodule TO.")
+	_ = cmd.MarkPersistentFlagRequired(TargetFolderFlag)
 
-	cmd.PersistentFlags().BoolVar(&isDebug, debugFlag, false, "Enables debug logs.")
-	cmd.PersistentFlags().BoolVar(&isSilent, silentFlag, false, "Always return exit code 0, even on error")
+	cmd.PersistentFlags().BoolVar(&isDebug, DebugFlag, false, "(Optional) Enables debug logs.")
+	cmd.PersistentFlags().Lookup(DebugFlag).NoOptDefVal = "true"
+
+	cmd.PersistentFlags().BoolVar(&areErrorsSuppressed, SuppressErrorsFlag, false, "(Optional) Always return exit code 0, even on error")
+	cmd.PersistentFlags().Lookup(SuppressErrorsFlag).NoOptDefVal = "true"
 }
 
 func run(fs afero.Fs) func(cmd *cobra.Command, _ []string) error {
@@ -78,8 +81,8 @@ func run(fs afero.Fs) func(cmd *cobra.Command, _ []string) error {
 
 		err := move.Execute(log, aferoFs, sourceFolder, targetFolder)
 		if err != nil {
-			if isSilent {
-				log.Error(err, "error during moving, silent fail is enabled")
+			if areErrorsSuppressed {
+				log.Error(err, "error during moving, the error was suppressed")
 
 				return nil
 			}
@@ -88,8 +91,8 @@ func run(fs afero.Fs) func(cmd *cobra.Command, _ []string) error {
 
 		err = configure.Execute(log, aferoFs, targetFolder)
 		if err != nil {
-			if isSilent {
-				log.Error(err, "error during configuration, silent fail is enabled")
+			if areErrorsSuppressed {
+				log.Error(err, "error during configuration, the error was suppressed")
 
 				return nil
 			}
