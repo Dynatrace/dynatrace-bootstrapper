@@ -14,9 +14,7 @@ permissions:
   contents: read
 
 env:
-  IMAGE_REGISTRY: "quay.io"
-  IMAGE_NAMESPACE: "dynatrace"
-  IMAGE_NAME: "dynatrace-bootstrapper"
+  IMAGE: "quay.io/dynatrace/dynatrace-bootstrapper"
 
 jobs:
   tests:
@@ -102,8 +100,7 @@ jobs:
           containerfiles: |
            ./Dockerfile
           archs: amd64, arm64, ppc64le, s390x
-          image: ${{ env.IMAGE_NAME }}
-          tags: ${{ needs.prepare.outputs.version }}
+          tags: ${{ env.IMAGE }}:${{ needs.prepare.outputs.version }}
           labels: ${{ needs.prepare.outputs.labels }}
           build-args: |
             GO_LINKER_ARGS=${{ needs.prepare.outputs.go_linker_args }}
@@ -111,9 +108,6 @@ jobs:
         id: push-to-quay
         uses: redhat-actions/push-to-registry@5ed88d269cf581ea9ef6dd6806d01562096bee9c # v2.8
         with:
-          image: ${{ steps.build-image.outputs.image }}
           tags: ${{ steps.build-image.outputs.tags }}
-          registry: ${{ env.IMAGE_REGISTRY }}/${{ env.IMAGE_NAMESPACE }}
           username: ${{ secrets.QUAY_USERNAME }}
           password: ${{ secrets.QUAY_PASSWORD }}
-
