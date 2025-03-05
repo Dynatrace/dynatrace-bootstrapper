@@ -99,15 +99,15 @@ The `dynatrace-bootstrapper` is a small CLI binary built into a [Dynatrace CodeM
 
 #### `--suppress-error`
 
-*Example*: `--suppress-error=true` or `--suppress-error`
+*Example*: `--suppress-error`
 
 - This is an **optional** arg
   - Defaults to `false`
-- The `--silent` arg will silence any errors, causing the executable to return with an exit code 0 even if an error occurred. Intended purpose is not to fail the whole Pod if used as init-container.
+- The `--suppress-error` arg will silence any errors, causing the executable to return with an exit code 0 even if an error occurred. Intended purpose is not to fail the whole Pod if used as init-container.
 
 #### `--debug`
 
-*Example*: `--debug=true` or `--debug`
+*Example*: `--debug`
 
 - This is an **optional** arg
   - Defaults to `false`
