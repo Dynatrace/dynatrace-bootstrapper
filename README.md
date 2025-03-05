@@ -103,7 +103,7 @@ The `dynatrace-bootstrapper` is a small CLI binary built into a [Dynatrace CodeM
 
 - This is an **optional** arg
   - Defaults to `false`
-- The `--suppress-error` arg will silence any errors, causing the executable to return with an exit code 0 even if an error occurred. Intended purpose is not to fail the whole Pod if used as init-container.
+- The `--suppress-error` arg will silence any errors, causing the executable to return with an exit code 0 even if an error occurred. Intended purpose is to not block the application container from starting, if used as init-container.
 
 #### `--debug`
 
