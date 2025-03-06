@@ -18,9 +18,9 @@ import (
 )
 
 const (
-	inputFolderFlag  = "input-directory"
-	configFolderFlag = "config-directory"
-	installPathFlag  = "install-path"
+	InputFolderFlag  = "input-directory"
+	ConfigFolderFlag = "config-directory"
+	InstallPathFlag  = "install-path"
 )
 
 var (
@@ -33,11 +33,11 @@ var (
 )
 
 func AddFlags(cmd *cobra.Command) {
-	cmd.PersistentFlags().StringVar(&inputFolder, inputFolderFlag, "", "(Optional) Base path where to look for the configuration files.")
+	cmd.PersistentFlags().StringVar(&inputFolder, InputFolderFlag, "", "(Optional) Base path where to look for the configuration files.")
 
-	cmd.PersistentFlags().StringVar(&configFolder, configFolderFlag, "", "(Optional) Base path where to put the configuration files.")
+	cmd.PersistentFlags().StringVar(&configFolder, ConfigFolderFlag, "", "(Optional) Base path where to put the configuration files.")
 
-	cmd.PersistentFlags().StringVar(&installPath, installPathFlag, "/opt/dynatrace/oneagent", "(Optional) Base path where the agent binary will be put.")
+	cmd.PersistentFlags().StringVar(&installPath, InstallPathFlag, "/opt/dynatrace/oneagent", "(Optional) Base path where the agent binary will be put.")
 
 	cmd.PersistentFlags().StringArrayVar(&containerAttributes, container.Flag, []string{}, "(Optional) Container-specific attributes in JSON format.")
 
