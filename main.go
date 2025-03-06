@@ -42,8 +42,9 @@ func main() {
 
 func bootstrapper(fs afero.Fs) *cobra.Command {
 	cmd := &cobra.Command{
-		Use:  "dynatrace-bootstrapper",
-		RunE: run(fs),
+		Use:                "dynatrace-bootstrapper",
+		RunE:               run(fs),
+		FParseErrWhitelist: cobra.FParseErrWhitelist{UnknownFlags: true},
 	}
 
 	AddFlags(cmd)
