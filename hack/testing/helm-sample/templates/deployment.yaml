@@ -16,6 +16,8 @@ spec:
     metadata:
       labels:
         {{- include "testing-sample.labels" . | nindent 8 }}
+      annotations:
+        dynatrace.com/inject: "false"
     spec:
       serviceAccountName: bootstrap-php-glibc
       initContainers:
