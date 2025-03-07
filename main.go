@@ -15,8 +15,6 @@ import (
 )
 
 const (
-	SourceFolderFlag   = "source"
-	TargetFolderFlag   = "target"
 	DebugFlag          = "debug"
 	SuppressErrorsFlag = "suppress-error"
 )
@@ -25,9 +23,6 @@ var (
 	log                 logr.Logger
 	isDebug             bool
 	areErrorsSuppressed bool
-
-	sourceFolder string
-	targetFolder string
 )
 
 func main() {
@@ -55,12 +50,6 @@ func bootstrapper(fs afero.Fs) *cobra.Command {
 }
 
 func AddFlags(cmd *cobra.Command) {
-	cmd.PersistentFlags().StringVar(&sourceFolder, SourceFolderFlag, "", "Base path where to copy the codemodule FROM.")
-	_ = cmd.MarkPersistentFlagRequired(SourceFolderFlag)
-
-	cmd.PersistentFlags().StringVar(&targetFolder, TargetFolderFlag, "", "Base path where to copy the codemodule TO.")
-	_ = cmd.MarkPersistentFlagRequired(TargetFolderFlag)
-
 	cmd.PersistentFlags().BoolVar(&isDebug, DebugFlag, false, "(Optional) Enables debug logs.")
 	cmd.PersistentFlags().Lookup(DebugFlag).NoOptDefVal = "true"
 
@@ -81,7 +70,7 @@ func run(fs afero.Fs) func(cmd *cobra.Command, _ []string) error {
 			Fs: fs,
 		}
 
-		err := move.Execute(log, aferoFs, sourceFolder, targetFolder)
+		err := move.Execute(log, aferoFs, move.SourceFolder, move.TargetFolder)
 		if err != nil {
 			if areErrorsSuppressed {
 				log.Error(err, "error during moving, the error was suppressed")
@@ -91,7 +80,7 @@ func run(fs afero.Fs) func(cmd *cobra.Command, _ []string) error {
 			return err
 		}
 
-		err = configure.Execute(log, aferoFs, targetFolder)
+		err = configure.Execute(log, aferoFs, move.TargetFolder)
 		if err != nil {
 			if areErrorsSuppressed {
 				log.Error(err, "error during configuration, the error was suppressed")
