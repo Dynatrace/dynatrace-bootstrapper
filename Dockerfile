@@ -12,6 +12,7 @@ ARG TARGETARCH
 ARG TARGETOS
 
 COPY pkg ./pkg
+COPY cmd ./cmd
 RUN --mount=type=cache,target="/root/.cache/go-build" \
     CGO_ENABLED=0 GOOS=$TARGETOS GOARCH=$TARGETARCH \
     go build -tags -trimpath -ldflags="${GO_LINKER_ARGS}" \
