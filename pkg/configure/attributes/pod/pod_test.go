@@ -15,7 +15,7 @@ func TestParseAttributes(t *testing.T) {
 			UserDefined: map[string]string{},
 			PodInfo: PodInfo{
 				PodName:       "pod1",
-				PodUid:        "123",
+				PodUID:        "123",
 				NamespaceName: "default"},
 		}
 

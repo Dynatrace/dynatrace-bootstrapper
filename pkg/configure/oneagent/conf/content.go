@@ -46,9 +46,9 @@ func (c fileContent) toString() (string, error) {
 func fromAttributes(containerAttr container.Attributes, podAttr pod.Attributes) fileContent {
 	return fileContent{
 		PodName:                 podAttr.PodName,
-		PodUID:                  podAttr.PodUid,
+		PodUID:                  podAttr.PodUID,
 		PodNamespace:            podAttr.NamespaceName,
-		ClusterID:               podAttr.ClusterUId,
+		ClusterID:               podAttr.ClusterUID,
 		ContainerName:           containerAttr.ContainerName,
 		DeprecatedContainerName: containerAttr.ContainerName,
 		ImageName:               containerAttr.ImageInfo.ToURI(),

@@ -25,7 +25,8 @@ func (attr Attributes) ToMap() (map[string]string, error) {
 
 type PodInfo struct {
 	PodName       string `json:"k8s.pod.name"`
-	PodUid        string `json:"k8s.pod.uid"`
+	PodUID        string `json:"k8s.pod.uid"`
+	NodeName      string `json:"k8s.node.name"`
 	NamespaceName string `json:"k8s.namespace.name"`
 }
 
@@ -35,7 +36,8 @@ type WorkloadInfo struct {
 }
 
 type ClusterInfo struct {
-	ClusterUId      string `json:"k8s.cluster.uid"`
+	ClusterUID      string `json:"k8s.cluster.uid"`
+	ClusterName     string `json:"k8s.cluster.name"`
 	DTClusterEntity string `json:"dt.entity.kubernetes_cluster"`
 }
 

@@ -24,11 +24,11 @@ func TestConfigure(t *testing.T) {
 		},
 		PodInfo: pod.PodInfo{
 			PodName:       "podname",
-			PodUid:        "poduid",
+			PodUID:        "poduid",
 			NamespaceName: "namespacename",
 		},
 		ClusterInfo: pod.ClusterInfo{
-			ClusterUId:      "clusteruid",
+			ClusterUID:      "clusteruid",
 			DTClusterEntity: "dtclusterentity",
 		},
 		WorkloadInfo: pod.WorkloadInfo{

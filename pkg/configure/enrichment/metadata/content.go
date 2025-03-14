@@ -71,7 +71,7 @@ func fromAttributes(containerAttr container.Attributes, podAttr pod.Attributes) 
 	return fileContent{
 		Attributes:     podAttr,
 		ContainerName:  containerAttr.ContainerName,
-		DTClusterID:    podAttr.ClusterUId,
+		DTClusterID:    podAttr.ClusterUID,
 		DTWorkloadKind: podAttr.WorkloadKind,
 		DTWorkloadName: podAttr.WorkloadName,
 	}
