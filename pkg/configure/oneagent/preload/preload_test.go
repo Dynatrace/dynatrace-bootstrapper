@@ -19,12 +19,12 @@ func TestConfigure(t *testing.T) {
 
 		configDir := "path/conf"
 		installPath := "/path/install"
-		expectedContent := filepath.Join(installPath, libAgentProcPath)
+		expectedContent := filepath.Join(installPath, LibAgentProcPath)
 
 		err := Configure(testLog, fs, configDir, installPath)
 		require.NoError(t, err)
 
-		content, err := fs.ReadFile(filepath.Join(configDir, configPath))
+		content, err := fs.ReadFile(filepath.Join(configDir, ConfigPath))
 		require.NoError(t, err)
 		assert.Equal(t, expectedContent, string(content))
 

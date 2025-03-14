@@ -30,13 +30,13 @@ func TestConfigure(t *testing.T) {
 		err := Configure(testLog, fs, inputDir, configDir)
 		require.NoError(t, err)
 
-		certFilePath := filepath.Join(configDir, configBasePath, certsFileName)
+		certFilePath := filepath.Join(configDir, ConfigBasePath, CertsFileName)
 		content, err := fs.ReadFile(certFilePath)
 		require.NoError(t, err)
 		assert.Contains(t, string(content), expectedTrusted)
 		assert.Contains(t, string(content), expectedAG)
 
-		proxyCertFilePath := filepath.Join(configDir, configBasePath, proxyCertsFileName)
+		proxyCertFilePath := filepath.Join(configDir, ConfigBasePath, ProxyCertsFileName)
 		content, err = fs.ReadFile(proxyCertFilePath)
 		require.NoError(t, err)
 		assert.Contains(t, string(content), expectedTrusted)
@@ -51,13 +51,13 @@ func TestConfigure(t *testing.T) {
 		err := Configure(testLog, fs, inputDir, configDir)
 		require.NoError(t, err)
 
-		certFilePath := filepath.Join(configDir, configBasePath, certsFileName)
+		certFilePath := filepath.Join(configDir, ConfigBasePath, CertsFileName)
 		content, err := fs.ReadFile(certFilePath)
 		require.NoError(t, err)
 		assert.Contains(t, string(content), expectedTrusted)
 		assert.NotContains(t, string(content), expectedAG)
 
-		proxyCertFilePath := filepath.Join(configDir, configBasePath, proxyCertsFileName)
+		proxyCertFilePath := filepath.Join(configDir, ConfigBasePath, ProxyCertsFileName)
 		content, err = fs.ReadFile(proxyCertFilePath)
 		require.NoError(t, err)
 		assert.Contains(t, string(content), expectedTrusted)
@@ -71,13 +71,13 @@ func TestConfigure(t *testing.T) {
 		err := Configure(testLog, fs, inputDir, configDir)
 		require.NoError(t, err)
 
-		certFilePath := filepath.Join(configDir, configBasePath, certsFileName)
+		certFilePath := filepath.Join(configDir, ConfigBasePath, CertsFileName)
 		content, err := fs.ReadFile(certFilePath)
 		require.NoError(t, err)
 		assert.NotContains(t, string(content), expectedTrusted)
 		assert.Contains(t, string(content), expectedAG)
 
-		proxyCertFilePath := filepath.Join(configDir, configBasePath, proxyCertsFileName)
+		proxyCertFilePath := filepath.Join(configDir, ConfigBasePath, ProxyCertsFileName)
 		_, err = fs.ReadFile(proxyCertFilePath)
 		require.True(t, os.IsNotExist(err))
 	})
@@ -88,11 +88,11 @@ func TestConfigure(t *testing.T) {
 		err := Configure(testLog, fs, inputDir, configDir)
 		require.NoError(t, err)
 
-		certFilePath := filepath.Join(configDir, configBasePath, certsFileName)
+		certFilePath := filepath.Join(configDir, ConfigBasePath, CertsFileName)
 		_, err = fs.ReadFile(certFilePath)
 		require.True(t, os.IsNotExist(err))
 
-		proxyCertFilePath := filepath.Join(configDir, configBasePath, proxyCertsFileName)
+		proxyCertFilePath := filepath.Join(configDir, ConfigBasePath, ProxyCertsFileName)
 		_, err = fs.ReadFile(proxyCertFilePath)
 		require.True(t, os.IsNotExist(err))
 	})

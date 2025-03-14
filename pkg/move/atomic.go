@@ -7,7 +7,7 @@ import (
 	"github.com/spf13/afero"
 )
 
-func atomic(work string, copy copyFunc) copyFunc {
+func Atomic(work string, copy copyFunc) copyFunc {
 	return func(log logr.Logger, fs afero.Afero, from, to string) (err error) {
 		log.Info("setting up atomic operation", "from", from, "to", to, "work", work)
 

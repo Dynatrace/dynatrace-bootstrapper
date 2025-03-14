@@ -46,7 +46,7 @@ func TestConfigure(t *testing.T) {
 		expectedContent, err := fromAttributes(containerAttr, podAttr).toMap()
 		require.NoError(t, err)
 
-		content, err := fs.ReadFile(filepath.Join(configDir, configPath))
+		content, err := fs.ReadFile(filepath.Join(configDir, ConfigPath))
 		require.NoError(t, err)
 
 		for key, value := range expectedContent {

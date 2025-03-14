@@ -1,6 +1,7 @@
 package move
 
 import (
+	"fmt"
 	"path/filepath"
 	"testing"
 
@@ -47,8 +48,8 @@ func TestCopyFolderWithTechnologyFiltering(t *testing.T) {
 			_ = fs.MkdirAll(targetDir, 0755)
 		})
 
-		technology = "java"
-		err := copyByTechnology(testLog, fs, sourceDir, targetDir)
+		technology := "java"
+		err := CopyByTechnology(testLog, fs, sourceDir, targetDir, technology)
 		require.NoError(t, err)
 
 		assertFileExists(t, fs, filepath.Join(targetDir, "fileA1.txt"))
@@ -62,8 +63,8 @@ func TestCopyFolderWithTechnologyFiltering(t *testing.T) {
 			_ = fs.MkdirAll(targetDir, 0755)
 		})
 
-		technology = "java,python"
-		err := copyByTechnology(testLog, fs, sourceDir, targetDir)
+		technology := "java,python"
+		err := CopyByTechnology(testLog, fs, sourceDir, targetDir, technology)
 		require.NoError(t, err)
 
 		assertFileExists(t, fs, filepath.Join(targetDir, "fileA1.txt"))
@@ -77,8 +78,8 @@ func TestCopyFolderWithTechnologyFiltering(t *testing.T) {
 			_ = fs.MkdirAll(targetDir, 0755)
 		})
 
-		technology = "php"
-		err := copyByTechnology(testLog, fs, sourceDir, targetDir)
+		technology := "php"
+		err := CopyByTechnology(testLog, fs, sourceDir, targetDir, technology)
 		require.NoError(t, err)
 
 		assertFileNotExists(t, fs, filepath.Join(targetDir, "fileA1.txt"))
@@ -142,4 +143,19 @@ func TestFilterFilesByTechnology(t *testing.T) {
 		require.Error(t, err)
 		assert.Nil(t, paths)
 	})
+}
+
+func assertFileExists(t *testing.T, fs afero.Fs, path string) {
+	t.Helper()
+
+	exists, err := afero.Exists(fs, path)
+	assert.NoError(t, err)
+	assert.True(t, exists, fmt.Sprintf("file should exist: %s", path))
+}
+func assertFileNotExists(t *testing.T, fs afero.Fs, path string) {
+	t.Helper()
+
+	exists, err := afero.Exists(fs, path)
+	assert.NoError(t, err)
+	assert.False(t, exists, fmt.Sprintf("file should not exist: %s", path))
 }

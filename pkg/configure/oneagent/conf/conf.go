@@ -11,7 +11,7 @@ import (
 )
 
 const (
-	configPath = "/oneagent/agent/config/container.conf"
+	ConfigPath = "/oneagent/agent/config/container.conf"
 )
 
 func Configure(log logr.Logger, fs afero.Afero, configDirectory string, containerAttr container.Attributes, podAttr pod.Attributes) error {
@@ -24,7 +24,7 @@ func Configure(log logr.Logger, fs afero.Afero, configDirectory string, containe
 		return err
 	}
 
-	configFilePath := filepath.Join(configDirectory, configPath)
+	configFilePath := filepath.Join(configDirectory, ConfigPath)
 
 	err = fsutils.CreateFile(fs, configFilePath, stringContent)
 	if err != nil {

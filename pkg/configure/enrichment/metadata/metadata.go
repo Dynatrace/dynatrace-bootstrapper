@@ -11,8 +11,8 @@ import (
 )
 
 const (
-	jsonFilePath       = "enrichment/dt_metadata.json"
-	propertiesFilePath = "enrichment/dt_metadata.properties"
+	JsonFilePath       = "enrichment/dt_metadata.json"
+	PropertiesFilePath = "enrichment/dt_metadata.properties"
 )
 
 func Configure(log logr.Logger, fs afero.Afero, configDirectory string, podAttr pod.Attributes, containerAttr container.Attributes) error {
@@ -25,7 +25,7 @@ func Configure(log logr.Logger, fs afero.Afero, configDirectory string, podAttr 
 		return err
 	}
 
-	jsonFilePath := filepath.Join(configDirectory, jsonFilePath)
+	jsonFilePath := filepath.Join(configDirectory, JsonFilePath)
 
 	err = fsutils.CreateFile(fs, jsonFilePath, string(confJson))
 	if err != nil {
@@ -39,7 +39,7 @@ func Configure(log logr.Logger, fs afero.Afero, configDirectory string, podAttr 
 		return err
 	}
 
-	propsFilePath := filepath.Join(configDirectory, propertiesFilePath)
+	propsFilePath := filepath.Join(configDirectory, PropertiesFilePath)
 
 	err = fsutils.CreateFile(fs, propsFilePath, confProperties)
 	if err != nil {

@@ -1,7 +1,6 @@
 package move
 
 import (
-	"fmt"
 	"testing"
 
 	"github.com/go-logr/zapr"
@@ -110,19 +109,4 @@ func TestExecute(t *testing.T) {
 		assert.Error(t, err)
 		assert.Empty(t, string(content))
 	})
-}
-
-func assertFileExists(t *testing.T, fs afero.Fs, path string) {
-	t.Helper()
-
-	exists, err := afero.Exists(fs, path)
-	assert.NoError(t, err)
-	assert.True(t, exists, fmt.Sprintf("file should exist: %s", path))
-}
-func assertFileNotExists(t *testing.T, fs afero.Fs, path string) {
-	t.Helper()
-
-	exists, err := afero.Exists(fs, path)
-	assert.NoError(t, err)
-	assert.False(t, exists, fmt.Sprintf("file should not exist: %s", path))
 }

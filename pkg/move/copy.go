@@ -8,9 +8,9 @@ import (
 
 type copyFunc func(log logr.Logger, fs afero.Afero, from, to string) error
 
-var _ copyFunc = simpleCopy
+var _ copyFunc = SimpleCopy
 
-func simpleCopy(log logr.Logger, fs afero.Afero, from, to string) error {
+func SimpleCopy(log logr.Logger, fs afero.Afero, from, to string) error {
 	log.Info("starting to copy (simple)", "from", from, "to", to)
 
 	err := fsutils.CopyFolder(log, fs, from, to)

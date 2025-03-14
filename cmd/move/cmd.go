@@ -1,6 +1,7 @@
 package move
 
 import (
+	impl "github.com/Dynatrace/dynatrace-bootstrapper/pkg/move"
 	"github.com/go-logr/logr"
 	"github.com/spf13/afero"
 	"github.com/spf13/cobra"
@@ -26,14 +27,14 @@ func AddFlags(cmd *cobra.Command) {
 // Execute moves the contents of a folder to another via copying.
 // This could be a simple os.Rename, however that will not work if the source and target are on different disk.
 func Execute(log logr.Logger, fs afero.Afero, from, to string) error {
-	copy := simpleCopy
+	copy := impl.SimpleCopy
 
 	if technology != "" {
-		copy = copyByTechnology
+		copy = impl.CopyByTechnologyWrapper(technology)
 	}
 
 	if workFolder != "" {
-		copy = atomic(workFolder, copy)
+		copy = impl.Atomic(workFolder, copy)
 	}
 
 	return copy(log, fs, from, to)
