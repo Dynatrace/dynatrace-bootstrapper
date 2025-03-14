@@ -4,8 +4,8 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/Dynatrace/dynatrace-bootstrapper/pkg/configure/attributes/container"
-	"github.com/Dynatrace/dynatrace-bootstrapper/pkg/configure/attributes/pod"
+	"github.com/Dynatrace/dynatrace-bootstrapper/cmd/configure/attributes/container"
+	"github.com/Dynatrace/dynatrace-bootstrapper/cmd/configure/attributes/pod"
 	"github.com/go-logr/zapr"
 	"github.com/spf13/afero"
 	"github.com/stretchr/testify/assert"
