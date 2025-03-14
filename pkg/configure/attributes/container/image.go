@@ -16,17 +16,17 @@ func (img ImageInfo) ToURI() string {
 	digest := img.ImageDigest
 
 	if registry != "" {
-		if repository != "" {
-			imageName = registry + "/" + repository
-		} else {
-			imageName = repository
-		}
+		imageName = registry + "/" + repository
+	} else {
+		imageName = repository
+	}
 
-		if digest != "" {
-			imageName += "@" + digest
-		} else if tag != "" {
-			imageName += ":" + tag
-		}
+	if tag != "" {
+		imageName += ":" + tag
+	}
+
+	if digest != "" {
+		imageName += "@" + digest
 	}
 
 	return imageName
