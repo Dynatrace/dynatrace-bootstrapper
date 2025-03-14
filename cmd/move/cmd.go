@@ -27,15 +27,15 @@ func AddFlags(cmd *cobra.Command) {
 // Execute moves the contents of a folder to another via copying.
 // This could be a simple os.Rename, however that will not work if the source and target are on different disk.
 func Execute(log logr.Logger, fs afero.Afero, from, to string) error {
-	copy := impl.SimpleCopy
+	copyFunc := impl.SimpleCopy
 
 	if technology != "" {
-		copy = impl.CopyByTechnologyWrapper(technology)
+		copyFunc = impl.CopyByTechnologyWrapper(technology)
 	}
 
 	if workFolder != "" {
-		copy = impl.Atomic(workFolder, copy)
+		copyFunc = impl.Atomic(workFolder, copyFunc)
 	}
 
-	return copy(log, fs, from, to)
+	return copyFunc(log, fs, from, to)
 }
