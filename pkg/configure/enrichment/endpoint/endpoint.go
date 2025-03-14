@@ -10,7 +10,7 @@ import (
 )
 
 const (
-	configBasePath = "enrichment/endpoint"
+	ConfigBasePath = "enrichment/endpoint"
 	InputFileName  = "endpoint.properties"
 )
 
@@ -26,7 +26,7 @@ func Configure(log logr.Logger, fs afero.Afero, inputDir, configDir string) erro
 		return err
 	}
 
-	propertiesFileName := filepath.Join(configDir, configBasePath, InputFileName)
+	propertiesFileName := filepath.Join(configDir, ConfigBasePath, InputFileName)
 
 	err = fsutils.CreateFile(fs, propertiesFileName, properties)
 	if err != nil {

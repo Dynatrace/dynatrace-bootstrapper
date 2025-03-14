@@ -13,7 +13,7 @@ import (
 const (
 	optionsFormatString = `initialConnectRetryMs %s
 `
-	configPath    = "oneagent/agent/customkeys/curl_options.conf"
+	ConfigPath    = "oneagent/agent/customkeys/curl_options.conf"
 	InputFileName = "initial-connect-retry"
 )
 
@@ -46,7 +46,7 @@ func getFromFs(fs afero.Afero, inputDir string) (string, error) {
 }
 
 func createFile(fs afero.Afero, configDir, content string) error {
-	configFile := filepath.Join(configDir, configPath)
+	configFile := filepath.Join(configDir, ConfigPath)
 
 	return fsutils.CreateFile(fs, configFile, content)
 }

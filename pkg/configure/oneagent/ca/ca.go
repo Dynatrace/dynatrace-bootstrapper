@@ -10,9 +10,9 @@ import (
 )
 
 const (
-	configBasePath     = "oneagent/agent/customkeys"
-	proxyCertsFileName = "custom_proxy.pem"
-	certsFileName      = "custom.pem"
+	ConfigBasePath     = "oneagent/agent/customkeys"
+	ProxyCertsFileName = "custom_proxy.pem"
+	CertsFileName      = "custom.pem"
 
 	TrustedCertsInputFile = "trusted.pem"
 	AgCertsInputFile      = "activegate.pem"
@@ -30,7 +30,7 @@ func Configure(log logr.Logger, fs afero.Afero, inputDir, configDir string) erro
 	}
 
 	if agCerts != "" || trustedCerts != "" {
-		certFilePath := filepath.Join(configDir, configBasePath, certsFileName)
+		certFilePath := filepath.Join(configDir, ConfigBasePath, CertsFileName)
 		log.Info("creating cert file", "path", certFilePath)
 
 		err := fsutils.CreateFile(fs, certFilePath, agCerts+"\n"+trustedCerts)
@@ -41,7 +41,7 @@ func Configure(log logr.Logger, fs afero.Afero, inputDir, configDir string) erro
 	}
 
 	if trustedCerts != "" {
-		proxyCertFilePath := filepath.Join(configDir, configBasePath, proxyCertsFileName)
+		proxyCertFilePath := filepath.Join(configDir, ConfigBasePath, ProxyCertsFileName)
 		log.Info("creating cert file", "path", proxyCertFilePath)
 
 		err := fsutils.CreateFile(fs, proxyCertFilePath, trustedCerts)

@@ -1,4 +1,4 @@
-package main
+package cmd
 
 import (
 	"testing"
@@ -9,14 +9,14 @@ import (
 
 func TestBootstrapper(t *testing.T) {
 	t.Run("should validate required flags - missing flags -> error", func(t *testing.T) {
-		cmd := bootstrapper(afero.NewMemMapFs())
+		cmd := New(afero.NewMemMapFs())
 
 		err := cmd.Execute()
 
 		require.Error(t, err)
 	})
 	t.Run("should validate required flags - present flags -> no error", func(t *testing.T) {
-		cmd := bootstrapper(afero.NewMemMapFs())
+		cmd := New(afero.NewMemMapFs())
 		cmd.SetArgs([]string{"--source", "./", "--target", "./"})
 
 		err := cmd.Execute()
@@ -25,14 +25,14 @@ func TestBootstrapper(t *testing.T) {
 	})
 
 	t.Run("--suppress-error=true -> no error", func(t *testing.T) {
-		cmd := bootstrapper(afero.NewMemMapFs())
+		cmd := New(afero.NewMemMapFs())
 		cmd.SetArgs([]string{"--source", "\\\\", "--target", "\\\\"})
 
 		err := cmd.Execute()
 
 		require.Error(t, err)
 
-		cmd = bootstrapper(afero.NewMemMapFs())
+		cmd = New(afero.NewMemMapFs())
 		// Note: we can't skip/mask the validation of the required flags
 		cmd.SetArgs([]string{"--source", "\\\\", "--target", "\\\\", "--suppress-error"})
 
@@ -40,7 +40,7 @@ func TestBootstrapper(t *testing.T) {
 
 		require.NoError(t, err)
 
-		cmd = bootstrapper(afero.NewMemMapFs())
+		cmd = New(afero.NewMemMapFs())
 		// Note: we can't skip/mask the validation of the required flags
 		cmd.SetArgs([]string{"--source", "\\\\", "--target", "\\\\", "--suppress-error", "true"})
 
@@ -50,7 +50,7 @@ func TestBootstrapper(t *testing.T) {
 	})
 
 	t.Run("should allow unknown flags -> no error", func(t *testing.T) {
-		cmd := bootstrapper(afero.NewMemMapFs())
+		cmd := New(afero.NewMemMapFs())
 		cmd.SetArgs([]string{"--source", "./", "--target", "./", "--unknown", "--flag", "value"})
 
 		err := cmd.Execute()

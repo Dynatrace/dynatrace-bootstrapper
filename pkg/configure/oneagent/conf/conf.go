@@ -3,15 +3,15 @@ package conf
 import (
 	"path/filepath"
 
-	"github.com/Dynatrace/dynatrace-bootstrapper/pkg/configure/attributes/container"
-	"github.com/Dynatrace/dynatrace-bootstrapper/pkg/configure/attributes/pod"
+	"github.com/Dynatrace/dynatrace-bootstrapper/cmd/configure/attributes/container"
+	"github.com/Dynatrace/dynatrace-bootstrapper/cmd/configure/attributes/pod"
 	fsutils "github.com/Dynatrace/dynatrace-bootstrapper/pkg/utils/fs"
 	"github.com/go-logr/logr"
 	"github.com/spf13/afero"
 )
 
 const (
-	configPath = "/oneagent/agent/config/container.conf"
+	ConfigPath = "/oneagent/agent/config/container.conf"
 )
 
 func Configure(log logr.Logger, fs afero.Afero, configDirectory string, containerAttr container.Attributes, podAttr pod.Attributes) error {
@@ -24,7 +24,7 @@ func Configure(log logr.Logger, fs afero.Afero, configDirectory string, containe
 		return err
 	}
 
-	configFilePath := filepath.Join(configDirectory, configPath)
+	configFilePath := filepath.Join(configDirectory, ConfigPath)
 
 	err = fsutils.CreateFile(fs, configFilePath, stringContent)
 	if err != nil {

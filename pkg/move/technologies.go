@@ -25,9 +25,15 @@ type FileEntry struct {
 	MD5     string `json:"md5"`
 }
 
-var _ copyFunc = copyByTechnology
+var _ copyFunc = CopyByTechnologyWrapper("test")
 
-func copyByTechnology(log logr.Logger, fs afero.Afero, from string, to string) error {
+func CopyByTechnologyWrapper(technology string) func(log logr.Logger, fs afero.Afero, from string, to string) error {
+	return func(log logr.Logger, fs afero.Afero, from, to string) error {
+		return CopyByTechnology(log, fs, from, to, technology)
+	}
+}
+
+func CopyByTechnology(log logr.Logger, fs afero.Afero, from string, to string, technology string) error {
 	log.Info("starting to copy (filtered)", "from", from, "to", to)
 
 	filteredPaths, err := filterFilesByTechnology(log, fs, from, strings.Split(technology, ","))

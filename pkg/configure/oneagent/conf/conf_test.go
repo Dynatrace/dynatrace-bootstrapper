@@ -4,8 +4,8 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/Dynatrace/dynatrace-bootstrapper/pkg/configure/attributes/container"
-	"github.com/Dynatrace/dynatrace-bootstrapper/pkg/configure/attributes/pod"
+	"github.com/Dynatrace/dynatrace-bootstrapper/cmd/configure/attributes/container"
+	"github.com/Dynatrace/dynatrace-bootstrapper/cmd/configure/attributes/pod"
 	"github.com/go-logr/zapr"
 	"github.com/spf13/afero"
 	"github.com/stretchr/testify/assert"
@@ -46,7 +46,7 @@ func TestConfigure(t *testing.T) {
 		expectedContent, err := fromAttributes(containerAttr, podAttr).toMap()
 		require.NoError(t, err)
 
-		content, err := fs.ReadFile(filepath.Join(configDir, configPath))
+		content, err := fs.ReadFile(filepath.Join(configDir, ConfigPath))
 		require.NoError(t, err)
 
 		for key, value := range expectedContent {

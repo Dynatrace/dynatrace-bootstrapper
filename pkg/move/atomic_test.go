@@ -6,12 +6,16 @@ import (
 	"testing"
 
 	"github.com/go-logr/logr"
+	"github.com/go-logr/zapr"
 	"github.com/spf13/afero"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"go.uber.org/zap"
 )
 
-func mockCopyFuncWithAtomicCheck(t *testing.T, isSuccessful bool) copyFunc {
+var testLog = zapr.NewLogger(zap.NewExample())
+
+func mockCopyFuncWithAtomicCheck(t *testing.T, workFolder string, isSuccessful bool) copyFunc {
 	t.Helper()
 
 	return func(log logr.Logger, fs afero.Afero, _, target string) error {
@@ -42,19 +46,18 @@ func TestAtomic(t *testing.T) {
 
 	t.Run("success -> target is present", func(t *testing.T) {
 		fs := afero.Afero{Fs: afero.NewMemMapFs()}
-		workFolder = "/work"
 
 		err := fs.MkdirAll(source, 0755)
 		assert.NoError(t, err)
 
-		atomicCopy := atomic(work, mockCopyFuncWithAtomicCheck(t, true))
+		atomicCopy := Atomic(work, mockCopyFuncWithAtomicCheck(t, work, true))
 
 		err = atomicCopy(testLog, fs, source, target)
 		assert.NoError(t, err)
 
-		require.NotEqual(t, workFolder, target)
+		require.NotEqual(t, work, target)
 
-		exists, err := fs.DirExists(workFolder)
+		exists, err := fs.DirExists(work)
 		assert.NoError(t, err)
 		assert.False(t, exists)
 
@@ -69,15 +72,15 @@ func TestAtomic(t *testing.T) {
 	t.Run("fail -> target is not present", func(t *testing.T) {
 		fs := afero.Afero{Fs: afero.NewMemMapFs()}
 
-		atomicCopy := atomic(work, mockCopyFuncWithAtomicCheck(t, false))
+		atomicCopy := Atomic(work, mockCopyFuncWithAtomicCheck(t, work, false))
 
 		err := atomicCopy(testLog, fs, source, target)
 		assert.Error(t, err)
 		assert.Equal(t, "some mock error", err.Error())
 
-		require.NotEqual(t, workFolder, target)
+		require.NotEqual(t, work, target)
 
-		exists, err := fs.DirExists(workFolder)
+		exists, err := fs.DirExists(work)
 		assert.NoError(t, err)
 		assert.False(t, exists)
 
