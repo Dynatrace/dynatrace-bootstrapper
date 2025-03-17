@@ -25,9 +25,8 @@ type FileEntry struct {
 	MD5     string `json:"md5"`
 }
 
-var _ copyFunc = CopyByTechnologyWrapper("test")
-
-func CopyByTechnologyWrapper(technology string) func(log logr.Logger, fs afero.Afero, from string, to string) error {
+// CopyByTechnologyWrapper exists so CopyByTechnology can be used with Atomic wrapper as it expects a `copyFunc`.
+func CopyByTechnologyWrapper(technology string) copyFunc {
 	return func(log logr.Logger, fs afero.Afero, from, to string) error {
 		return CopyByTechnology(log, fs, from, to, technology)
 	}
