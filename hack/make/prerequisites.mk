@@ -1,5 +1,5 @@
 # renovate depName=github.com/golangci/golangci-lint
-golang_ci_cmd_version=v1.64.8
+golang_ci_cmd_version=v2.0.2
 # renovate depName=github.com/daixiang0/gci
 gci_version=v0.13.6
 # renovate depName=golang.org/x/tools
