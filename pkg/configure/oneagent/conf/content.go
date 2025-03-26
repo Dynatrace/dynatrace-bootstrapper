@@ -51,6 +51,6 @@ func fromAttributes(containerAttr container.Attributes, podAttr pod.Attributes) 
 		ClusterID:               podAttr.ClusterUID,
 		ContainerName:           containerAttr.ContainerName,
 		DeprecatedContainerName: containerAttr.ContainerName,
-		ImageName:               containerAttr.ImageInfo.ToURI(),
+		ImageName:               containerAttr.ToURI(),
 	}
 }

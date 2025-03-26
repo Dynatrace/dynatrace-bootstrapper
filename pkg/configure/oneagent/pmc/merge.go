@@ -37,7 +37,8 @@ func safeMerge(log logr.Logger, fs afero.Fs, sourcePath, destPath string, conf r
 
 		return errors.WithStack(err)
 	}
-	defer sourceFile.Close()
+
+	defer func() { _ = sourceFile.Close() }()
 
 	sourceConf, err := ruxit.FromConf(sourceFile)
 	if err != nil {
@@ -54,7 +55,8 @@ func safeMerge(log logr.Logger, fs afero.Fs, sourcePath, destPath string, conf r
 
 		return errors.WithStack(err)
 	}
-	defer destFile.Close()
+
+	defer func() { _ = destFile.Close() }()
 
 	_, err = destFile.Write([]byte(mergedConf.ToString()))
 	if err != nil {

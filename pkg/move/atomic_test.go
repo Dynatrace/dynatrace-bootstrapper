@@ -31,7 +31,8 @@ func mockCopyFuncWithAtomicCheck(t *testing.T, workFolder string, isSuccessful b
 		if isSuccessful {
 			file, err := fs.Create(filepath.Join(target, "test.txt"))
 			require.NoError(t, err)
-			file.Close()
+
+			_ = file.Close()
 
 			return nil
 		}

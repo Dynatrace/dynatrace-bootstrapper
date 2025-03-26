@@ -30,7 +30,7 @@ func (c fileContent) toMap() (map[string]string, error) {
 		return nil, err
 	}
 
-	maps.Copy(baseMap, c.Attributes.UserDefined)
+	maps.Copy(baseMap, c.UserDefined)
 
 	return baseMap, nil
 }

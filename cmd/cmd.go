@@ -54,9 +54,11 @@ func AddFlags(cmd *cobra.Command) {
 	_ = cmd.MarkPersistentFlagRequired(TargetFolderFlag)
 
 	cmd.PersistentFlags().BoolVar(&isDebug, DebugFlag, false, "(Optional) Enables debug logs.")
+
 	cmd.PersistentFlags().Lookup(DebugFlag).NoOptDefVal = "true"
 
 	cmd.PersistentFlags().BoolVar(&areErrorsSuppressed, SuppressErrorsFlag, false, "(Optional) Always return exit code 0, even on error")
+
 	cmd.PersistentFlags().Lookup(SuppressErrorsFlag).NoOptDefVal = "true"
 }
 
@@ -67,6 +69,7 @@ func run(fs afero.Fs) func(cmd *cobra.Command, _ []string) error {
 		if isDebug {
 			log.Info("debug logs enabled")
 		}
+
 		version.Print(log)
 
 		aferoFs := afero.Afero{
@@ -82,6 +85,7 @@ func run(fs afero.Fs) func(cmd *cobra.Command, _ []string) error {
 			}
 
 			log.Error(err, "error during configuration")
+
 			return err
 		}
 
@@ -94,6 +98,7 @@ func run(fs afero.Fs) func(cmd *cobra.Command, _ []string) error {
 			}
 
 			log.Error(err, "error during configuration")
+
 			return err
 		}
 

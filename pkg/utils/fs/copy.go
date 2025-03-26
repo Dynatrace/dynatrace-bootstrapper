@@ -59,7 +59,8 @@ func CopyFile(fs afero.Fs, sourcePath string, destinationPath string) error {
 	if err != nil {
 		return errors.WithStack(err)
 	}
-	defer sourceFile.Close()
+
+	defer func() { _ = sourceFile.Close() }()
 
 	sourceInfo, err := sourceFile.Stat()
 	if err != nil {
@@ -71,7 +72,7 @@ func CopyFile(fs afero.Fs, sourcePath string, destinationPath string) error {
 		return errors.WithStack(err)
 	}
 
-	defer destinationFile.Close()
+	defer func() { _ = destinationFile.Close() }()
 
 	_, err = io.Copy(destinationFile, sourceFile)
 	if err != nil {

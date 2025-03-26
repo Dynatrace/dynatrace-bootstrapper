@@ -29,7 +29,7 @@ func Configure(log logr.Logger, fs afero.Afero, inputDir, targetDir string) erro
 		return err
 	}
 
-	defer inputFile.Close()
+	defer func() { _ = inputFile.Close() }()
 
 	conf, err := ruxit.FromJson(inputFile)
 	if err != nil {
