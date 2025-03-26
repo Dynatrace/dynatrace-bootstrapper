@@ -1,5 +1,5 @@
-# renovate depName=github.com/golangci/golangci-lint
-golang_ci_cmd_version=v1.64.8
+# renovate depName=github.com/golangci/golangci-lint/v2
+golang_ci_cmd_version=v2.0.1
 # renovate depName=github.com/daixiang0/gci
 gci_version=v0.13.6
 # renovate depName=golang.org/x/tools
@@ -24,7 +24,7 @@ prerequisites/setup-go-dev-dependencies: prerequisites/go-linting prerequisites/
 
 ## Install go linters
 prerequisites/go-linting: prerequisites/go-deadcode
-	go install github.com/golangci/golangci-lint/cmd/golangci-lint@$(golang_ci_cmd_version)
+	go install github.com/golangci/golangci-lint/v2/cmd/golangci-lint@$(golang_ci_cmd_version)
 	go install github.com/daixiang0/gci@$(gci_version)
 	go install golang.org/x/tools/cmd/goimports@$(golang_tools_version)
 	go install github.com/bombsimon/wsl/v4/cmd...@master

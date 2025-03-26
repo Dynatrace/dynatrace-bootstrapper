@@ -23,7 +23,7 @@ go/vet:
 
 ## Runs go wsl linter
 go/wsl:
-	wsl -fix -allow-trailing-comment ./pkg/...
+	wsl -fix -allow-trailing-comment ./...
 
 ## Runs golangci-lint
 go/golangci:
