@@ -112,6 +112,5 @@ jobs:
           push: true
           tags: ${{ env.IMAGE }}:${{ needs.prepare.outputs.version }}
           labels: ${{ needs.prepare.outputs.labels }}
-          outputs: type=oci
           build-args: |
             GO_LINKER_ARGS=${{ needs.prepare.outputs.go_linker_args }}
