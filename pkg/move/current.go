@@ -13,7 +13,7 @@ const (
 	currentDir               = "agent/bin/current"
 )
 
-// CreateCurrentSymlink finds the version of the CodeModule in the `targetDir` (in the installer.version file) and creates a "current" symlink next to it.
+// CreateCurrentSymlink finds the version of the CodeModule in the `targetDir` (in the installer.version file) and creates a "current" symlink in the agent/bin folder that points to the agent/bin/<version> subfolder.
 // this is needed for the nginx use-case.
 func CreateCurrentSymlink(log logr.Logger, fs afero.Afero, targetDir string) error {
 	targetCurrentDir := filepath.Join(targetDir, currentDir)
