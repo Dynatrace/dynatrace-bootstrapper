@@ -16,7 +16,10 @@ func TestBootstrapper(t *testing.T) {
 		require.Error(t, err)
 	})
 	t.Run("should validate required flags - present flags -> no error", func(t *testing.T) {
-		cmd := New(afero.NewMemMapFs())
+		fs := afero.NewMemMapFs()
+		_,_ = fs.Create("agent/bin/1.239.14.20220325-164521")
+
+		cmd := New(fs)
 		cmd.SetArgs([]string{"--source", "./", "--target", "./"})
 
 		err := cmd.Execute()
@@ -50,7 +53,10 @@ func TestBootstrapper(t *testing.T) {
 	})
 
 	t.Run("should allow unknown flags -> no error", func(t *testing.T) {
-		cmd := New(afero.NewMemMapFs())
+		fs := afero.NewMemMapFs()
+		_,_ = fs.Create("agent/bin/1.239.14.20220325-164521")
+
+		cmd := New(fs)
 		cmd.SetArgs([]string{"--source", "./", "--target", "./", "--unknown", "--flag", "value"})
 
 		err := cmd.Execute()

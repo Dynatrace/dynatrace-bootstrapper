@@ -24,7 +24,7 @@ func TestExecute(t *testing.T) {
 		_ = fs.MkdirAll(sourceDir, 0755)
 		_ = afero.WriteFile(fs, sourceDir+"/file1.txt", []byte("file1 content"), 0644)
 		_ = afero.WriteFile(fs, sourceDir+"/file2.txt", []byte("file2 content"), 0644)
-		_ = afero.WriteFile(fs, sourceDir+"/agent/bin/1.239.14.20220325-164521", []byte("file2 content"), 0644)
+		_,_ = fs.Create(sourceDir+"/agent/bin/1.239.14.20220325-164521")
 
 		workFolder = workDir
 
@@ -83,7 +83,7 @@ func TestExecute(t *testing.T) {
 		_ = afero.WriteFile(fs, sourceDir+"/manifest.json", []byte(manifestContent), 0644)
 		_ = afero.WriteFile(fs, sourceDir+"/fileA1.txt", []byte("fileA1 content"), 0644)
 		_ = afero.WriteFile(fs, sourceDir+"/fileA2.txt", []byte("fileA2 content"), 0644)
-		_ = afero.WriteFile(fs, sourceDir+"/agent/bin/1.239.14.20220325-164521", []byte("file2 content"), 0644)
+		_,_ = fs.Create(sourceDir+"/agent/bin/1.239.14.20220325-164521")
 
 		technology = technologyList
 
