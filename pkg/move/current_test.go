@@ -5,32 +5,24 @@ import (
 	"testing"
 
 	"github.com/spf13/afero"
-	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
-func TestFindVersionFromFileSystem(t *testing.T) {
+func TestCreateCurrentSymlink(t *testing.T) {
 	testPath := "/test"
 	expectedVersion := "1.239.14.20220325-164521"
 
-	t.Run("get version from directory in file system", func(t *testing.T) {
-		fs := afero.NewMemMapFs()
-		err := fs.MkdirAll(filepath.Join(testPath, expectedVersion), 0755)
-		require.NoError(t, err)
+	t.Run("no fail if version file exists", func(t *testing.T) {
+		fs := afero.Afero{Fs: afero.NewMemMapFs()}
+		_ = fs.WriteFile(filepath.Join(testPath, InstallerVersionFilePath), []byte(expectedVersion), 0644)
 
-		version, err := findVersionFromFS(testLog, fs, testPath)
+		err := CreateCurrentSymlink(testLog, fs, testPath)
 		require.NoError(t, err)
-		assert.Equal(t, expectedVersion, version)
 	})
-	t.Run("get nothing from file", func(t *testing.T) {
-		fs := afero.NewMemMapFs()
-		err := fs.MkdirAll(testPath, 0755)
-		require.NoError(t, err)
-		_, err = fs.Create(filepath.Join(testPath, expectedVersion))
-		require.NoError(t, err)
+	t.Run("fail if version file is missing", func(t *testing.T) {
+		fs := afero.Afero{Fs: afero.NewMemMapFs()}
 
-		version, err := findVersionFromFS(testLog, fs, testPath)
-		require.NoError(t, err)
-		assert.Empty(t, version)
+		err := CreateCurrentSymlink(testLog, fs, testPath)
+		require.Error(t, err)
 	})
 }

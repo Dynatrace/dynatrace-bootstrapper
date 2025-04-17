@@ -42,5 +42,5 @@ func Execute(log logr.Logger, fs afero.Afero, from, to string) error {
 		return err
 	}
 
-	return impl.CreateCurrentSymlink(log, fs.Fs, to)
+	return impl.CreateCurrentSymlink(log, fs, to)
 }

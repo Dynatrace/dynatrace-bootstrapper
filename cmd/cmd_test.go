@@ -1,8 +1,10 @@
 package cmd
 
 import (
+	"path/filepath"
 	"testing"
 
+	"github.com/Dynatrace/dynatrace-bootstrapper/pkg/move"
 	"github.com/spf13/afero"
 	"github.com/stretchr/testify/require"
 )
@@ -17,7 +19,7 @@ func TestBootstrapper(t *testing.T) {
 	})
 	t.Run("should validate required flags - present flags -> no error", func(t *testing.T) {
 		fs := afero.NewMemMapFs()
-		_,_ = fs.Create("agent/bin/1.239.14.20220325-164521")
+		_ = afero.WriteFile(fs, filepath.Join("./", move.InstallerVersionFilePath), []byte("123"), 0644)
 
 		cmd := New(fs)
 		cmd.SetArgs([]string{"--source", "./", "--target", "./"})
@@ -54,7 +56,7 @@ func TestBootstrapper(t *testing.T) {
 
 	t.Run("should allow unknown flags -> no error", func(t *testing.T) {
 		fs := afero.NewMemMapFs()
-		_,_ = fs.Create("agent/bin/1.239.14.20220325-164521")
+		_ = afero.WriteFile(fs, filepath.Join("./", move.InstallerVersionFilePath), []byte("123"), 0644)
 
 		cmd := New(fs)
 		cmd.SetArgs([]string{"--source", "./", "--target", "./", "--unknown", "--flag", "value"})

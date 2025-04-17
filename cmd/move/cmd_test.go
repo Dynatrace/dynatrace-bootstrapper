@@ -1,8 +1,10 @@
 package move
 
 import (
+	"path/filepath"
 	"testing"
 
+	impl "github.com/Dynatrace/dynatrace-bootstrapper/pkg/move"
 	"github.com/go-logr/zapr"
 	"github.com/spf13/afero"
 	"github.com/stretchr/testify/assert"
@@ -24,7 +26,7 @@ func TestExecute(t *testing.T) {
 		_ = fs.MkdirAll(sourceDir, 0755)
 		_ = afero.WriteFile(fs, sourceDir+"/file1.txt", []byte("file1 content"), 0644)
 		_ = afero.WriteFile(fs, sourceDir+"/file2.txt", []byte("file2 content"), 0644)
-		_,_ = fs.Create(sourceDir+"/agent/bin/1.239.14.20220325-164521")
+		_ = afero.WriteFile(fs, filepath.Join(sourceDir, impl.InstallerVersionFilePath), []byte("123"), 0644)
 
 		workFolder = workDir
 
@@ -67,7 +69,7 @@ func TestExecute(t *testing.T) {
 				"java": {
 					"x86": [
 						{"path": "fileA1.txt", "version": "1.0", "md5": "abc123"},
-						{"path": "agent/bin/1.239.14.20220325-164521", "version": "1.0", "md5": "abc123"}
+						{"path": "agent/installer.version", "version": "1.0", "md5": "abc123"}
 					]
 				},
 				"python": {
@@ -83,7 +85,7 @@ func TestExecute(t *testing.T) {
 		_ = afero.WriteFile(fs, sourceDir+"/manifest.json", []byte(manifestContent), 0644)
 		_ = afero.WriteFile(fs, sourceDir+"/fileA1.txt", []byte("fileA1 content"), 0644)
 		_ = afero.WriteFile(fs, sourceDir+"/fileA2.txt", []byte("fileA2 content"), 0644)
-		_,_ = fs.Create(sourceDir+"/agent/bin/1.239.14.20220325-164521")
+		_ = afero.WriteFile(fs, filepath.Join(sourceDir, impl.InstallerVersionFilePath), []byte("123"), 0644)
 
 		technology = technologyList
 
