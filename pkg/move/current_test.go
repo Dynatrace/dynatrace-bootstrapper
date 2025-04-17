@@ -22,7 +22,7 @@ func TestCreateCurrentSymlink(t *testing.T) {
 
 	t.Run("no fail if current dir already exists", func(t *testing.T) {
 		fs := afero.Afero{Fs: afero.NewMemMapFs()}
-		_ = fs.Fs.Mkdir(filepath.Join(testPath, currentDir), 0644)
+		_ = fs.Mkdir(filepath.Join(testPath, currentDir), 0644)
 
 		err := CreateCurrentSymlink(testLog, fs, testPath)
 		require.NoError(t, err)
