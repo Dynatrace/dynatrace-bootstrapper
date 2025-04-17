@@ -11,22 +11,22 @@ import (
 
 func TestFindVersionFromFileSystem(t *testing.T) {
 	testPath := "/test"
-	testVersion := "1.239.14.20220325-164521"
+	expectedVersion := "1.239.14.20220325-164521"
 
 	t.Run("get version from directory in file system", func(t *testing.T) {
 		fs := afero.NewMemMapFs()
-		err := fs.MkdirAll(filepath.Join(testPath, testVersion), 0755)
+		err := fs.MkdirAll(filepath.Join(testPath, expectedVersion), 0755)
 		require.NoError(t, err)
 
 		version, err := findVersionFromFS(testLog, fs, testPath)
 		require.NoError(t, err)
-		assert.Equal(t, testVersion, version)
+		assert.Equal(t, expectedVersion, version)
 	})
 	t.Run("get nothing from file", func(t *testing.T) {
 		fs := afero.NewMemMapFs()
 		err := fs.MkdirAll(testPath, 0755)
 		require.NoError(t, err)
-		_, err = fs.Create(filepath.Join(testPath, testVersion))
+		_, err = fs.Create(filepath.Join(testPath, expectedVersion))
 		require.NoError(t, err)
 
 		version, err := findVersionFromFS(testLog, fs, testPath)

@@ -21,15 +21,6 @@ const (
 // CreateCurrentSymlink finds a the version of the CodeModule in the `targetDir` and creates a "current" symlink next to it.
 // this is needed for the nginx use-case.
 func CreateCurrentSymlink(log logr.Logger, fs afero.Fs, targetDir string) error {
-	var err error
-
-	_, ok := fs.(afero.Linker)
-	if !ok {
-		log.Info("symlinking not possible", "targetDir", targetDir, "fs", fs)
-
-		return nil
-	}
-
 	targetBinDir := filepath.Join(targetDir, binDir)
 
 	relativeSymlinkPath, err := findVersionFromFS(log, fs, targetBinDir)
@@ -42,7 +33,7 @@ func CreateCurrentSymlink(log logr.Logger, fs afero.Fs, targetDir string) error 
 	return symlink.Create(log, fs, relativeSymlinkPath, filepath.Join(targetBinDir, currentDir))
 }
 
-func findVersionFromFS(log logr.Logger, fs afero.Fs, targetDir string) (string, error) {
+func findVersionFromFS(log logr.Logger, fs afero.Fs, targetBinDir string) (string, error) {
 	var version string
 
 	aferoFs := afero.Afero{
@@ -51,8 +42,8 @@ func findVersionFromFS(log logr.Logger, fs afero.Fs, targetDir string) (string, 
 	walkFiles := func(path string, info iofs.FileInfo, err error) error {
 		if info == nil {
 			log.Info(
-				"file does not exist, are you using a correct codeModules image?",
-				"path", path)
+				"version sub-dir does not exist in dir",
+				"dir", targetBinDir)
 
 			return iofs.ErrNotExist
 		}
@@ -72,7 +63,7 @@ func findVersionFromFS(log logr.Logger, fs afero.Fs, targetDir string) (string, 
 		return nil
 	}
 
-	err := aferoFs.Walk(targetDir, walkFiles)
+	err := aferoFs.Walk(targetBinDir, walkFiles)
 	if errors.Is(err, iofs.ErrNotExist) {
 		return "", errors.WithStack(err)
 	}
