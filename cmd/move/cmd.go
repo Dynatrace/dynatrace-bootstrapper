@@ -37,5 +37,10 @@ func Execute(log logr.Logger, fs afero.Afero, from, to string) error {
 		copyFunc = impl.Atomic(workFolder, copyFunc)
 	}
 
-	return copyFunc(log, fs, from, to)
+	err := copyFunc(log, fs, from, to)
+	if err != nil {
+		return err
+	}
+
+	return impl.CreateCurrentSymlink(log, fs.Fs, to)
 }
