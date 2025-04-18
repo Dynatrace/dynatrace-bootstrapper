@@ -2,6 +2,7 @@ package move
 
 import (
 	"encoding/json"
+	"golang.org/x/sys/unix"
 	"path/filepath"
 	"strings"
 
@@ -39,6 +40,9 @@ func CopyByTechnology(log logr.Logger, fs afero.Afero, from string, to string, t
 	if err != nil {
 		return err
 	}
+
+	oldUmask := unix.Umask(0000)
+	defer unix.Umask(oldUmask)
 
 	for _, sourceFilePath := range filteredPaths {
 		targetFilePath := filepath.Join(to, strings.Split(sourceFilePath, from)[1])
