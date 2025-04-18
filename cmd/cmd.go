@@ -12,6 +12,7 @@ import (
 	"github.com/spf13/cobra"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
+	"golang.org/x/sys/unix"
 )
 
 const (
@@ -64,6 +65,8 @@ func AddFlags(cmd *cobra.Command) {
 
 func run(fs afero.Fs) func(cmd *cobra.Command, _ []string) error {
 	return func(cmd *cobra.Command, _ []string) error {
+		unix.Umask(0000)
+
 		setupLogger()
 
 		if isDebug {
