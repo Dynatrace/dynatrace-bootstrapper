@@ -48,6 +48,17 @@ spec:
           mountPath: /mnt/input
       containers:
       - image: docker.io/php:fpm-stretch
+        securityContext:
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+              - ALL
+          readOnlyRootFilesystem: false
+          runAsNonRoot: true
+          runAsUser: 101
+          runAsGroup: 99
+          seccompProfile:
+            type: RuntimeDefault
         imagePullPolicy: Always
         livenessProbe:
           failureThreshold: 3
@@ -93,10 +104,6 @@ spec:
         - key: kubernetes.io/arch
           value: amd64
           effect: NoSchedule
-      securityContext:
-        runAsUser: 0
-        runAsGroup: 0
-        fsGroup: 2000
       terminationGracePeriodSeconds: 30
       imagePullSecrets:
         {{ .Values.image.pullSecrets }}
