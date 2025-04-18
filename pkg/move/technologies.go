@@ -2,7 +2,6 @@ package move
 
 import (
 	"encoding/json"
-	"golang.org/x/sys/unix"
 	"path/filepath"
 	"strings"
 
@@ -10,6 +9,7 @@ import (
 	"github.com/go-logr/logr"
 	"github.com/pkg/errors"
 	"github.com/spf13/afero"
+	"golang.org/x/sys/unix"
 )
 
 type Manifest struct {
