@@ -19,12 +19,12 @@ const (
 )
 
 func Configure(log logr.Logger, fs afero.Afero, inputDir, configDir string) error {
-	trustedCerts, err := getFromFs(fs, inputDir, TrustedCertsInputFile)
+	trustedCerts, err := GetFromFs(fs, inputDir, TrustedCertsInputFile)
 	if err != nil && !os.IsNotExist(err) {
 		return err
 	}
 
-	agCerts, err := getFromFs(fs, inputDir, AgCertsInputFile)
+	agCerts, err := GetFromFs(fs, inputDir, AgCertsInputFile)
 	if err != nil && !os.IsNotExist(err) {
 		return err
 	}
@@ -54,7 +54,7 @@ func Configure(log logr.Logger, fs afero.Afero, inputDir, configDir string) erro
 	return nil
 }
 
-func getFromFs(fs afero.Afero, inputDir, certFileName string) (string, error) {
+func GetFromFs(fs afero.Afero, inputDir, certFileName string) (string, error) {
 	inputFile := filepath.Join(inputDir, certFileName)
 
 	content, err := fs.ReadFile(inputFile)
