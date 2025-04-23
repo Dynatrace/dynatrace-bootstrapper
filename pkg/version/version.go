@@ -1,6 +1,8 @@
 package version
 
 import (
+	"runtime/debug"
+
 	"github.com/go-logr/logr"
 )
 
@@ -10,7 +12,7 @@ var (
 	AppName = "dynatrace-bootsrapper"
 
 	// Version contains the version of the Bootstrapper. Assigned externally.
-	Version = "snapshot"
+	Version = ""
 
 	// Commit indicates the Git commit hash the binary was build from. Assigned externally.
 	Commit = ""
@@ -20,5 +22,31 @@ var (
 )
 
 func Print(log logr.Logger) {
-	log.Info("version info", "name", AppName, "version", Version, "commit", Commit, "build_date", BuildDate)
+	keyValues := []any{"name", AppName,}
+
+	i, ok := debug.ReadBuildInfo()
+	if !ok {
+		return
+	}
+
+	if Version == "" {
+		Version = i.Main.Version
+	}
+
+	keyValues = append(keyValues, "version", Version)
+
+	if i.Main.Sum != "" {
+		keyValues = append(keyValues, "module-sum", i.Main.Sum)
+	}
+
+	if Commit != "" {
+		keyValues = append(keyValues, "commit", Commit)
+	}
+
+	if BuildDate != "" {
+		keyValues = append(keyValues, "build_date", BuildDate)
+	}
+
+
+	log.Info("version info", keyValues...)
 }
