@@ -19,11 +19,11 @@ var (
 
 	// BuildDate is the date when the binary was build. Assigned externally.
 	BuildDate = ""
+
+	ModuleSum = ""
 )
 
-func Print(log logr.Logger) {
-	keyValues := []any{"name", AppName,}
-
+func init() {
 	i, ok := debug.ReadBuildInfo()
 	if !ok {
 		return
@@ -33,10 +33,15 @@ func Print(log logr.Logger) {
 		Version = i.Main.Version
 	}
 
-	keyValues = append(keyValues, "version", Version)
+	ModuleSum = i.Main.Sum
 
-	if i.Main.Sum != "" {
-		keyValues = append(keyValues, "module-sum", i.Main.Sum)
+}
+
+func Print(log logr.Logger) {
+	keyValues := []any{"name", AppName, "version", Version}
+
+	if ModuleSum != "" {
+		keyValues = append(keyValues, "module-sum", ModuleSum)
 	}
 
 	if Commit != "" {
@@ -46,7 +51,6 @@ func Print(log logr.Logger) {
 	if BuildDate != "" {
 		keyValues = append(keyValues, "build_date", BuildDate)
 	}
-
 
 	log.Info("version info", keyValues...)
 }
