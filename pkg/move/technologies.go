@@ -2,6 +2,7 @@ package move
 
 import (
 	"encoding/json"
+	"os"
 	"path/filepath"
 	"strings"
 
@@ -41,33 +42,68 @@ func CopyByTechnology(log logr.Logger, fs afero.Afero, from string, to string, t
 		return err
 	}
 
+	err = copyByList(log, fs, from, to, filteredPaths)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func copyByList(log logr.Logger, fs afero.Afero, from string, to string, paths []string) error {
 	oldUmask := unix.Umask(0000)
 	defer unix.Umask(oldUmask)
 
-	for _, sourceFilePath := range filteredPaths {
-		targetFilePath := filepath.Join(to, strings.Split(sourceFilePath, from)[1])
+	fromStat, err := fs.Stat(from)
+	if err != nil {
+		log.Error(err, "error checking stat mode from source folder")
 
-		sourceStatMode, err := fs.Stat(from)
-		if err != nil {
-			log.Error(err, "error checking stat mode from source folder")
+		return err
+	}
 
-			return err
-		}
+	err = fs.MkdirAll(to, fromStat.Mode())
+	if err != nil {
+		log.Error(err, "error creating target folder")
 
-		err = fs.MkdirAll(filepath.Dir(targetFilePath), sourceStatMode.Mode())
-		if err != nil {
-			log.Error(err, "error creating target folder")
+		return err
+	}
 
-			return err
-		}
+	for _, path := range paths {
+		splitPath := strings.Split(path, string(filepath.Separator))
 
-		log.V(1).Info("copying file %s to %s", "from", sourceFilePath, "to", targetFilePath)
+		walkedPath := ""
+		for _, subPath := range splitPath {
+			walkedPath = filepath.Join(walkedPath, subPath)
+			sourcePath := filepath.Join(from, walkedPath)
+			targetPath := filepath.Join(to, walkedPath)
 
-		err = fsutils.CopyFile(fs, sourceFilePath, targetFilePath)
-		if err != nil {
-			log.Error(err, "error copying file")
+			sourceStat, err := fs.Stat(sourcePath)
+			if err != nil {
+				log.Error(err, "failed checking stat mode from source", "path", sourcePath)
 
-			return err
+				return err
+			}
+
+			if sourceStat.IsDir() {
+				err := fs.Mkdir(targetPath, sourceStat.Mode())
+				if err != nil && !os.IsExist(err) {
+					log.Error(err, "failed to create new dir", "path", targetPath)
+
+					return err
+				} else {
+					log.V(1).Info("created new dir", "from", sourcePath, "to", targetPath, "mode", sourceStat.Mode())
+				}
+			} else {
+				log.V(1).Info("copying file", "from", sourcePath, "to", targetPath, "mode", sourceStat.Mode())
+
+				err = fsutils.CopyFile(fs, sourcePath, targetPath)
+				if err != nil {
+					log.Error(err, "error copying file")
+
+					return err
+				}
+			}
+
 		}
 	}
 
@@ -100,7 +136,7 @@ func filterFilesByTechnology(log logr.Logger, fs afero.Afero, source string, tec
 			log.V(1).Info("collecting files for technology", "tech", tech, "arch", arch)
 
 			for _, file := range files {
-				paths = append(paths, filepath.Join(source, file.Path))
+				paths = append(paths, file.Path)
 			}
 		}
 	}

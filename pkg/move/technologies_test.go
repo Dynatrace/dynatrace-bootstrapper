@@ -2,6 +2,7 @@ package move
 
 import (
 	"fmt"
+	"io/fs"
 	"path/filepath"
 	"testing"
 
@@ -87,6 +88,66 @@ func TestCopyFolderWithTechnologyFiltering(t *testing.T) {
 		assertFileNotExists(t, fs, filepath.Join(targetDir, "fileB1.txt"))
 		assertFileNotExists(t, fs, filepath.Join(targetDir, "fileC1.txt"))
 	})
+}
+
+func TestCopyByList(t *testing.T) {
+	dirs := []string{
+		"./folder",
+		"./folder/sub",
+		"./folder/sub/child",
+	}
+	dirModes := []fs.FileMode{
+		0777,
+		0776,
+		0775,
+	}
+
+	filesNames := []string{
+		"f1.txt",
+		"runtime",
+		"log",
+	}
+	fileModes := []fs.FileMode{
+		0774,
+		0773,
+		0772,
+	}
+
+	fs := afero.Afero{Fs: afero.NewMemMapFs()}
+	// create an FS where there are multiple sub dirs and files, each with their own file modes
+	for i := range len(dirs) {
+		err := fs.Mkdir(dirs[i], dirModes[i])
+		require.NoError(t, err)
+		err = fs.WriteFile(filepath.Join(dirs[i], filesNames[i]), []byte(fmt.Sprintf("%d", i)), fileModes[i])
+		require.NoError(t, err)
+	}
+
+	// reverse the list, so the longest path is the first
+	fileList := []string{}
+	for i := len(dirs) - 1; i >= 0; i-- {
+		fileList = append(fileList, filepath.Join(dirs[i], filesNames[i]))
+	}
+
+	targetDir := "./target"
+
+	err := copyByList(testLog, fs, "./", targetDir, fileList)
+	require.NoError(t, err)
+
+	// you can't directly compare with fileModes and dirModes, as they "change" when the file/dir is created
+	// if you check with the debugger, you can see that the FileModes are correctly distinct for every dir and file.
+	for i := range len(dirs) {
+		sourceStat, err := fs.Stat(dirs[i])
+		require.NoError(t, err)
+		targetStat, err := fs.Stat(filepath.Join(targetDir, dirs[i]))
+		require.NoError(t, err)
+		assert.Equal(t, sourceStat.Mode(), targetStat.Mode())
+
+		sourceStat, err = fs.Stat(fileList[i])
+		require.NoError(t, err)
+		targetStat, err = fs.Stat(filepath.Join(targetDir, fileList[i]))
+		require.NoError(t, err)
+		assert.Equal(t, sourceStat.Mode(), targetStat.Mode())
+	}
 }
 
 func TestFilterFilesByTechnology(t *testing.T) {
