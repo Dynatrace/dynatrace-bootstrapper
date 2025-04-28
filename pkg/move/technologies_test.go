@@ -180,17 +180,17 @@ func TestFilterFilesByTechnology(t *testing.T) {
 		paths, err := filterFilesByTechnology(testLog, fs, sourceDir, []string{"java"})
 		require.NoError(t, err)
 		assert.ElementsMatch(t, []string{
-			filepath.Join(sourceDir, "fileA1.txt"),
-			filepath.Join(sourceDir, "fileA2.txt"),
+			filepath.Join("fileA1.txt"),
+			filepath.Join("fileA2.txt"),
 		}, paths)
 	})
 	t.Run("filter multiple technologies", func(t *testing.T) {
 		paths, err := filterFilesByTechnology(testLog, fs, sourceDir, []string{"java", "python"})
 		require.NoError(t, err)
 		assert.ElementsMatch(t, []string{
-			filepath.Join(sourceDir, "fileA1.txt"),
-			filepath.Join(sourceDir, "fileA2.txt"),
-			filepath.Join(sourceDir, "fileB1.txt"),
+			filepath.Join("fileA1.txt"),
+			filepath.Join("fileA2.txt"),
+			filepath.Join("fileB1.txt"),
 		}, paths)
 	})
 	t.Run("not filter non-existing technology", func(t *testing.T) {
