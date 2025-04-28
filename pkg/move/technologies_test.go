@@ -172,9 +172,6 @@ func TestFilterFilesByTechnology(t *testing.T) {
         }
     }`
 	_ = afero.WriteFile(fs, filepath.Join(sourceDir, "manifest.json"), []byte(manifestContent), 0644)
-	_ = afero.WriteFile(fs, filepath.Join(sourceDir, "fileA1.txt"), []byte("a1 content"), 0644)
-	_ = afero.WriteFile(fs, filepath.Join(sourceDir, "fileA2.txt"), []byte("a2 content"), 0644)
-	_ = afero.WriteFile(fs, filepath.Join(sourceDir, "fileB1.txt"), []byte("b1 content"), 0644)
 
 	t.Run("filter single technology", func(t *testing.T) {
 		paths, err := filterFilesByTechnology(testLog, fs, sourceDir, []string{"java"})
