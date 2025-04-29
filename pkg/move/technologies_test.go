@@ -108,7 +108,7 @@ func TestCopyByList(t *testing.T) {
 		"log",
 	}
 	fileModes := []fs.FileMode{
-		0774,
+		0764,
 		0773,
 		0772,
 	}
@@ -133,20 +133,14 @@ func TestCopyByList(t *testing.T) {
 	err := copyByList(testLog, fs, "./", targetDir, fileList)
 	require.NoError(t, err)
 
-	// you can't directly compare with fileModes and dirModes, as they "change" when the file/dir is created
-	// if you check with the debugger, you can see that the FileModes are correctly distinct for every dir and file.
 	for i := range len(dirs) {
-		sourceStat, err := fs.Stat(dirs[i])
-		require.NoError(t, err)
 		targetStat, err := fs.Stat(filepath.Join(targetDir, dirs[i]))
 		require.NoError(t, err)
-		assert.Equal(t, sourceStat.Mode(), targetStat.Mode())
+		assert.Equal(t, dirModes[i], targetStat.Mode().Perm(), targetStat.Name())
 
-		sourceStat, err = fs.Stat(fileList[i])
+		targetStat, err = fs.Stat(filepath.Join(targetDir, dirs[i], filesNames[i]))
 		require.NoError(t, err)
-		targetStat, err = fs.Stat(filepath.Join(targetDir, fileList[i]))
-		require.NoError(t, err)
-		assert.Equal(t, sourceStat.Mode(), targetStat.Mode())
+		assert.Equal(t, fileModes[i], targetStat.Mode().Perm(), targetStat.Name())
 	}
 }
 
