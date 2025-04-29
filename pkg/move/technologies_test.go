@@ -138,9 +138,17 @@ func TestCopyByList(t *testing.T) {
 		require.NoError(t, err)
 		assert.Equal(t, dirModes[i], targetStat.Mode().Perm(), targetStat.Name())
 
+		sourceStat, err := fs.Stat(dirs[i])
+		require.NoError(t, err)
+		assert.Equal(t, sourceStat.Mode(), targetStat.Mode(), targetStat.Name())
+
 		targetStat, err = fs.Stat(filepath.Join(targetDir, dirs[i], filesNames[i]))
 		require.NoError(t, err)
 		assert.Equal(t, fileModes[i], targetStat.Mode().Perm(), targetStat.Name())
+
+		sourceStat, err = fs.Stat(filepath.Join(dirs[i], filesNames[i]))
+		require.NoError(t, err)
+		assert.Equal(t, sourceStat.Mode(), targetStat.Mode(), targetStat.Name())
 	}
 }
 
