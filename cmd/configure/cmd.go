@@ -46,6 +46,8 @@ func AddFlags(cmd *cobra.Command) {
 	cmd.PersistentFlags().StringArrayVar(&podAttributes, pod.Flag, []string{}, "(Optional) Pod-specific attributes in key=value format.")
 
 	cmd.PersistentFlags().BoolVar(&isFullstack, FullstackFlag, false, "(Optional) Configure the CodeModule to be fullstack.")
+
+	cmd.PersistentFlags().Lookup(FullstackFlag).NoOptDefVal = "false"
 }
 
 func Execute(log logr.Logger, fs afero.Afero, targetDir string) error {
