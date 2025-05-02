@@ -57,7 +57,7 @@ The `dynatrace-bootstrapper` is a small CLI binary built into a [Dynatrace CodeM
   - Config files:
     - `ruxitagentproc.json`: A json file containing a response from the `/deployment/installer/agent/processmoduleconfig` endpoint of the Dynatrace Environment(v1) API.
       - This file is **required** if `--input-directory` is defined.
-      - Used to update the `<target>/agent/conf/ruxitagentproc.conf` file
+      - Used to create the `<config-directory>/<container-name>/oneagent/config/ruxitagentproc.conf` file
     - `initial-connect-retry`: A file containing a single number value. Defines the delay before the initial connection attempt. (Useful in case of `istio-proxy` is used.)
       - Used to create/update the `<config-directory>/<container-name>/oneagent/agent/customkeys/curl_options.conf` file.
     - `trusted.pem`: A file containing the **certificates** used by the CodeModule for all its communication (proxy communication's not included).
