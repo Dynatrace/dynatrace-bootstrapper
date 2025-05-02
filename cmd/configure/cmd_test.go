@@ -243,5 +243,5 @@ func setupTargetFs(t *testing.T, fs afero.Afero, targetDir string) {
 		},
 	}
 
-	require.NoError(t, fsutils.CreateFile(fs, filepath.Join(targetDir, pmc.RuxitAgentProcPath), procConf.ToString()))
+	require.NoError(t, fsutils.CreateFile(fs, filepath.Join(targetDir, pmc.SourceRuxitAgentProcPath), procConf.ToString()))
 }

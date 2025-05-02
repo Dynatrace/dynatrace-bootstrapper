@@ -18,6 +18,11 @@ import (
 var testLog = zapr.NewLogger(zap.NewExample())
 
 func TestConfigure(t *testing.T) {
+	targetDir := "path/target"
+	inputDir := "/path/input"
+	configDir := "/path/config/container"
+	installPath := "path/install"
+
 	source := ruxit.ProcConf{
 		Properties: []ruxit.Property{
 			{
@@ -46,40 +51,38 @@ func TestConfigure(t *testing.T) {
 				Value:   "add",
 			},
 		},
+		InstallPath: &installPath,
 	}
-
-	targetDir := "path/target"
-	inputDir := "/path/input"
 
 	t.Run("success", func(t *testing.T) {
 		fs := afero.Afero{Fs: afero.NewMemMapFs()}
 		setupInputFs(t, fs, inputDir, override)
 		setupTargetFs(t, fs, targetDir, source)
 
-		err := Configure(testLog, fs, inputDir, targetDir)
+		err := Configure(testLog, fs, inputDir, targetDir, configDir, installPath)
 		require.NoError(t, err)
 
-		content, err := fs.ReadFile(filepath.Join(targetDir, RuxitAgentProcPath))
-		require.NoError(t, err)
-		assert.Equal(t, source.Merge(override).ToString(), string(content))
-
-		content, err = fs.ReadFile(filepath.Join(targetDir, originalCopyRuxitAgentProcPath))
+		content, err := fs.ReadFile(GetSourceRuxitAgentProcPath(targetDir))
 		require.NoError(t, err)
 		assert.Equal(t, source.ToString(), string(content))
+
+		content, err = fs.ReadFile(GetDestinationRuxitAgentProcPath(configDir))
+		require.NoError(t, err)
+		assert.Equal(t, source.Merge(override).ToString(), string(content))
 	})
 
 	t.Run("missing file == skip", func(t *testing.T) {
 		fs := afero.Afero{Fs: afero.NewMemMapFs()}
 		setupTargetFs(t, fs, targetDir, source)
 
-		err := Configure(testLog, fs, inputDir, targetDir)
+		err := Configure(testLog, fs, inputDir, targetDir, configDir, installPath)
 		require.NoError(t, err)
 
-		content, err := fs.ReadFile(filepath.Join(targetDir, RuxitAgentProcPath))
+		content, err := fs.ReadFile(GetSourceRuxitAgentProcPath(targetDir))
 		require.NoError(t, err)
 		assert.Equal(t, source.ToString(), string(content))
 
-		_, err = fs.ReadFile(filepath.Join(targetDir, originalCopyRuxitAgentProcPath))
+		_, err = fs.ReadFile(GetDestinationRuxitAgentProcPath(configDir))
 		require.True(t, os.IsNotExist(err))
 	})
 }
@@ -95,5 +98,5 @@ func setupInputFs(t *testing.T, fs afero.Afero, inputDir string, value ruxit.Pro
 func setupTargetFs(t *testing.T, fs afero.Afero, targetDir string, value ruxit.ProcConf) {
 	t.Helper()
 
-	require.NoError(t, fsutils.CreateFile(fs, filepath.Join(targetDir, RuxitAgentProcPath), value.ToString()))
+	require.NoError(t, fsutils.CreateFile(fs, filepath.Join(targetDir, SourceRuxitAgentProcPath), value.ToString()))
 }

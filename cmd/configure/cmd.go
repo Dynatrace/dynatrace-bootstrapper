@@ -65,13 +65,6 @@ func SetupOneAgent(log logr.Logger, fs afero.Afero, targetDir string) error {
 		return err
 	}
 
-	err = pmc.Configure(log, fs, inputFolder, targetDir)
-	if err != nil {
-		log.Info("failed to configure the ruxitagentproc.conf", "config-directory", configFolder)
-
-		return err
-	}
-
 	podAttr, err := pod.ParseAttributes(podAttributes)
 	if err != nil {
 		return err
@@ -86,7 +79,28 @@ func SetupOneAgent(log logr.Logger, fs afero.Afero, targetDir string) error {
 		containerConfigDir := filepath.Join(configFolder, containerAttr.ContainerName)
 		log.Info("starting to configure the container", "path", containerConfigDir)
 
-		err = conf.Configure(log, fs, containerConfigDir, containerAttr, podAttr, tenant, isFullstack)
+		err = pmc.Configure(log, fs, inputFolder, targetDir, containerConfigDir, installPath)
+		if err != nil {
+			log.Info("failed to configure the ruxitagentproc.conf", "config-directory", containerConfigDir)
+
+			return err
+		}
+
+		err = metadata.Configure(log, fs, containerConfigDir, podAttr, containerAttr)
+		if err != nil {
+			log.Info("failed to configure the enrichment files", "config-directory", containerConfigDir)
+
+			return err
+		}
+
+		err = endpoint.Configure(log, fs, inputFolder, containerConfigDir)
+		if err != nil {
+			log.Info("failed to configure the endpoint.properties", "config-directory", configFolder)
+
+			return err
+		}
+
+		err = conf.Configure(log, fs, containerConfigDir, containerAttr, podAttr)
 		if err != nil {
 			log.Info("failed to configure the container-conf files", "config-directory", containerConfigDir)
 
