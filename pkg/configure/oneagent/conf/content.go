@@ -10,7 +10,7 @@ import (
 
 type fileContent struct {
 	*containerSection `json:",inline,omitempty"`
-	*hostSection `json:",inline,omitempty"`
+	*hostSection      `json:",inline,omitempty"`
 }
 
 func (fc fileContent) toMap() (map[string]string, error) {
@@ -25,6 +25,7 @@ func (fc fileContent) toString() (string, error) {
 		if err != nil {
 			return "", err
 		}
+
 		confContent.WriteString(content)
 		confContent.WriteString("\n")
 	}
@@ -34,6 +35,7 @@ func (fc fileContent) toString() (string, error) {
 		if err != nil {
 			return "", err
 		}
+
 		confContent.WriteString(content)
 		confContent.WriteString("\n")
 	}
@@ -71,6 +73,7 @@ func (cs containerSection) toString() (string, error) {
 		if value == "" {
 			continue
 		}
+
 		sectionContent.WriteString(key)
 		sectionContent.WriteString(" ")
 		sectionContent.WriteString(value)
@@ -82,7 +85,7 @@ func (cs containerSection) toString() (string, error) {
 
 type hostSection struct {
 	Tenant      string `json:"tenant"`
-	IsFullStack string   `json:"isCloudNativeFullStack"`
+	IsFullStack string `json:"isCloudNativeFullStack"`
 }
 
 func (hs hostSection) toMap() (map[string]string, error) {
@@ -104,6 +107,7 @@ func (hs hostSection) toString() (string, error) {
 		if value == "" {
 			continue
 		}
+
 		sectionContent.WriteString(key)
 		sectionContent.WriteString(" ")
 		sectionContent.WriteString(value)
@@ -128,10 +132,10 @@ func fromAttributes(containerAttr container.Attributes, podAttr pod.Attributes, 
 
 	if isFullStack {
 		fileContent.hostSection = &hostSection{
-			Tenant: podAttr.DTTenantUID,
+			Tenant:      podAttr.DTTenantUID,
 			IsFullStack: "true",
 		}
-		fileContent.containerSection.NodeName = podAttr.NodeName
+		fileContent.NodeName = podAttr.NodeName
 	}
 
 	return fileContent

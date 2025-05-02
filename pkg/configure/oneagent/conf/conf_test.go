@@ -21,10 +21,10 @@ func TestConfigure(t *testing.T) {
 			PodName:       "podname",
 			PodUID:        "poduid",
 			NamespaceName: "namespacename",
-			NodeName: "nodename",
+			NodeName:      "nodename",
 		},
 		ClusterInfo: pod.ClusterInfo{
-			ClusterUID: "clusteruid",
+			ClusterUID:  "clusteruid",
 			DTTenantUID: "tenant",
 		},
 	}
@@ -52,6 +52,7 @@ func TestConfigure(t *testing.T) {
 		require.NoError(t, err)
 
 		missingEntries := []string{}
+
 		for key, value := range expectedMap {
 			if value == "" {
 				assert.NotContains(t, string(content), key)
@@ -63,6 +64,7 @@ func TestConfigure(t *testing.T) {
 
 		expectedMissingEntries := []string{"tenant", "k8s_node_name", "isCloudNativeFullStack"}
 		require.Subset(t, expectedMissingEntries, missingEntries) // incase of isFullstack, the host section is missing from the map
+
 		for _, key := range expectedMissingEntries {
 			assert.NotContains(t, string(content), key)
 		}
@@ -70,7 +72,6 @@ func TestConfigure(t *testing.T) {
 		assert.Contains(t, string(content), "[container]")
 		assert.NotContains(t, string(content), "[host]")
 	})
-
 
 	t.Run("success - fullstack", func(t *testing.T) {
 		fs := afero.Afero{Fs: afero.NewMemMapFs()}

@@ -21,7 +21,7 @@ const (
 	InputFolderFlag  = "input-directory"
 	ConfigFolderFlag = "config-directory"
 	InstallPathFlag  = "install-path"
-	FullstackFlag    = "fullstack"
+	IsFullstackFlag  = "fullstack"
 )
 
 var (
@@ -45,9 +45,9 @@ func AddFlags(cmd *cobra.Command) {
 
 	cmd.PersistentFlags().StringArrayVar(&podAttributes, pod.Flag, []string{}, "(Optional) Pod-specific attributes in key=value format.")
 
-	cmd.PersistentFlags().BoolVar(&isFullstack, FullstackFlag, false, "(Optional) Configure the CodeModule to be fullstack.")
+	cmd.PersistentFlags().BoolVar(&isFullstack, IsFullstackFlag, false, "(Optional) Configure the CodeModule to be fullstack.")
 
-	cmd.PersistentFlags().Lookup(FullstackFlag).NoOptDefVal = "false"
+	cmd.PersistentFlags().Lookup(IsFullstackFlag).NoOptDefVal = "false"
 }
 
 func Execute(log logr.Logger, fs afero.Afero, targetDir string) error {
