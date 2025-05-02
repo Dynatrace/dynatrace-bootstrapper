@@ -8,9 +8,9 @@ import (
 
 // ProcConf represents the response of the /deployment/installer/agent/processmoduleconfig endpoint from the Dynatrace Environment(v1) API.
 type ProcConf struct {
+	InstallPath *string    `json:"-"`
 	Properties  []Property `json:"properties"`
 	Revision    uint       `json:"revision"`
-	InstallPath *string    `json:"-"`
 }
 
 type Property struct {
@@ -24,6 +24,7 @@ func (pmc ProcConf) ToString() string {
 	if pmc.InstallPath != nil {
 		pm := pmc.ToMap()
 		pm = pm.SetupReadonly(*pmc.InstallPath)
+
 		return pm.ToString()
 	}
 
@@ -77,6 +78,7 @@ func (pm ProcMap) SetupReadonly(installPath string) ProcMap {
 		if !ok {
 			continue
 		}
+
 		for _, value := range values {
 			delete(pm[key], value)
 		}
@@ -87,8 +89,9 @@ func (pm ProcMap) SetupReadonly(installPath string) ProcMap {
 			if strings.Contains(value, "../") {
 				sanitizedEntry := strings.ReplaceAll(value, "../", "")
 				sanitizedEntry, found := strings.CutPrefix(sanitizedEntry, "\"")
+
 				if found {
-					pm[section][entry] = "\""+filepath.Join(installPath, sanitizedEntry)
+					pm[section][entry] = "\"" + filepath.Join(installPath, sanitizedEntry)
 				} else {
 					pm[section][entry] = filepath.Join(installPath, sanitizedEntry)
 				}
