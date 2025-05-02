@@ -14,8 +14,8 @@ const (
 	ConfigPath = "/oneagent/agent/config/container.conf"
 )
 
-func Configure(log logr.Logger, fs afero.Afero, configDirectory string, containerAttr container.Attributes, podAttr pod.Attributes) error {
-	confContent := fromAttributes(containerAttr, podAttr)
+func Configure(log logr.Logger, fs afero.Afero, configDirectory string, containerAttr container.Attributes, podAttr pod.Attributes, isFullstack bool) error {
+	confContent := fromAttributes(containerAttr, podAttr, isFullstack)
 
 	stringContent, err := confContent.toString()
 	if err != nil {
