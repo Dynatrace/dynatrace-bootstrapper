@@ -10,7 +10,6 @@ import (
 	"github.com/spf13/afero"
 )
 
-
 func Create(log logr.Logger, fs afero.Fs, source, destination string, conf ruxit.ProcConf) error {
 	sourceFile, err := fs.Open(source)
 	if err != nil {
