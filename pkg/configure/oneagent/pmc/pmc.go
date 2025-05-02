@@ -11,9 +11,20 @@ import (
 
 const (
 	InputFileName = "ruxitagentproc.json"
+
+	SourceRuxitAgentProcPath      = "agent/conf/ruxitagentproc.conf"
+	DestinationRuxitAgentProcPath = "oneagent/config/ruxitagentproc.conf"
 )
 
-func Configure(log logr.Logger, fs afero.Afero, inputDir, targetDir string) error {
+func GetSourceRuxitAgentProcPath(targetDir string) string {
+	return filepath.Join(targetDir, SourceRuxitAgentProcPath)
+}
+
+func GetDestinationRuxitAgentProcPath(configDir string) string {
+	return filepath.Join(configDir, DestinationRuxitAgentProcPath)
+}
+
+func Configure(log logr.Logger, fs afero.Afero, inputDir, targetDir, configDir, installPath string) error {
 	inputFilePath := filepath.Join(inputDir, InputFileName)
 
 	inputFile, err := fs.Open(inputFilePath)
@@ -38,5 +49,12 @@ func Configure(log logr.Logger, fs afero.Afero, inputDir, targetDir string) erro
 		return err
 	}
 
-	return UpdateInPlace(log, fs, targetDir, conf)
+	conf.InstallPath = &installPath
+
+	source := GetSourceRuxitAgentProcPath(targetDir)
+	destination := GetDestinationRuxitAgentProcPath(configDir)
+
+	log.Info("creating ruxitagentproc.conf", "source", source, "destination", destination)
+
+	return Create(log, fs, source, destination, conf)
 }

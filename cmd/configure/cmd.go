@@ -58,13 +58,6 @@ func Execute(log logr.Logger, fs afero.Afero, targetDir string) error {
 		return err
 	}
 
-	err = pmc.Configure(log, fs, inputFolder, targetDir)
-	if err != nil {
-		log.Info("failed to configure the ruxitagentproc.conf", "config-directory", configFolder)
-
-		return err
-	}
-
 	podAttr, err := pod.ParseAttributes(podAttributes)
 	if err != nil {
 		return err
@@ -77,6 +70,13 @@ func Execute(log logr.Logger, fs afero.Afero, targetDir string) error {
 
 	for _, containerAttr := range containerAttrs {
 		containerConfigDir := filepath.Join(configFolder, containerAttr.ContainerName)
+
+		err = pmc.Configure(log, fs, inputFolder, targetDir, containerConfigDir, installPath)
+		if err != nil {
+			log.Info("failed to configure the ruxitagentproc.conf", "config-directory", containerConfigDir)
+
+			return err
+		}
 
 		err = metadata.Configure(log, fs, containerConfigDir, podAttr, containerAttr)
 		if err != nil {

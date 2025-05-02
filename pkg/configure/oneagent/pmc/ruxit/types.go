@@ -1,23 +1,45 @@
 package ruxit
 
 import (
+	"path/filepath"
 	"sort"
 	"strings"
 )
 
-// ProcMap presents the content in a more easy to work with format. (a map of maps).
-type ProcMap map[string]map[string]string
-
 // ProcConf represents the response of the /deployment/installer/agent/processmoduleconfig endpoint from the Dynatrace Environment(v1) API.
 type ProcConf struct {
-	Properties []Property `json:"properties"`
-	Revision   uint       `json:"revision"`
+	Properties  []Property `json:"properties"`
+	Revision    uint       `json:"revision"`
+	InstallPath *string    `json:"-"`
 }
 
 type Property struct {
 	Section string `json:"section"`
 	Key     string `json:"key"`
 	Value   string `json:"value"`
+}
+
+// ToString creates the content of the configuration file, the sections and properties are printed in a sorted order, so it can be tested.
+func (pmc ProcConf) ToString() string {
+	if pmc.InstallPath != nil {
+		pm := pmc.ToMap()
+		pm = pm.SetupReadonly(*pmc.InstallPath)
+		return pm.ToString()
+	}
+
+	return pmc.ToMap().ToString()
+}
+
+// Merge will return the merged ProcConf, the values in the input will take precedent, does not mutate the original.
+func (pmc ProcConf) Merge(input ProcConf) ProcConf {
+	source := pmc.ToMap()
+	override := input.ToMap()
+
+	updated := FromMap(source.Merge(override))
+	updated.Revision = input.Revision
+	updated.InstallPath = input.InstallPath
+
+	return updated
 }
 
 func (pmc ProcConf) ToMap() ProcMap {
@@ -35,12 +57,51 @@ func (pmc ProcConf) ToMap() ProcMap {
 	return sections
 }
 
-// ToString creates the content of the configuration file, the sections and properties are printed in a sorted order, so it can be tested.
-func (pmc ProcConf) ToString() string {
-	rawMap := pmc.ToMap()
+// ProcMap presents the content in a more easy to work with format. (a map of maps).
+type ProcMap map[string]map[string]string
 
+var (
+	redundantEntries = map[string][]string{
+		"general": {"logDir", "dataStorageDir"},
+	}
+	additionalEntries = ProcMap{
+		"general": map[string]string{
+			"storage": "\"/var/lib/dynatrace/oneagent\"", // TODO: Make configurable?
+		},
+	}
+)
+
+func (pm ProcMap) SetupReadonly(installPath string) ProcMap {
+	for key, values := range redundantEntries {
+		_, ok := pm[key]
+		if !ok {
+			continue
+		}
+		for _, value := range values {
+			delete(pm[key], value)
+		}
+	}
+
+	for section, entries := range pm {
+		for entry, value := range entries {
+			if strings.Contains(value, "../") {
+				sanitizedEntry := strings.ReplaceAll(value, "../", "")
+				sanitizedEntry, found := strings.CutPrefix(sanitizedEntry, "\"")
+				if found {
+					pm[section][entry] = "\""+filepath.Join(installPath, sanitizedEntry)
+				} else {
+					pm[section][entry] = filepath.Join(installPath, sanitizedEntry)
+				}
+			}
+		}
+	}
+
+	return pm.Merge(additionalEntries)
+}
+
+func (pm ProcMap) ToString() string {
 	var sections []string
-	for section := range rawMap {
+	for section := range pm {
 		sections = append(sections, section)
 	}
 
@@ -52,7 +113,7 @@ func (pmc ProcConf) ToString() string {
 		content.WriteString("\n")
 
 		var props []string
-		for prop := range rawMap[section] {
+		for prop := range pm[section] {
 			props = append(props, prop)
 		}
 
@@ -61,7 +122,7 @@ func (pmc ProcConf) ToString() string {
 		for _, prop := range props {
 			content.WriteString(prop)
 			content.WriteString(" ")
-			content.WriteString(rawMap[section][prop])
+			content.WriteString(pm[section][prop])
 			content.WriteString("\n")
 		}
 
@@ -71,24 +132,17 @@ func (pmc ProcConf) ToString() string {
 	return content.String()
 }
 
-// Merge will return the merged ProcConf, the values in the input will take precedent, does not mutate the original.
-func (pmc ProcConf) Merge(input ProcConf) ProcConf {
-	source := pmc.ToMap()
-	override := input.ToMap()
-
+func (pm ProcMap) Merge(override ProcMap) ProcMap {
 	for section, props := range override {
-		_, ok := source[section]
+		_, ok := pm[section]
 		if !ok {
-			source[section] = map[string]string{}
+			pm[section] = map[string]string{}
 		}
 
 		for key, value := range props {
-			source[section][key] = value
+			pm[section][key] = value
 		}
 	}
 
-	updated := FromMap(source)
-	updated.Revision = input.Revision
-
-	return updated
+	return pm
 }
