@@ -16,11 +16,11 @@ const (
 	DestinationRuxitAgentProcPath = "oneagent/config/ruxitagentproc.conf"
 )
 
-func GetSourceRuxitAgentProcPath(targetDir string) string {
+func GetSourceRuxitAgentProcFilePath(targetDir string) string {
 	return filepath.Join(targetDir, SourceRuxitAgentProcPath)
 }
 
-func GetDestinationRuxitAgentProcPath(configDir string) string {
+func GetDestinationRuxitAgentProcFilePath(configDir string) string {
 	return filepath.Join(configDir, DestinationRuxitAgentProcPath)
 }
 
@@ -51,10 +51,10 @@ func Configure(log logr.Logger, fs afero.Afero, inputDir, targetDir, configDir, 
 
 	conf.InstallPath = &installPath
 
-	source := GetSourceRuxitAgentProcPath(targetDir)
-	destination := GetDestinationRuxitAgentProcPath(configDir)
+	srcPath := GetSourceRuxitAgentProcFilePath(targetDir)
+	dstPath := GetDestinationRuxitAgentProcFilePath(configDir)
 
-	log.Info("creating ruxitagentproc.conf", "source", source, "destination", destination)
+	log.Info("creating ruxitagentproc.conf", "source", srcPath, "destination", dstPath)
 
-	return Create(log, fs, source, destination, conf)
+	return Create(log, fs, srcPath, dstPath, conf)
 }
