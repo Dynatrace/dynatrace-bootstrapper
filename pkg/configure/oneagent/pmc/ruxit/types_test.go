@@ -190,3 +190,92 @@ func TestMerge(t *testing.T) {
 		assert.ElementsMatch(t, expectedProps, merged.Properties)
 	})
 }
+
+func TestSetupReadonly(t *testing.T) {
+	t.Run("do adjustments according to installPath", func(t *testing.T) {
+		installPath := "/absolute/path"
+		expectedProps := []Property{
+			{
+				// updated from override
+				Section: "test",
+				Key:     "update",
+				Value:   "updated-value",
+			},
+			{
+				// overwritten to be absolute path
+				Section: "test",
+				Key:     "keyWithPath",
+				Value:   "\"/absolute/path/relative/path\"",
+			},
+			{
+				// added from override
+				Section: "test",
+				Key:     "add",
+				Value:   "added-value",
+			},
+			{
+				// added to be work with a readonly CodeModule bin
+				Section: "general",
+				Key:     "storage",
+				Value:   "\"/var/lib/dynatrace/oneagent\"",
+			},
+		}
+
+		sourceProps := []Property{
+			{
+				Section: "test",
+				Key:     "update",
+				Value:   "old-value",
+			},
+			{
+				Section: "test",
+				Key:     "keyWithPath",
+				Value:   "\"../../relative/path\"",
+			},
+			{
+				// will be removed, as it is not needed in readonly
+				Section: "general",
+				Key:     "logDir",
+				Value:   "some-path",
+			},
+			{
+				// will be removed, as it is not needed in readonly
+				Section: "general",
+				Key:     "dataStorageDir",
+				Value:   "some-path",
+			},
+		}
+
+		overrideProps := []Property{
+			{
+				Section: "test",
+				Key:     "update",
+				Value:   "updated-value",
+			},
+			{
+				Section: "test",
+				Key:     "add",
+				Value:   "added-value",
+			},
+		}
+
+		source := ProcConf{
+			Properties: sourceProps,
+			Revision: 0,
+		}
+		override := ProcConf{
+			Properties:  overrideProps,
+			Revision:    1,
+			InstallPath: &installPath,
+		}
+
+		merged := source.Merge(override)
+
+		assert.Equal(t, override.Revision, merged.Revision)
+		assert.Equal(t, *override.InstallPath, *merged.InstallPath)
+
+		expected := ProcConf{Properties: expectedProps}.ToString()
+		assert.Equal(t, expected, merged.ToString())
+	})
+
+}

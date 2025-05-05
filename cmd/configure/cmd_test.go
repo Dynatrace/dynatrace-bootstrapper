@@ -49,12 +49,12 @@ func TestSetupOneAgent(t *testing.T) {
 		require.Equal(t, 0, preExecuteConfigCount)
 
 		preExecuteTargetCount := countFiles(t, memFs, targetFolder)
-		require.Equal(t, 1, preExecuteTargetCount) // for pmc, you need a source file
+		require.Equal(t, 1, preExecuteTargetCount) // for ruxitagentproc.conf, you need a source file
 
 		err := SetupOneAgent(testLog, memFs, targetFolder)
 		require.NoError(t, err)
 
-		expectedContainerSpecificConfigCount := 4 // curl(1) + ca(2) + conf(1)
+		expectedContainerSpecificConfigCount := 5 // curl(1) + ca(2) + conf(1) + ruxitagentproc.conf(1)
 
 		for _, name := range containerNames {
 			containerConfigFolder := filepath.Join(configFolder, name)
@@ -68,7 +68,7 @@ func TestSetupOneAgent(t *testing.T) {
 		require.Equal(t, expectedPostExecuteConfigCount, postExecuteConfigCount)
 
 		postExecuteTargetCount := countFiles(t, memFs, targetFolder)
-		require.Equal(t, 2, postExecuteTargetCount) // pmc should make a copy of the original, so copy+merged
+		require.Equal(t, preExecuteTargetCount, postExecuteTargetCount) // no change to the target folder during configuration
 	})
 
 	t.Run("no input-directory ==> do nothing", func(t *testing.T) {
