@@ -261,7 +261,7 @@ func TestSetupReadonly(t *testing.T) {
 
 		source := ProcConf{
 			Properties: sourceProps,
-			Revision: 0,
+			Revision:   0,
 		}
 		override := ProcConf{
 			Properties:  overrideProps,
