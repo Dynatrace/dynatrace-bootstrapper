@@ -1,6 +1,7 @@
 package ruxit
 
 import (
+	"fmt"
 	"path/filepath"
 	"sort"
 	"strings"
@@ -86,7 +87,9 @@ func (pm ProcMap) SetupReadonly(installPath string) ProcMap {
 
 	for section, entries := range pm {
 		for entry, value := range entries {
-			if strings.Contains(value, "../") {
+			volume := filepath.VolumeName(value)
+			fmt.Printf("%s", volume)
+			if strings.HasPrefix(value, "\"../") {
 				sanitizedEntry := strings.ReplaceAll(value, "../", "")
 				sanitizedEntry, found := strings.CutPrefix(sanitizedEntry, "\"")
 
