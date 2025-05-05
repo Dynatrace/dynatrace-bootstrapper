@@ -62,11 +62,11 @@ func TestConfigure(t *testing.T) {
 		err := Configure(testLog, fs, inputDir, targetDir, configDir, installPath)
 		require.NoError(t, err)
 
-		content, err := fs.ReadFile(GetSourceRuxitAgentProcPath(targetDir))
+		content, err := fs.ReadFile(GetSourceRuxitAgentProcFilePath(targetDir))
 		require.NoError(t, err)
 		assert.Equal(t, source.ToString(), string(content))
 
-		content, err = fs.ReadFile(GetDestinationRuxitAgentProcPath(configDir))
+		content, err = fs.ReadFile(GetDestinationRuxitAgentProcFilePath(configDir))
 		require.NoError(t, err)
 		assert.Equal(t, source.Merge(override).ToString(), string(content))
 	})
@@ -78,11 +78,11 @@ func TestConfigure(t *testing.T) {
 		err := Configure(testLog, fs, inputDir, targetDir, configDir, installPath)
 		require.NoError(t, err)
 
-		content, err := fs.ReadFile(GetSourceRuxitAgentProcPath(targetDir))
+		content, err := fs.ReadFile(GetSourceRuxitAgentProcFilePath(targetDir))
 		require.NoError(t, err)
 		assert.Equal(t, source.ToString(), string(content))
 
-		_, err = fs.ReadFile(GetDestinationRuxitAgentProcPath(configDir))
+		_, err = fs.ReadFile(GetDestinationRuxitAgentProcFilePath(configDir))
 		require.True(t, os.IsNotExist(err))
 	})
 }

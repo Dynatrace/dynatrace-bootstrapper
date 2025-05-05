@@ -20,20 +20,20 @@ type Property struct {
 }
 
 // ToString creates the content of the configuration file, the sections and properties are printed in a sorted order, so it can be tested.
-func (pmc ProcConf) ToString() string {
-	if pmc.InstallPath != nil {
-		pm := pmc.ToMap()
-		pm = pm.SetupReadonly(*pmc.InstallPath)
+func (pc ProcConf) ToString() string {
+	if pc.InstallPath != nil {
+		pm := pc.ToMap()
+		pm = pm.SetupReadonly(*pc.InstallPath)
 
 		return pm.ToString()
 	}
 
-	return pmc.ToMap().ToString()
+	return pc.ToMap().ToString()
 }
 
 // Merge will return the merged ProcConf, the values in the input will take precedent, does not mutate the original.
-func (pmc ProcConf) Merge(input ProcConf) ProcConf {
-	source := pmc.ToMap()
+func (pc ProcConf) Merge(input ProcConf) ProcConf {
+	source := pc.ToMap()
 	override := input.ToMap()
 
 	updated := FromMap(source.Merge(override))
@@ -43,9 +43,9 @@ func (pmc ProcConf) Merge(input ProcConf) ProcConf {
 	return updated
 }
 
-func (pmc ProcConf) ToMap() ProcMap {
+func (pc ProcConf) ToMap() ProcMap {
 	sections := map[string]map[string]string{}
-	for _, prop := range pmc.Properties {
+	for _, prop := range pc.Properties {
 		section := sections[prop.Section]
 		if section == nil {
 			section = map[string]string{}

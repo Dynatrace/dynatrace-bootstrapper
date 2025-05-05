@@ -38,14 +38,14 @@ func TestSetupOneAgent(t *testing.T) {
 	}
 
 	t.Run("success", func(t *testing.T) {
-		inputFolder = "/path/input"
-		configFolder = "/path/config"
+		inputDir = "/path/input"
+		configDir = "/path/config"
 
 		memFs := afero.Afero{Fs: afero.NewMemMapFs()}
-		setupInputFs(t, memFs, inputFolder)
+		setupInputFs(t, memFs, inputDir)
 		setupTargetFs(t, memFs, targetFolder)
 
-		preExecuteConfigCount := countFiles(t, memFs, configFolder)
+		preExecuteConfigCount := countFiles(t, memFs, configDir)
 		require.Equal(t, 0, preExecuteConfigCount)
 
 		preExecuteTargetCount := countFiles(t, memFs, targetFolder)
@@ -57,14 +57,14 @@ func TestSetupOneAgent(t *testing.T) {
 		expectedContainerSpecificConfigCount := 5 // curl(1) + ca(2) + conf(1) + ruxitagentproc.conf(1)
 
 		for _, name := range containerNames {
-			containerConfigFolder := filepath.Join(configFolder, name)
+			containerConfigFolder := filepath.Join(configDir, name)
 
 			containerSpecificConfigCount := countFiles(t, memFs, containerConfigFolder)
 			require.Equal(t, expectedContainerSpecificConfigCount, containerSpecificConfigCount)
 		}
 
 		expectedPostExecuteConfigCount := 1 + len(containerNames)*expectedContainerSpecificConfigCount // preload(1) + len(containers) * container-specific-files
-		postExecuteConfigCount := countFiles(t, memFs, configFolder)
+		postExecuteConfigCount := countFiles(t, memFs, configDir)
 		require.Equal(t, expectedPostExecuteConfigCount, postExecuteConfigCount)
 
 		postExecuteTargetCount := countFiles(t, memFs, targetFolder)
@@ -72,14 +72,14 @@ func TestSetupOneAgent(t *testing.T) {
 	})
 
 	t.Run("no input-directory ==> do nothing", func(t *testing.T) {
-		inputFolder = ""
-		configFolder = "/path/config"
+		inputDir = ""
+		configDir = "/path/config"
 		memFs := afero.Afero{Fs: afero.NewMemMapFs()}
 
 		err := SetupOneAgent(testLog, memFs, targetFolder)
 		require.NoError(t, err)
 
-		postExecuteConfigCount := countFiles(t, memFs, configFolder)
+		postExecuteConfigCount := countFiles(t, memFs, configDir)
 		require.Equal(t, 0, postExecuteConfigCount)
 
 		postExecuteTargetCount := countFiles(t, memFs, targetFolder)
@@ -87,14 +87,14 @@ func TestSetupOneAgent(t *testing.T) {
 	})
 
 	t.Run("no config-directory ==> do nothing", func(t *testing.T) {
-		configFolder = ""
-		inputFolder = "/path/config"
+		configDir = ""
+		inputDir = "/path/config"
 		memFs := afero.Afero{Fs: afero.NewMemMapFs()}
 
 		err := SetupOneAgent(testLog, memFs, targetFolder)
 		require.NoError(t, err)
 
-		postExecuteConfigCount := countFiles(t, memFs, configFolder)
+		postExecuteConfigCount := countFiles(t, memFs, configDir)
 		require.Equal(t, 0, postExecuteConfigCount)
 
 		postExecuteTargetCount := countFiles(t, memFs, targetFolder)

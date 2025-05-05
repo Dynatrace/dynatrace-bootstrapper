@@ -10,50 +10,50 @@ import (
 	"github.com/spf13/afero"
 )
 
-func Create(log logr.Logger, fs afero.Fs, source, destination string, conf ruxit.ProcConf) error {
-	sourceFile, err := fs.Open(source)
+func Create(log logr.Logger, fs afero.Fs, srcPath, dstPath string, conf ruxit.ProcConf) error {
+	srcFile, err := fs.Open(srcPath)
 	if err != nil {
-		log.Info("failed to open source file", "path", source)
+		log.Info("failed to open source file", "path", srcPath)
 
 		return errors.WithStack(err)
 	}
 
-	defer func() { _ = sourceFile.Close() }()
+	defer func() { _ = srcFile.Close() }()
 
-	sourceInfo, err := sourceFile.Stat()
+	srcInfo, err := srcFile.Stat()
 	if err != nil {
-		log.Info("failed to stat the source file", "path", source)
+		log.Info("failed to stat the source file", "path", srcPath)
 
 		return err
 	}
 
-	sourceConf, err := ruxit.FromConf(sourceFile)
+	srcConf, err := ruxit.FromConf(srcFile)
 	if err != nil {
-		log.Info("failed to parse source file to struct", "path", source)
+		log.Info("failed to parse source file to struct", "path", srcPath)
 
 		return err
 	}
 
-	mergedConf := sourceConf.Merge(conf)
+	mergedConf := srcConf.Merge(conf)
 
-	err = fs.MkdirAll(filepath.Dir(destination), os.ModePerm)
+	err = fs.MkdirAll(filepath.Dir(dstPath), os.ModePerm)
 	if err != nil {
-		log.Info("failed to create destination dir", "path", filepath.Dir(filepath.Dir(destination)))
+		log.Info("failed to create destination dir", "path", filepath.Dir(filepath.Dir(dstPath)))
 		return err
 	}
 
-	destFile, err := fs.OpenFile(destination, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, sourceInfo.Mode())
+	dstFile, err := fs.OpenFile(dstPath, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, srcInfo.Mode())
 	if err != nil {
-		log.Info("failed to open destination file to write", "path", destination)
+		log.Info("failed to open destination file to write", "path", dstPath)
 
 		return errors.WithStack(err)
 	}
 
-	defer func() { _ = destFile.Close() }()
+	defer func() { _ = dstFile.Close() }()
 
-	_, err = destFile.Write([]byte(mergedConf.ToString()))
+	_, err = dstFile.Write([]byte(mergedConf.ToString()))
 	if err != nil {
-		log.Info("failed to write merged config into destination file", "path", destination)
+		log.Info("failed to write merged config into destination file", "path", dstPath)
 
 		return errors.WithStack(err)
 	}
