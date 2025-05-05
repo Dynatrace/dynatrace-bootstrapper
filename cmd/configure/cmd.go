@@ -22,6 +22,7 @@ const (
 	ConfigFolderFlag = "config-directory"
 	InstallPathFlag  = "install-path"
 	IsFullstackFlag  = "fullstack"
+	TenantFlag       = "tenant"
 )
 
 var (
@@ -29,6 +30,7 @@ var (
 	configFolder string
 	installPath  = "/opt/dynatrace/oneagent"
 	isFullstack  bool
+	tenant       string
 
 	podAttributes       []string
 	containerAttributes []string
@@ -48,6 +50,8 @@ func AddFlags(cmd *cobra.Command) {
 	cmd.PersistentFlags().BoolVar(&isFullstack, IsFullstackFlag, false, "(Optional) Configure the CodeModule to be fullstack.")
 
 	cmd.PersistentFlags().Lookup(IsFullstackFlag).NoOptDefVal = "false"
+
+	cmd.PersistentFlags().StringVar(&tenant, TenantFlag, "", "The name of the tenant that the CodeModule will communicate with. Mandatory in case of --fullstack.")
 }
 
 func Execute(log logr.Logger, fs afero.Afero, targetDir string) error {
@@ -98,7 +102,7 @@ func Execute(log logr.Logger, fs afero.Afero, targetDir string) error {
 			return err
 		}
 
-		err = conf.Configure(log, fs, containerConfigDir, containerAttr, podAttr, isFullstack)
+		err = conf.Configure(log, fs, containerConfigDir, containerAttr, podAttr, tenant, isFullstack)
 		if err != nil {
 			log.Info("failed to configure the container-conf files", "config-directory", containerConfigDir)
 

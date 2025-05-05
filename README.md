@@ -92,6 +92,13 @@ The `dynatrace-bootstrapper` is a small CLI binary built into a [Dynatrace CodeM
 - The `--fullstack` arg will make sure that the CodeModule is configured to be in fullstack mode.
   - Adds additional values to the `<config-directory>/<container-name>/oneagent/agent/config/container.conf`.
 
+#### `--tenant`
+
+*Example*: `--tenant="my-tenant"`
+
+- This is an **optional** arg, but mandatory incase of `--fullstack`.
+- Only used incase of `--fullstack`, provides additional info needed to properly configure `<config-directory>/<container-name>/oneagent/agent/config/container.conf`.
+
 #### `--attribute`
 
 *Example*: `--attribute="k8s.pod.name=test"`

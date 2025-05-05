@@ -11,6 +11,8 @@ args:
   - --target=/mnt/bin
   - --config-directory=/mnt/config
   - --input-directory=/mnt/input
+  - --fullstack
+  - --tenant=test-tenant
   - --attribute=k8s.pod.name=test-pod-name
   - --attribute=k8s.pod.uid=test-pod-uid
   - --attribute=k8s.namespace.name=test-namespace
@@ -20,7 +22,6 @@ args:
   - --attribute=user.defined.1=test-user-defined-1
   - --attribute=user.defined.2=test-user-defined-2
   - --attribute=dt.entity.kubernetes_cluster=test-entity-cluster
-  - --attribute=dt.tenant=test-tenant
   - --attribute=k8s.node.name=test-node-name
   - --attribute-container={"k8s.container.name":"app", "container_image.registry":"gcr.io", "container_image.repository":"testrepo", "container_image.tags":"testtag", "container_image.digest":"testdigest"}
   - --attribute-container={"k8s.container.name":"app2", "container_image.registry":"gcr.io", "container_image.repository":"othertest"}

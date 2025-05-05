@@ -39,7 +39,6 @@ type ClusterInfo struct {
 	ClusterUID      string `json:"k8s.cluster.uid"`
 	ClusterName     string `json:"k8s.cluster.name"`
 	DTClusterEntity string `json:"dt.entity.kubernetes_cluster"`
-	DTTenantUID     string `json:"dt.tenant,omitempty"`
 }
 
 func ParseAttributes(rawAttributes []string) (Attributes, error) {

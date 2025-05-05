@@ -117,7 +117,7 @@ func (hs hostSection) toString() (string, error) {
 	return sectionContent.String(), nil
 }
 
-func fromAttributes(containerAttr container.Attributes, podAttr pod.Attributes, isFullStack bool) fileContent {
+func fromAttributes(containerAttr container.Attributes, podAttr pod.Attributes, tenant string, isFullStack bool) fileContent {
 	fileContent := fileContent{
 		containerSection: &containerSection{
 			PodName:                 podAttr.PodName,
@@ -132,7 +132,7 @@ func fromAttributes(containerAttr container.Attributes, podAttr pod.Attributes, 
 
 	if isFullStack {
 		fileContent.hostSection = &hostSection{
-			Tenant:      podAttr.DTTenantUID,
+			Tenant:      tenant,
 			IsFullStack: "true",
 		}
 		fileContent.NodeName = podAttr.NodeName

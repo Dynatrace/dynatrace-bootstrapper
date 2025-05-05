@@ -24,8 +24,7 @@ func TestConfigure(t *testing.T) {
 			NodeName:      "nodename",
 		},
 		ClusterInfo: pod.ClusterInfo{
-			ClusterUID:  "clusteruid",
-			DTTenantUID: "tenant",
+			ClusterUID: "clusteruid",
 		},
 	}
 	containerAttr := container.Attributes{
@@ -42,10 +41,10 @@ func TestConfigure(t *testing.T) {
 	t.Run("success - not fullstack", func(t *testing.T) {
 		fs := afero.Afero{Fs: afero.NewMemMapFs()}
 
-		err := Configure(testLog, fs, configDir, containerAttr, podAttr, false)
+		err := Configure(testLog, fs, configDir, containerAttr, podAttr, "", false)
 		require.NoError(t, err)
 
-		expectedMap, err := fromAttributes(containerAttr, podAttr, false).toMap()
+		expectedMap, err := fromAttributes(containerAttr, podAttr, "", false).toMap()
 		require.NoError(t, err)
 
 		content, err := fs.ReadFile(filepath.Join(configDir, ConfigPath))
@@ -75,11 +74,12 @@ func TestConfigure(t *testing.T) {
 
 	t.Run("success - fullstack", func(t *testing.T) {
 		fs := afero.Afero{Fs: afero.NewMemMapFs()}
+		tenant := "test-tenant"
 
-		err := Configure(testLog, fs, configDir, containerAttr, podAttr, true)
+		err := Configure(testLog, fs, configDir, containerAttr, podAttr, tenant, true)
 		require.NoError(t, err)
 
-		expectedMap, err := fromAttributes(containerAttr, podAttr, true).toMap()
+		expectedMap, err := fromAttributes(containerAttr, podAttr, tenant, true).toMap()
 		require.NoError(t, err)
 
 		content, err := fs.ReadFile(filepath.Join(configDir, ConfigPath))
@@ -91,5 +91,12 @@ func TestConfigure(t *testing.T) {
 
 		assert.Contains(t, string(content), "[container]")
 		assert.Contains(t, string(content), "[host]")
+	})
+
+	t.Run("error - fullstack but no tenant", func(t *testing.T) {
+		fs := afero.Afero{Fs: afero.NewMemMapFs()}
+
+		err := Configure(testLog, fs, configDir, containerAttr, podAttr, "", true)
+		require.Error(t, err)
 	})
 }
