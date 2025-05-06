@@ -24,18 +24,18 @@ const (
 )
 
 var (
-	inputFolder  string
-	configFolder string
-	installPath  = "/opt/dynatrace/oneagent"
+	inputDir    string
+	configDir   string
+	installPath = "/opt/dynatrace/oneagent"
 
 	podAttributes       []string
 	containerAttributes []string
 )
 
 func AddFlags(cmd *cobra.Command) {
-	cmd.PersistentFlags().StringVar(&inputFolder, InputFolderFlag, "", "(Optional) Base path where to look for the configuration files.")
+	cmd.PersistentFlags().StringVar(&inputDir, InputFolderFlag, "", "(Optional) Base path where to look for the configuration files.")
 
-	cmd.PersistentFlags().StringVar(&configFolder, ConfigFolderFlag, "", "(Optional) Base path where to put the configuration files.")
+	cmd.PersistentFlags().StringVar(&configDir, ConfigFolderFlag, "", "(Optional) Base path where to put the configuration files.")
 
 	cmd.PersistentFlags().StringVar(&installPath, InstallPathFlag, "/opt/dynatrace/oneagent", "(Optional) Base path where the agent binary will be put.")
 
@@ -45,22 +45,15 @@ func AddFlags(cmd *cobra.Command) {
 }
 
 func Execute(log logr.Logger, fs afero.Afero, targetDir string) error {
-	if configFolder == "" || inputFolder == "" {
+	if configDir == "" || inputDir == "" {
 		return nil
 	}
 
-	log.Info("starting configuration", "config-directory", configFolder, "input-directory", inputFolder)
+	log.Info("starting configuration", "config-directory", configDir, "input-directory", inputDir)
 
-	err := preload.Configure(log, fs, configFolder, installPath)
+	err := preload.Configure(log, fs, configDir, installPath)
 	if err != nil {
-		log.Info("failed to configure the ld.so.preload", "config-directory", configFolder)
-
-		return err
-	}
-
-	err = pmc.Configure(log, fs, inputFolder, targetDir)
-	if err != nil {
-		log.Info("failed to configure the ruxitagentproc.conf", "config-directory", configFolder)
+		log.Info("failed to configure the ld.so.preload", "config-directory", configDir)
 
 		return err
 	}
@@ -76,7 +69,14 @@ func Execute(log logr.Logger, fs afero.Afero, targetDir string) error {
 	}
 
 	for _, containerAttr := range containerAttrs {
-		containerConfigDir := filepath.Join(configFolder, containerAttr.ContainerName)
+		containerConfigDir := filepath.Join(configDir, containerAttr.ContainerName)
+
+		err = pmc.Configure(log, fs, inputDir, targetDir, containerConfigDir, installPath)
+		if err != nil {
+			log.Info("failed to configure the ruxitagentproc.conf", "config-directory", containerConfigDir)
+
+			return err
+		}
 
 		err = metadata.Configure(log, fs, containerConfigDir, podAttr, containerAttr)
 		if err != nil {
@@ -85,9 +85,9 @@ func Execute(log logr.Logger, fs afero.Afero, targetDir string) error {
 			return err
 		}
 
-		err = endpoint.Configure(log, fs, inputFolder, containerConfigDir)
+		err = endpoint.Configure(log, fs, inputDir, containerConfigDir)
 		if err != nil {
-			log.Info("failed to configure the endpoint.properties", "config-directory", configFolder)
+			log.Info("failed to configure the endpoint.properties", "config-directory", configDir)
 
 			return err
 		}
@@ -99,7 +99,7 @@ func Execute(log logr.Logger, fs afero.Afero, targetDir string) error {
 			return err
 		}
 
-		err = configureFromInputDir(log, fs, containerConfigDir, inputFolder)
+		err = configureFromInputDir(log, fs, containerConfigDir, inputDir)
 		if err != nil {
 			log.Info("failed to configure container", "config-directory", containerConfigDir)
 
@@ -107,24 +107,24 @@ func Execute(log logr.Logger, fs afero.Afero, targetDir string) error {
 		}
 	}
 
-	log.Info("finished configuration", "config-directory", configFolder, "input-directory", inputFolder)
+	log.Info("finished configuration", "config-directory", configDir, "input-directory", inputDir)
 
 	return nil
 }
 
-func configureFromInputDir(log logr.Logger, fs afero.Afero, configDir, inputDir string) error {
-	log.Info("starting to configure the container", "path", configFolder)
+func configureFromInputDir(log logr.Logger, fs afero.Afero, containerConfigDir, inputDir string) error {
+	log.Info("starting to configure the container", "path", containerConfigDir)
 
-	err := curl.Configure(log, fs, inputDir, configDir)
+	err := curl.Configure(log, fs, inputDir, containerConfigDir)
 	if err != nil {
-		log.Info("failed to configure the curl options", "config-directory", configFolder)
+		log.Info("failed to configure the curl options", "config-directory", containerConfigDir)
 
 		return err
 	}
 
-	err = ca.Configure(log, fs, inputDir, configDir)
+	err = ca.Configure(log, fs, inputDir, containerConfigDir)
 	if err != nil {
-		log.Info("failed to configure the CAs", "config-directory", configFolder)
+		log.Info("failed to configure the CAs", "config-directory", containerConfigDir)
 
 		return err
 	}
