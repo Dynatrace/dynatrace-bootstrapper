@@ -49,7 +49,7 @@ func AddFlags(cmd *cobra.Command) {
 
 	cmd.PersistentFlags().BoolVar(&isFullstack, IsFullstackFlag, false, "(Optional) Configure the CodeModule to be fullstack.")
 
-	cmd.PersistentFlags().Lookup(IsFullstackFlag).NoOptDefVal = "false"
+	cmd.PersistentFlags().Lookup(IsFullstackFlag).NoOptDefVal = "true"
 
 	cmd.PersistentFlags().StringVar(&tenant, TenantFlag, "", "The name of the tenant that the CodeModule will communicate with. Mandatory in case of --fullstack.")
 }
