@@ -18,29 +18,29 @@ func (fc fileContent) toMap() (map[string]string, error) {
 }
 
 func (fc fileContent) toString() (string, error) {
-	var confContent strings.Builder
+	var content strings.Builder
 
 	if fc.containerSection != nil {
-		content, err := fc.containerSection.toString()
+		sectionContent, err := fc.containerSection.toString()
 		if err != nil {
 			return "", err
 		}
 
-		confContent.WriteString(content)
-		confContent.WriteString("\n")
+		content.WriteString(sectionContent)
+		content.WriteString("\n")
 	}
 
 	if fc.hostSection != nil {
-		content, err := fc.hostSection.toString()
+		sectionContent, err := fc.hostSection.toString()
 		if err != nil {
 			return "", err
 		}
 
-		confContent.WriteString(content)
-		confContent.WriteString("\n")
+		content.WriteString(sectionContent)
+		content.WriteString("\n")
 	}
 
-	return confContent.String(), nil
+	return content.String(), nil
 }
 
 type containerSection struct {
@@ -59,28 +59,28 @@ func (cs containerSection) toMap() (map[string]string, error) {
 }
 
 func (cs containerSection) toString() (string, error) {
-	var sectionContent strings.Builder
+	var content strings.Builder
 
 	contentMap, err := cs.toMap()
 	if err != nil {
 		return "", err
 	}
 
-	sectionContent.WriteString("[container]")
-	sectionContent.WriteString("\n")
+	content.WriteString("[container]")
+	content.WriteString("\n")
 
 	for key, value := range contentMap {
 		if value == "" {
 			continue
 		}
 
-		sectionContent.WriteString(key)
-		sectionContent.WriteString(" ")
-		sectionContent.WriteString(value)
-		sectionContent.WriteString("\n")
+		content.WriteString(key)
+		content.WriteString(" ")
+		content.WriteString(value)
+		content.WriteString("\n")
 	}
 
-	return sectionContent.String(), nil
+	return content.String(), nil
 }
 
 type hostSection struct {
@@ -93,32 +93,32 @@ func (hs hostSection) toMap() (map[string]string, error) {
 }
 
 func (hs hostSection) toString() (string, error) {
-	var sectionContent strings.Builder
+	var content strings.Builder
 
 	contentMap, err := hs.toMap()
 	if err != nil {
 		return "", err
 	}
 
-	sectionContent.WriteString("[host]")
-	sectionContent.WriteString("\n")
+	content.WriteString("[host]")
+	content.WriteString("\n")
 
 	for key, value := range contentMap {
 		if value == "" {
 			continue
 		}
 
-		sectionContent.WriteString(key)
-		sectionContent.WriteString(" ")
-		sectionContent.WriteString(value)
-		sectionContent.WriteString("\n")
+		content.WriteString(key)
+		content.WriteString(" ")
+		content.WriteString(value)
+		content.WriteString("\n")
 	}
 
-	return sectionContent.String(), nil
+	return content.String(), nil
 }
 
 func fromAttributes(containerAttr container.Attributes, podAttr pod.Attributes, tenant string, isFullStack bool) fileContent {
-	fileContent := fileContent{
+	fc := fileContent{
 		containerSection: &containerSection{
 			PodName:                 podAttr.PodName,
 			PodUID:                  podAttr.PodUID,
@@ -131,12 +131,12 @@ func fromAttributes(containerAttr container.Attributes, podAttr pod.Attributes, 
 	}
 
 	if isFullStack {
-		fileContent.hostSection = &hostSection{
+		fc.hostSection = &hostSection{
 			Tenant:      tenant,
 			IsFullStack: "true",
 		}
-		fileContent.NodeName = podAttr.NodeName
+		fc.NodeName = podAttr.NodeName
 	}
 
-	return fileContent
+	return fc
 }
