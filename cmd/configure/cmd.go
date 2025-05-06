@@ -61,10 +61,6 @@ func Execute(log logr.Logger, fs afero.Afero, targetDir string) error {
 
 	log.Info("starting configuration", "config-directory", configFolder, "input-directory", inputFolder)
 
-	if isFullstack {
-		log.Info("fullstack flag detected, configuring accordingly", "tenant", tenant)
-	}
-
 	err := preload.Configure(log, fs, configFolder, installPath)
 	if err != nil {
 		log.Info("failed to configure the ld.so.preload", "config-directory", configFolder)

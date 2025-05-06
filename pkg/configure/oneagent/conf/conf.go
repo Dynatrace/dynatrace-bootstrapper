@@ -16,8 +16,14 @@ const (
 )
 
 func Configure(log logr.Logger, fs afero.Afero, configDirectory string, containerAttr container.Attributes, podAttr pod.Attributes, tenant string, isFullstack bool) error {
-	if isFullstack && tenant == "" {
-		return errors.New("fullstack mode is set, but no tenant was provided")
+	log.Info("configuring container.conf", "config-directory", configDirectory)
+
+	if isFullstack {
+		log.Info("fullstack flag detected, configuring accordingly", "tenant", tenant)
+
+		if tenant == "" {
+			return errors.New("fullstack mode is set, but no tenant was provided")
+		}
 	}
 
 	confContent := fromAttributes(containerAttr, podAttr, tenant, isFullstack)
