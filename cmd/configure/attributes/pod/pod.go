@@ -24,21 +24,21 @@ func (attr Attributes) ToMap() (map[string]string, error) {
 }
 
 type PodInfo struct {
-	PodName       string `json:"k8s.pod.name"`
-	PodUID        string `json:"k8s.pod.uid"`
-	NodeName      string `json:"k8s.node.name"`
-	NamespaceName string `json:"k8s.namespace.name"`
+	PodName       string `json:"k8s.pod.name,omitempty"`
+	PodUID        string `json:"k8s.pod.uid,omitempty"`
+	NodeName      string `json:"k8s.node.name,omitempty"`
+	NamespaceName string `json:"k8s.namespace.name,omitempty"`
 }
 
 type WorkloadInfo struct {
-	WorkloadKind string `json:"k8s.workload.kind"`
-	WorkloadName string `json:"k8s.workload.name"`
+	WorkloadKind string `json:"k8s.workload.kind,omitempty"`
+	WorkloadName string `json:"k8s.workload.name,omitempty"`
 }
 
 type ClusterInfo struct {
-	ClusterUID      string `json:"k8s.cluster.uid"`
-	ClusterName     string `json:"k8s.cluster.name"`
-	DTClusterEntity string `json:"dt.entity.kubernetes_cluster"`
+	ClusterUID      string `json:"k8s.cluster.uid,omitempty"`
+	ClusterName     string `json:"k8s.cluster.name,omitempty"`
+	DTClusterEntity string `json:"dt.entity.kubernetes_cluster,omitempty"`
 }
 
 func ParseAttributes(rawAttributes []string) (Attributes, error) {

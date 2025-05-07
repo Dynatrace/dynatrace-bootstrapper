@@ -89,15 +89,28 @@ func run(fs afero.Fs) func(cmd *cobra.Command, _ []string) error {
 			return err
 		}
 
-		err = configure.Execute(log, aferoFs, targetFolder)
+		err = configure.SetupOneAgent(log, aferoFs, targetFolder)
 		if err != nil {
 			if areErrorsSuppressed {
-				log.Error(err, "error during configuration, the error was suppressed")
+				log.Error(err, "error during oneagent setup, the error was suppressed")
 
 				return nil
 			}
 
 			log.Error(err, "error during configuration")
+
+			return err
+		}
+
+		err = configure.EnrichWithMetadata(log, aferoFs)
+		if err != nil {
+			if areErrorsSuppressed {
+				log.Error(err, "error during enrichment, the error was suppressed")
+
+				return nil
+			}
+
+			log.Error(err, "error during enrichment")
 
 			return err
 		}

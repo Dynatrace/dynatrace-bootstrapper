@@ -37,24 +37,21 @@ var (
 )
 
 func AddFlags(cmd *cobra.Command) {
+	// common
 	cmd.PersistentFlags().StringVar(&inputFolder, InputFolderFlag, "", "(Optional) Base path where to look for the configuration files.")
-
 	cmd.PersistentFlags().StringVar(&configFolder, ConfigFolderFlag, "", "(Optional) Base path where to put the configuration files.")
-
-	cmd.PersistentFlags().StringVar(&installPath, InstallPathFlag, "/opt/dynatrace/oneagent", "(Optional) Base path where the agent binary will be put.")
-
 	cmd.PersistentFlags().StringArrayVar(&containerAttributes, container.Flag, []string{}, "(Optional) Container-specific attributes in JSON format.")
-
 	cmd.PersistentFlags().StringArrayVar(&podAttributes, pod.Flag, []string{}, "(Optional) Pod-specific attributes in key=value format.")
 
+	// oneagent
+	cmd.PersistentFlags().StringVar(&installPath, InstallPathFlag, "/opt/dynatrace/oneagent", "(Optional) Base path where the agent binary will be put.")
 	cmd.PersistentFlags().BoolVar(&isFullstack, IsFullstackFlag, false, "(Optional) Configure the CodeModule to be fullstack.")
+	cmd.PersistentFlags().StringVar(&tenant, TenantFlag, "", "The name of the tenant that the CodeModule will communicate with. Mandatory in case of --fullstack.")
 
 	cmd.PersistentFlags().Lookup(IsFullstackFlag).NoOptDefVal = "true"
-
-	cmd.PersistentFlags().StringVar(&tenant, TenantFlag, "", "The name of the tenant that the CodeModule will communicate with. Mandatory in case of --fullstack.")
 }
 
-func Execute(log logr.Logger, fs afero.Afero, targetDir string) error {
+func SetupOneAgent(log logr.Logger, fs afero.Afero, targetDir string) error {
 	if configFolder == "" || inputFolder == "" {
 		return nil
 	}
@@ -87,20 +84,7 @@ func Execute(log logr.Logger, fs afero.Afero, targetDir string) error {
 
 	for _, containerAttr := range containerAttrs {
 		containerConfigDir := filepath.Join(configFolder, containerAttr.ContainerName)
-
-		err = metadata.Configure(log, fs, containerConfigDir, podAttr, containerAttr)
-		if err != nil {
-			log.Info("failed to configure the enrichment files", "config-directory", containerConfigDir)
-
-			return err
-		}
-
-		err = endpoint.Configure(log, fs, inputFolder, containerConfigDir)
-		if err != nil {
-			log.Info("failed to configure the endpoint.properties", "config-directory", configFolder)
-
-			return err
-		}
+		log.Info("starting to configure the container", "path", containerConfigDir)
 
 		err = conf.Configure(log, fs, containerConfigDir, containerAttr, podAttr, tenant, isFullstack)
 		if err != nil {
@@ -123,8 +107,6 @@ func Execute(log logr.Logger, fs afero.Afero, targetDir string) error {
 }
 
 func configureFromInputDir(log logr.Logger, fs afero.Afero, configDir, inputDir string) error {
-	log.Info("starting to configure the container", "path", configFolder)
-
 	err := curl.Configure(log, fs, inputDir, configDir)
 	if err != nil {
 		log.Info("failed to configure the curl options", "config-directory", configFolder)
@@ -138,6 +120,48 @@ func configureFromInputDir(log logr.Logger, fs afero.Afero, configDir, inputDir 
 
 		return err
 	}
+
+	return nil
+}
+
+func EnrichWithMetadata(log logr.Logger, fs afero.Afero) error {
+	if configFolder == "" || inputFolder == "" {
+		return nil
+	}
+
+	log.Info("starting enrichment", "config-directory", configFolder, "input-directory", inputFolder)
+
+	podAttr, err := pod.ParseAttributes(podAttributes)
+	if err != nil {
+		return err
+	}
+
+	containerAttrs, err := container.ParseAttributes(containerAttributes)
+	if err != nil {
+		return err
+	}
+
+	for _, containerAttr := range containerAttrs {
+		containerConfigDir := filepath.Join(configFolder, containerAttr.ContainerName)
+		log.Info("starting to enrich the container", "path", containerConfigDir)
+
+		err = endpoint.Configure(log, fs, inputFolder, containerConfigDir)
+		if err != nil {
+			log.Info("failed to configure the endpoint.properties", "config-directory", configFolder)
+
+			return err
+		}
+
+		err = metadata.Configure(log, fs, containerConfigDir, podAttr, containerAttr)
+		if err != nil {
+			log.Info("failed to configure the enrichment files", "config-directory", containerConfigDir)
+
+			return err
+		}
+
+	}
+
+	log.Info("finished enrichment", "config-directory", configFolder, "input-directory", inputFolder)
 
 	return nil
 }

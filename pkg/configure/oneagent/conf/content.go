@@ -44,14 +44,14 @@ func (fc fileContent) toString() (string, error) {
 }
 
 type containerSection struct {
-	NodeName                string `json:"k8s_node_name"`
-	PodName                 string `json:"k8s_fullpodname"`
-	PodUID                  string `json:"k8s_poduid"`
-	PodNamespace            string `json:"k8s_namespace"`
-	ClusterID               string `json:"k8s_cluster_id"`
-	ContainerName           string `json:"k8s_containername"`
-	DeprecatedContainerName string `json:"containerName"`
-	ImageName               string `json:"imageName"`
+	NodeName                string `json:"k8s_node_name,omitempty"`
+	PodName                 string `json:"k8s_fullpodname,omitempty"`
+	PodUID                  string `json:"k8s_poduid,omitempty"`
+	PodNamespace            string `json:"k8s_namespace,omitempty"`
+	ClusterID               string `json:"k8s_cluster_id,omitempty"`
+	ContainerName           string `json:"k8s_containername,omitempty"`
+	DeprecatedContainerName string `json:"containerName,omitempty"`
+	ImageName               string `json:"imageName,omitempty"`
 }
 
 func (cs containerSection) toMap() (map[string]string, error) {
@@ -84,8 +84,8 @@ func (cs containerSection) toString() (string, error) {
 }
 
 type hostSection struct {
-	Tenant      string `json:"tenant"`
-	IsFullStack string `json:"isCloudNativeFullStack"`
+	Tenant      string `json:"tenant,omitempty"`
+	IsFullStack string `json:"isCloudNativeFullStack,omitempty"`
 }
 
 func (hs hostSection) toMap() (map[string]string, error) {
