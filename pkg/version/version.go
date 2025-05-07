@@ -1,6 +1,7 @@
 package version
 
 import (
+	"fmt"
 	"runtime/debug"
 
 	"github.com/go-logr/logr"
@@ -35,6 +36,10 @@ func init() {
 
 	ModuleSum = i.Main.Sum
 
+}
+
+func Get() string {
+	return fmt.Sprintf("%s (commit %s)", Version, Commit)
 }
 
 func Print(log logr.Logger) {
