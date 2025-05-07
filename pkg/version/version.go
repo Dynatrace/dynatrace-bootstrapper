@@ -9,7 +9,7 @@ import (
 var (
 
 	// AppName contains the name of the application
-	AppName = "dynatrace-bootsrapper"
+	AppName = "dynatrace-bootstrapper"
 
 	// Version contains the version of the Bootstrapper. Assigned externally.
 	Version = ""
