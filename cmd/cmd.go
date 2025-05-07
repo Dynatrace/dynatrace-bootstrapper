@@ -28,6 +28,7 @@ func New(fs afero.Fs) *cobra.Command {
 		Use:                Use,
 		RunE:               run(fs),
 		FParseErrWhitelist: cobra.FParseErrWhitelist{UnknownFlags: true},
+		Version:            version.Version,
 	}
 
 	AddFlags(cmd)
