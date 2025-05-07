@@ -14,7 +14,7 @@ const (
 )
 
 func Configure(log logr.Logger, fs afero.Afero, configDir, installPath string) error {
-	log.Info("Configuring ld.so.preload", "config-directory", configDir, "install-path", installPath)
+	log.Info("configuring ld.so.preload", "config-directory", configDir, "install-path", installPath)
 
 	return fsutils.CreateFile(fs, filepath.Join(configDir, ConfigPath), filepath.Join(installPath, LibAgentProcPath))
 }

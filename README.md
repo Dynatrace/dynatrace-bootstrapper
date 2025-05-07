@@ -83,6 +83,22 @@ The `dynatrace-bootstrapper` is a small CLI binary built into a [Dynatrace CodeM
 - The `--install-path` arg defines the base path where the agent binary will be put. This is only necessary to properly configure the `ld.so.preload` file.
   - The `ld.so.preload` is put under `<config-directory>/oneagent/ld.so.preload`
 
+#### `--fullstack`
+
+*Example*: `--fullstack`
+
+- This is an **optional** arg
+  - Defaults to `false`
+- The `--fullstack` arg will make sure that the CodeModule is configured to be in fullstack mode.
+  - Adds additional values to the `<config-directory>/<container-name>/oneagent/agent/config/container.conf`.
+
+#### `--tenant`
+
+*Example*: `--tenant="my-tenant"`
+
+- This is an **optional** arg, but mandatory incase of `--fullstack`.
+- Only used incase of `--fullstack`, provides additional info needed to properly configure `<config-directory>/<container-name>/oneagent/agent/config/container.conf`.
+
 #### `--attribute`
 
 *Example*: `--attribute="k8s.pod.name=test"`

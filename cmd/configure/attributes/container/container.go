@@ -14,7 +14,7 @@ const (
 
 type Attributes struct {
 	ImageInfo     `json:",inline"`
-	ContainerName string `json:"k8s.container.name"`
+	ContainerName string `json:"k8s.container.name,omitempty"`
 }
 
 func (attr Attributes) ToMap() (map[string]string, error) {

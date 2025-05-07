@@ -1,6 +1,7 @@
 package conf
 
 import (
+	"errors"
 	"path/filepath"
 
 	"github.com/Dynatrace/dynatrace-bootstrapper/cmd/configure/attributes/container"
@@ -14,8 +15,18 @@ const (
 	ConfigPath = "/oneagent/agent/config/container.conf"
 )
 
-func Configure(log logr.Logger, fs afero.Afero, configDirectory string, containerAttr container.Attributes, podAttr pod.Attributes) error {
-	confContent := fromAttributes(containerAttr, podAttr)
+func Configure(log logr.Logger, fs afero.Afero, configDirectory string, containerAttr container.Attributes, podAttr pod.Attributes, tenant string, isFullstack bool) error {
+	log.Info("configuring container.conf", "config-directory", configDirectory)
+
+	if isFullstack {
+		log.Info("fullstack flag detected, configuring accordingly", "tenant", tenant)
+
+		if tenant == "" {
+			return errors.New("fullstack mode is set, but no tenant was provided")
+		}
+	}
+
+	confContent := fromAttributes(containerAttr, podAttr, tenant, isFullstack)
 
 	stringContent, err := confContent.toString()
 	if err != nil {

@@ -11,6 +11,8 @@ args:
   - --target=/mnt/bin
   - --config-directory=/mnt/config
   - --input-directory=/mnt/input
+  - --fullstack
+  - --tenant=test-tenant
   - --attribute=k8s.pod.name=test-pod-name
   - --attribute=k8s.pod.uid=test-pod-uid
   - --attribute=k8s.namespace.name=test-namespace

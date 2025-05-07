@@ -1,10 +1,10 @@
 package container
 
 type ImageInfo struct {
-	Registry    string `json:"container_image.registry"`
-	Repository  string `json:"container_image.repository"`
-	Tag         string `json:"container_image.tags"`
-	ImageDigest string `json:"container_image.digest"`
+	Registry    string `json:"container_image.registry,omitempty"`
+	Repository  string `json:"container_image.repository,omitempty"`
+	Tag         string `json:"container_image.tags,omitempty"`
+	ImageDigest string `json:"container_image.digest,omitempty"`
 }
 
 func (img ImageInfo) ToURI() string {
