@@ -89,6 +89,7 @@ func (pm ProcMap) SetupReadonly(installPath string) ProcMap {
 		for entry, value := range entries {
 			volume := filepath.VolumeName(value)
 			fmt.Printf("%s", volume)
+
 			if strings.HasPrefix(value, "\"../") {
 				sanitizedEntry := strings.ReplaceAll(value, "../", "")
 				sanitizedEntry, found := strings.CutPrefix(sanitizedEntry, "\"")

@@ -118,14 +118,14 @@ func TestEnrichWithMetadata(t *testing.T) {
 	}
 
 	t.Run("success", func(t *testing.T) {
-		inputFolder = "/path/input"
-		configFolder = "/path/config"
+		inputDir = "/path/input"
+		configDir = "/path/config"
 
 		memFs := afero.Afero{Fs: afero.NewMemMapFs()}
-		setupInputFs(t, memFs, inputFolder)
+		setupInputFs(t, memFs, inputDir)
 		setupTargetFs(t, memFs, targetFolder)
 
-		preExecuteConfigCount := countFiles(t, memFs, configFolder)
+		preExecuteConfigCount := countFiles(t, memFs, configDir)
 		require.Equal(t, 0, preExecuteConfigCount)
 
 		err := EnrichWithMetadata(testLog, memFs)
@@ -134,38 +134,38 @@ func TestEnrichWithMetadata(t *testing.T) {
 		expectedContainerSpecificConfigCount := 3 // endpoint(1) + metadata(2)
 
 		for _, name := range containerNames {
-			containerConfigFolder := filepath.Join(configFolder, name)
+			containerConfigFolder := filepath.Join(configDir, name)
 
 			containerSpecificConfigCount := countFiles(t, memFs, containerConfigFolder)
 			require.Equal(t, expectedContainerSpecificConfigCount, containerSpecificConfigCount)
 		}
 
 		expectedPostExecuteConfigCount := len(containerNames) * expectedContainerSpecificConfigCount // len(containers) * container-specific-files
-		postExecuteConfigCount := countFiles(t, memFs, configFolder)
+		postExecuteConfigCount := countFiles(t, memFs, configDir)
 		require.Equal(t, expectedPostExecuteConfigCount, postExecuteConfigCount)
 	})
 
 	t.Run("no input-directory ==> do nothing", func(t *testing.T) {
-		inputFolder = ""
-		configFolder = "/path/config"
+		inputDir = ""
+		configDir = "/path/config"
 		memFs := afero.Afero{Fs: afero.NewMemMapFs()}
 
 		err := EnrichWithMetadata(testLog, memFs)
 		require.NoError(t, err)
 
-		postExecuteConfigCount := countFiles(t, memFs, configFolder)
+		postExecuteConfigCount := countFiles(t, memFs, configDir)
 		require.Equal(t, 0, postExecuteConfigCount)
 	})
 
 	t.Run("no config-directory ==> do nothing", func(t *testing.T) {
-		configFolder = ""
-		inputFolder = "/path/config"
+		configDir = ""
+		inputDir = "/path/config"
 		memFs := afero.Afero{Fs: afero.NewMemMapFs()}
 
 		err := EnrichWithMetadata(testLog, memFs)
 		require.NoError(t, err)
 
-		postExecuteConfigCount := countFiles(t, memFs, configFolder)
+		postExecuteConfigCount := countFiles(t, memFs, configDir)
 		require.Equal(t, 0, postExecuteConfigCount)
 	})
 }

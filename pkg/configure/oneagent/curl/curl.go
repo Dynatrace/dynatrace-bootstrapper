@@ -29,9 +29,11 @@ func Configure(log logr.Logger, fs afero.Afero, inputDir, configDir string) erro
 		return err
 	}
 
-	log.Info("configuring curl_options.conf", "config-directory", configDir)
+	configFile := filepath.Join(configDir, ConfigPath)
 
-	return createFile(fs, configDir, content)
+	log.Info("configuring curl_options.conf", "config-path", configFile)
+
+	return fsutils.CreateFile(fs, configFile, content)
 }
 
 func getFromFs(fs afero.Afero, inputDir string) (string, error) {
@@ -43,10 +45,4 @@ func getFromFs(fs afero.Afero, inputDir string) (string, error) {
 	}
 
 	return fmt.Sprintf(optionsFormatString, string(content)), err
-}
-
-func createFile(fs afero.Afero, configDir, content string) error {
-	configFile := filepath.Join(configDir, ConfigPath)
-
-	return fsutils.CreateFile(fs, configFile, content)
 }
