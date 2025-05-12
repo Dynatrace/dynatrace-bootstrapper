@@ -32,7 +32,7 @@ func (pc ProcConf) ToString() string {
 	return pc.ToMap().ToString()
 }
 
-// Merge will return the merged ProcConf, the values in the input will take precedent, does not mutate the original.
+// Merge returns the merged ProcConf, the values in the input will take precedent, does not mutate the original.
 func (pc ProcConf) Merge(input ProcConf) ProcConf {
 	source := pc.ToMap()
 	override := input.ToMap()
