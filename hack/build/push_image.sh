@@ -10,9 +10,14 @@ if [[ ! "${2}" ]]; then
 fi
 image=${1}
 tag=${2}
+arch=${3:-"amd64,arm64"}
 
 out_image="${image}:${tag}"
-supported_architectures=("amd64" "arm64")
+
+
+IFS=',' read -ra supported_architectures <<< "$arch"
+images=()
+echo "Creating image-index manifest for ${supported_architectures[*]}"
 
 if ! command -v docker 2>/dev/null; then
   CONTAINER_CMD=podman

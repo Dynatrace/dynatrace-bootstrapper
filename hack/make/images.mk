@@ -1,5 +1,6 @@
 IMAGE ?= quay.io/dynatrace/dynatrace-bootstrapper
 DEBUG ?= false
+BOOTSTRAPPER_BUILD_ARCHS ?= amd64,arm64
 
 #Needed for the e2e pipeline to work
 BRANCH ?= $(shell git branch --show-current)
@@ -26,11 +27,11 @@ endif
 
 ## Builds an Bootstrapper image with a given IMAGE and TAG
 images/build: ensure-tag-not-snapshot
-	./hack/build/build_image.sh "${IMAGE}" "${TAG}" "${DEBUG}"
+	./hack/build/build_image.sh "${IMAGE}" "${TAG}" "${DEBUG}" "${BOOTSTRAPPER_BUILD_ARCHS}"
 
 ## Pushes an ALREADY BUILT Bootstrapper image with a given IMAGE and TAG
 images/push: ensure-tag-not-snapshot
-	./hack/build/push_image.sh "${IMAGE}" "${TAG}"
+	./hack/build/push_image.sh "${IMAGE}" "${TAG}" "${BOOTSTRAPPER_BUILD_ARCHS}"
 
 ## Builds an Bootstrapper image and pushes it
 images/build/push: images/build images/push

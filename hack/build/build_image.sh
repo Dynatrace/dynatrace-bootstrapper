@@ -12,8 +12,10 @@ fi
 image=${1}
 tag=${2}
 debug=${3:-false}
+arch=${4:-"amd64,arm64"}
 
-supported_architectures=("amd64" "arm64")
+IFS=',' read -ra supported_architectures <<< "$arch"
+echo "Creating image-index manifest for ${supported_architectures[*]}"
 
 commit=$(git rev-parse HEAD)
 go_linker_args=$(hack/build/create_go_linker_args.sh "${tag}" "${commit}" "${debug}")
