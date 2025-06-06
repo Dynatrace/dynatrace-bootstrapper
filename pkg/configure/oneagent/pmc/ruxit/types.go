@@ -90,14 +90,14 @@ func (pm ProcMap) SetupReadonly(installPath string) ProcMap {
 			volume := filepath.VolumeName(value)
 			fmt.Printf("%s", volume)
 
-			if strings.HasPrefix(value, "\"../") {
+			if strings.HasPrefix(entry, "libraryPath") {
 				sanitizedEntry := strings.ReplaceAll(value, "../", "")
 				sanitizedEntry, found := strings.CutPrefix(sanitizedEntry, "\"")
 
 				if found {
-					pm[section][entry] = "\"" + filepath.Join(installPath, sanitizedEntry)
+					pm[section][entry] = "\"" + filepath.Join(installPath, "agent", sanitizedEntry)
 				} else {
-					pm[section][entry] = filepath.Join(installPath, sanitizedEntry)
+					pm[section][entry] = filepath.Join(installPath, "agent", sanitizedEntry)
 				}
 			}
 		}

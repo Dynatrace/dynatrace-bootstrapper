@@ -204,8 +204,13 @@ func TestSetupReadonly(t *testing.T) {
 			{
 				// overwritten to be absolute path
 				Section: "test",
-				Key:     "keyWithPath",
-				Value:   "\"/absolute/path/relative/path\"",
+				Key:     "libraryPath123",
+				Value:   "\"/absolute/path/agent/relative/path\"",
+			},
+			{
+				Section: "general",
+				Key:     "libraryPathMusl64",
+				Value:   "\"/absolute/path/agent/bin/1.2.3.4-5/linux-musl-x86-64\"",
 			},
 			{
 				// added from override
@@ -229,8 +234,13 @@ func TestSetupReadonly(t *testing.T) {
 			},
 			{
 				Section: "test",
-				Key:     "keyWithPath",
-				Value:   "\"../../relative/path\"",
+				Key:     "libraryPath123",
+				Value:   "\"../relative/path\"",
+			},
+			{
+				Section: "general",
+				Key:     "libraryPathMusl64",
+				Value:   "\"../bin/1.2.3.4-5/linux-musl-x86-64\"",
 			},
 			{
 				// will be removed, as it is not needed in readonly
