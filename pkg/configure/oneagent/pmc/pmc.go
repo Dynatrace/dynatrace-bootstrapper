@@ -13,7 +13,7 @@ const (
 	InputFileName = "ruxitagentproc.json"
 
 	SourceRuxitAgentProcPath      = "agent/conf/ruxitagentproc.conf"
-	DestinationRuxitAgentProcPath = "oneagent/config/ruxitagentproc.conf"
+	DestinationRuxitAgentProcPath = "oneagent/agent/config/ruxitagentproc.conf"
 )
 
 func GetSourceRuxitAgentProcFilePath(targetDir string) string {
