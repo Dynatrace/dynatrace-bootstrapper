@@ -207,6 +207,15 @@ func TestFilterFilesByTechnology(t *testing.T) {
 			filepath.Join("fileB1.txt"),
 		}, paths)
 	})
+	t.Run("filter multiple technologies with white spaces", func(t *testing.T) {
+		paths, err := filterFilesByTechnology(testLog, fs, sourceDir, []string{"java ", " python "})
+		require.NoError(t, err)
+		assert.ElementsMatch(t, []string{
+			filepath.Join("fileA1.txt"),
+			filepath.Join("fileA2.txt"),
+			filepath.Join("fileB1.txt"),
+		}, paths)
+	})
 	t.Run("not filter non-existing technology", func(t *testing.T) {
 		paths, err := filterFilesByTechnology(testLog, fs, sourceDir, []string{"php"})
 		require.NoError(t, err)
