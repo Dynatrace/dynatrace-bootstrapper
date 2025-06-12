@@ -162,3 +162,14 @@ You can use the `make deploy/custom`
 - This will use the `hack/testing/helm-sample/_values.yaml` as the values.
   - This file is ignored by git, so you can safely put whatever you want into it.
 - The `image` will still be set according to what `make build` would create.
+
+## How to release
+
+The bootstrapper is mainly used by installing it via `go install`, so the release is very simple:
+
+1. Go to the [release page](https://github.com/Dynatrace/dynatrace-bootstrapper/releases).
+2. Press [Draft new release](https://github.com/Dynatrace/dynatrace-bootstrapper/releases/new)
+3. Set the tag you want to release, you don't need to push the tag beforehand. Example format: v1.2.3
+4. Press `Generate release notes`
+5. Cleanup generated output to only have the interesting commits. (business logic relevant or bugfixes)
+6. Publish release
