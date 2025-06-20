@@ -30,6 +30,8 @@ func TestExecute(t *testing.T) {
 
 		workFolder = workDir
 
+		technology = " " + AllTechValue + " "
+
 		err := Execute(testLog, fs, sourceDir, targetDir)
 		require.NoError(t, err)
 
