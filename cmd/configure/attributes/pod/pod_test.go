@@ -13,7 +13,7 @@ func TestParseAttributes(t *testing.T) {
 		attributes := []string{"k8s.pod.name=pod1", "k8s.pod.uid=123", "k8s.namespace.name=default"}
 		expected := Attributes{
 			UserDefined: map[string]string{},
-			PodInfo: PodInfo{
+			Info: Info{
 				PodName:       "pod1",
 				PodUID:        "123",
 				NamespaceName: "default"},
@@ -41,7 +41,7 @@ func TestParseAttributes(t *testing.T) {
 		attributes := []string{"k8s.pod.name=pod2", "invalidEntry", "k8s.namespace.name=prod"}
 		expected := Attributes{
 			UserDefined: map[string]string{},
-			PodInfo: PodInfo{
+			Info: Info{
 				PodName:       "pod2",
 				NamespaceName: "prod",
 			},
@@ -56,7 +56,7 @@ func TestParseAttributes(t *testing.T) {
 			UserDefined: map[string]string{
 				"beep": "boop",
 			},
-			PodInfo: PodInfo{
+			Info: Info{
 				PodName:       "pod2",
 				NamespaceName: "prod",
 			},
@@ -69,7 +69,7 @@ func TestParseAttributes(t *testing.T) {
 
 func TestFilterOutUserDefined(t *testing.T) {
 	parsedInput := Attributes{
-		PodInfo: PodInfo{
+		Info: Info{
 			PodName:       "pod2",
 			NamespaceName: "prod",
 		},
@@ -86,8 +86,7 @@ func TestFilterOutUserDefined(t *testing.T) {
 	rawInput := maps.Clone(parseableInput)
 	maps.Copy(rawInput, expectedUserDefined)
 
-	err = filterOutUserDefined(rawInput, parsedInput)
-	require.NoError(t, err)
+	filterOutUserDefined(rawInput, parsedInput)
 	assert.Equal(t, expectedUserDefined, rawInput)
 }
 
@@ -96,7 +95,7 @@ func TestToArgs(t *testing.T) {
 		UserDefined: map[string]string{
 			"beep": "boop",
 		},
-		PodInfo: PodInfo{
+		Info: Info{
 			PodName:       "pod2",
 			NamespaceName: "prod",
 		},

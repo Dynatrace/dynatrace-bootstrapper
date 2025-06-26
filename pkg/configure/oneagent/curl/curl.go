@@ -1,3 +1,4 @@
+// Package curl provides configuration for OneAgent curl options files.
 package curl
 
 import (
@@ -11,12 +12,14 @@ import (
 )
 
 const (
-	optionsFormatString = `initialConnectRetryMs %s
-`
-	ConfigPath    = "oneagent/agent/customkeys/curl_options.conf"
+	optionsFormatString = `initialConnectRetryMs %s\n`
+	// ConfigPath is the path to the curl options configuration file.
+	ConfigPath = "oneagent/agent/customkeys/curl_options.conf"
+	// InputFileName is the name of the input file for curl options.
 	InputFileName = "initial-connect-retry"
 )
 
+// Configure sets up the curl_options.conf file for OneAgent.
 func Configure(log logr.Logger, fs afero.Afero, inputDir, configDir string) error {
 	content, err := getFromFs(fs, inputDir)
 	if err != nil {

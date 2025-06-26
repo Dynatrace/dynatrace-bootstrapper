@@ -1,3 +1,4 @@
+// Package pmc provides process module config utilities for OneAgent configuration.
 package pmc
 
 import (
@@ -10,6 +11,7 @@ import (
 	"github.com/spf13/afero"
 )
 
+// Create creates a new process module config file by merging the source config with the provided config.
 func Create(log logr.Logger, fs afero.Fs, srcPath, dstPath string, conf ruxit.ProcConf) error {
 	srcFile, err := fs.Open(srcPath)
 	if err != nil {
@@ -39,6 +41,7 @@ func Create(log logr.Logger, fs afero.Fs, srcPath, dstPath string, conf ruxit.Pr
 	err = fs.MkdirAll(filepath.Dir(dstPath), os.ModePerm)
 	if err != nil {
 		log.Info("failed to create destination dir", "path", filepath.Dir(filepath.Dir(dstPath)))
+
 		return err
 	}
 
@@ -51,12 +54,14 @@ func Create(log logr.Logger, fs afero.Fs, srcPath, dstPath string, conf ruxit.Pr
 
 	defer func() { _ = dstFile.Close() }()
 
-	_, err = dstFile.Write([]byte(mergedConf.ToString()))
+	_, err = dstFile.WriteString(mergedConf.ToString())
 	if err != nil {
-		log.Info("failed to write merged config into destination file", "path", dstPath)
+		log.Info("failed to write to destination file", "path", dstPath)
 
 		return errors.WithStack(err)
 	}
+
+	log.Info("created new config", "from", srcPath, "to", dstPath)
 
 	return nil
 }

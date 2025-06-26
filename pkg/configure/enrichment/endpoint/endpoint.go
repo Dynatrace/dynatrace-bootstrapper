@@ -1,3 +1,4 @@
+// Package endpoint provides configuration for enrichment endpoint files.
 package endpoint
 
 import (
@@ -9,11 +10,14 @@ import (
 	"github.com/spf13/afero"
 )
 
+// ConfigBasePath is the base path for endpoint enrichment configuration.
+// InputFileName is the name of the endpoint properties input file.
 const (
 	ConfigBasePath = "enrichment/endpoint"
 	InputFileName  = "endpoint.properties"
 )
 
+// Configure sets up the endpoint enrichment configuration file.
 func Configure(log logr.Logger, fs afero.Afero, inputDir, configDir string) error {
 	properties, err := getFromFs(fs, inputDir)
 	if err != nil {

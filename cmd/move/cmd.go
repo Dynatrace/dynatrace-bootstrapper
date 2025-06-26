@@ -1,3 +1,4 @@
+// Package move provides the CLI for moving files and folders atomically.
 package move
 
 import (
@@ -7,6 +8,8 @@ import (
 	"github.com/spf13/cobra"
 )
 
+// WorkFolderFlag is the command-line flag for specifying the work folder.
+// TechnologyFlag is the command-line flag for specifying the technology filter.
 const (
 	WorkFolderFlag = "work"
 	TechnologyFlag = "technology"
@@ -17,11 +20,11 @@ var (
 	technology string
 )
 
+// AddFlags adds move-related flags to the provided command.
 func AddFlags(cmd *cobra.Command) {
 	cmd.PersistentFlags().StringVar(&workFolder, WorkFolderFlag, "", "(Optional) Base path for a tmp folder, this is where the command will do its work, to make sure the operations are atomic. It must be on the same disk as the target folder.")
 
 	cmd.PersistentFlags().StringVar(&technology, TechnologyFlag, "", "(Optional) Comma-separated list of technologies to filter files.")
-
 }
 
 // Execute moves the contents of a folder to another via copying.

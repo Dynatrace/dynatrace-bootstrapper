@@ -1,3 +1,4 @@
+// Package symlink provides helpers for creating symlinks in the filesystem.
 package symlink
 
 import (
@@ -6,6 +7,7 @@ import (
 	"github.com/spf13/afero"
 )
 
+// Create creates a symlink from symlinkDir to targetDir using the provided afero filesystem.
 func Create(log logr.Logger, fs afero.Fs, targetDir, symlinkDir string) error {
 	// MemMapFs (used for testing) doesn't comply with the Linker interface
 	linker, ok := fs.(afero.Linker)

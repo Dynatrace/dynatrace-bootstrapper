@@ -39,5 +39,4 @@ func TestCreateFile(t *testing.T) {
 		require.NoError(t, err)
 		assert.True(t, stat.IsDir())
 	})
-
 }

@@ -1,7 +1,6 @@
 package ruxit
 
 import (
-	"fmt"
 	"path/filepath"
 	"sort"
 	"strings"
@@ -14,6 +13,7 @@ type ProcConf struct {
 	Revision    uint       `json:"revision"`
 }
 
+// Property represents a configuration property with section, key, and value.
 type Property struct {
 	Section string `json:"section"`
 	Key     string `json:"key"`
@@ -44,6 +44,7 @@ func (pc ProcConf) Merge(input ProcConf) ProcConf {
 	return updated
 }
 
+// ToMap converts ProcConf to ProcMap format for easier manipulation.
 func (pc ProcConf) ToMap() ProcMap {
 	sections := map[string]map[string]string{}
 	for _, prop := range pc.Properties {
@@ -73,6 +74,7 @@ var (
 	}
 )
 
+// SetupReadonly configures readonly paths by removing redundant entries and setting up library paths.
 func (pm ProcMap) SetupReadonly(installPath string) ProcMap {
 	for key, values := range redundantEntries {
 		_, ok := pm[key]
@@ -87,9 +89,7 @@ func (pm ProcMap) SetupReadonly(installPath string) ProcMap {
 
 	for section, entries := range pm {
 		for entry, value := range entries {
-			volume := filepath.VolumeName(value)
-			fmt.Printf("%s", volume)
-
+			// _ = filepath.VolumeName(value) // LINT: removed unused variable
 			if strings.HasPrefix(entry, "libraryPath") {
 				sanitizedEntry := strings.ReplaceAll(value, "../", "")
 				sanitizedEntry, found := strings.CutPrefix(sanitizedEntry, "\"")
@@ -106,8 +106,9 @@ func (pm ProcMap) SetupReadonly(installPath string) ProcMap {
 	return pm.Merge(additionalEntries)
 }
 
+// ToString creates the content of the configuration file, the sections and properties are printed in a sorted order, so it can be tested.
 func (pm ProcMap) ToString() string {
-	var sections []string
+	sections := make([]string, 0, len(pm))
 	for section := range pm {
 		sections = append(sections, section)
 	}
@@ -139,6 +140,7 @@ func (pm ProcMap) ToString() string {
 	return content.String()
 }
 
+// Merge merges the override ProcMap into the current ProcMap and returns the result.
 func (pm ProcMap) Merge(override ProcMap) ProcMap {
 	for section, props := range override {
 		_, ok := pm[section]

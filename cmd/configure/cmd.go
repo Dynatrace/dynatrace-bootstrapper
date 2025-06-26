@@ -1,3 +1,4 @@
+// Package configure provides functionality for setting up OneAgent configuration.
 package configure
 
 import (
@@ -18,24 +19,30 @@ import (
 )
 
 const (
-	InputFolderFlag  = "input-directory"
+	// InputFolderFlag is the command-line flag for specifying the input directory.
+	InputFolderFlag = "input-directory"
+	// ConfigFolderFlag is the command-line flag for specifying the config directory.
 	ConfigFolderFlag = "config-directory"
-	InstallPathFlag  = "install-path"
-	IsFullstackFlag  = "fullstack"
-	TenantFlag       = "tenant"
+	// InstallPathFlag is the command-line flag for specifying the install path.
+	InstallPathFlag = "install-path"
+	// TenantFlag is the command-line flag for specifying the tenant.
+	TenantFlag = "tenant"
+	// FullstackFlag is the command-line flag for enabling fullstack mode.
+	FullstackFlag = "fullstack"
 )
 
 var (
-	inputDir    string
-	configDir   string
-	installPath = "/opt/dynatrace/oneagent"
-	isFullstack bool
-	tenant      string
+	inputDir      string
+	configDir     string
+	installPath   string
+	tenant        string
+	isFullstack   bool
+	podAttributes []string
 
-	podAttributes       []string
 	containerAttributes []string
 )
 
+// AddFlags adds configuration-related flags to the provided command.
 func AddFlags(cmd *cobra.Command) {
 	// common
 	cmd.PersistentFlags().StringVar(&inputDir, InputFolderFlag, "", "(Optional) Base path where to look for the configuration files.")
@@ -45,12 +52,24 @@ func AddFlags(cmd *cobra.Command) {
 
 	// oneagent
 	cmd.PersistentFlags().StringVar(&installPath, InstallPathFlag, "/opt/dynatrace/oneagent", "(Optional) Base path where the agent binary will be put.")
-	cmd.PersistentFlags().BoolVar(&isFullstack, IsFullstackFlag, false, "(Optional) Configure the CodeModule to be fullstack.")
+	cmd.PersistentFlags().BoolVar(&isFullstack, FullstackFlag, false, "(Optional) Configure the CodeModule to be fullstack.")
 	cmd.PersistentFlags().StringVar(&tenant, TenantFlag, "", "The name of the tenant that the CodeModule will communicate with. Mandatory in case of --fullstack.")
 
-	cmd.PersistentFlags().Lookup(IsFullstackFlag).NoOptDefVal = "true"
+	cmd.PersistentFlags().Lookup(FullstackFlag).NoOptDefVal = "true"
+
+	cobra.OnInitialize(func() {
+		inputDir, _ = cmd.Flags().GetString(InputFolderFlag)
+		configDir, _ = cmd.Flags().GetString(ConfigFolderFlag)
+		installPath, _ = cmd.Flags().GetString(InstallPathFlag)
+		tenant, _ = cmd.Flags().GetString(TenantFlag)
+		isFullstack, _ = cmd.Flags().GetBool(FullstackFlag)
+
+		podAttributes, _ = cmd.Flags().GetStringSlice(pod.Flag)
+		containerAttributes, _ = cmd.Flags().GetStringSlice(container.Flag)
+	})
 }
 
+// SetupOneAgent sets up OneAgent configuration files in the target directory.
 func SetupOneAgent(log logr.Logger, fs afero.Afero, targetDir string) error {
 	if configDir == "" || inputDir == "" {
 		return nil
@@ -124,6 +143,7 @@ func configureFromInputDir(log logr.Logger, fs afero.Afero, containerConfigDir, 
 	return nil
 }
 
+// EnrichWithMetadata enriches the configuration with metadata.
 func EnrichWithMetadata(log logr.Logger, fs afero.Afero) error {
 	if configDir == "" || inputDir == "" {
 		return nil
@@ -158,7 +178,6 @@ func EnrichWithMetadata(log logr.Logger, fs afero.Afero) error {
 
 			return err
 		}
-
 	}
 
 	log.Info("finished enrichment", "config-directory", configDir, "input-directory", inputDir)

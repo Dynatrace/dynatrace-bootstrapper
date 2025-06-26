@@ -15,10 +15,10 @@ import (
 
 var testLog = zapr.NewLogger(zap.NewExample())
 
-func mockCopyFuncWithAtomicCheck(t *testing.T, workFolder string, isSuccessful bool) copyFunc {
+func mockCopyFuncWithAtomicCheck(t *testing.T, workFolder string, isSuccessful bool) CopyFunc {
 	t.Helper()
 
-	return func(log logr.Logger, fs afero.Afero, _, target string) error {
+	return func(_ logr.Logger, fs afero.Afero, _, target string) error {
 		// according to the inner copyFunc, the target should be the workFolder
 		// the actual target will be created outside the copyFunc by the atomic wrapper using fs.Rename
 		require.Equal(t, workFolder, target)
@@ -49,25 +49,25 @@ func TestAtomic(t *testing.T) {
 		fs := afero.Afero{Fs: afero.NewMemMapFs()}
 
 		err := fs.MkdirAll(source, 0755)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 
 		atomicCopy := Atomic(work, mockCopyFuncWithAtomicCheck(t, work, true))
 
 		err = atomicCopy(testLog, fs, source, target)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 
 		require.NotEqual(t, work, target)
 
 		exists, err := fs.DirExists(work)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		assert.False(t, exists)
 
 		exists, err = fs.DirExists(target)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		assert.True(t, exists)
 
 		isEmpty, err := fs.IsEmpty(target)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		assert.False(t, isEmpty)
 	})
 	t.Run("fail -> target is not present", func(t *testing.T) {
@@ -76,17 +76,17 @@ func TestAtomic(t *testing.T) {
 		atomicCopy := Atomic(work, mockCopyFuncWithAtomicCheck(t, work, false))
 
 		err := atomicCopy(testLog, fs, source, target)
-		assert.Error(t, err)
+		require.Error(t, err)
 		assert.Equal(t, "some mock error", err.Error())
 
 		require.NotEqual(t, work, target)
 
 		exists, err := fs.DirExists(work)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		assert.False(t, exists)
 
 		exists, err = fs.DirExists(target)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		assert.False(t, exists)
 	})
 }

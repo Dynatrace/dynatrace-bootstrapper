@@ -1,3 +1,4 @@
+// Package ca provides configuration for OneAgent certificate authority files.
 package ca
 
 import (
@@ -9,6 +10,11 @@ import (
 	"github.com/spf13/afero"
 )
 
+// ConfigBasePath is the base path for custom key configuration.
+// ProxyCertsFileName is the file name for proxy certificates.
+// CertsFileName is the file name for agent certificates.
+// TrustedCertsInputFile is the input file name for trusted certificates.
+// AgCertsInputFile is the input file name for ActiveGate certificates.
 const (
 	ConfigBasePath     = "oneagent/agent/customkeys"
 	ProxyCertsFileName = "custom_proxy.pem"
@@ -18,6 +24,7 @@ const (
 	AgCertsInputFile      = "activegate.pem"
 )
 
+// Configure sets up the certificate files for OneAgent.
 func Configure(log logr.Logger, fs afero.Afero, inputDir, configDir string) error {
 	trustedCerts, err := GetFromFs(fs, inputDir, TrustedCertsInputFile)
 	if err != nil && !os.IsNotExist(err) {
@@ -37,7 +44,6 @@ func Configure(log logr.Logger, fs afero.Afero, inputDir, configDir string) erro
 		if err != nil {
 			return err
 		}
-
 	}
 
 	if trustedCerts != "" {
@@ -48,12 +54,12 @@ func Configure(log logr.Logger, fs afero.Afero, inputDir, configDir string) erro
 		if err != nil {
 			return err
 		}
-
 	}
 
 	return nil
 }
 
+// GetFromFs reads a certificate file from the filesystem.
 func GetFromFs(fs afero.Afero, inputDir, certFileName string) (string, error) {
 	inputFile := filepath.Join(inputDir, certFileName)
 

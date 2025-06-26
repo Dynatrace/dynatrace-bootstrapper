@@ -1,3 +1,4 @@
+// Package move provides utilities for moving and copying files and folders.
 package move
 
 import (
@@ -7,14 +8,21 @@ import (
 	"golang.org/x/sys/unix"
 )
 
-type copyFunc func(log logr.Logger, fs afero.Afero, from, to string) error
+const (
+	// defaultUmask is the umask value to use for file operations.
+	defaultUmask = 0000
+)
 
-var _ copyFunc = SimpleCopy
+// CopyFunc defines a function signature for copying files or directories.
+type CopyFunc func(log logr.Logger, fs afero.Afero, from, to string) error
 
+var _ CopyFunc = SimpleCopy
+
+// SimpleCopy copies a folder from one location to another using the provided logger and filesystem.
 func SimpleCopy(log logr.Logger, fs afero.Afero, from, to string) error {
 	log.Info("starting to copy (simple)", "from", from, "to", to)
 
-	oldUmask := unix.Umask(0000)
+	oldUmask := unix.Umask(defaultUmask)
 	defer unix.Umask(oldUmask)
 
 	err := fsutils.CopyFolder(log, fs, from, to)

@@ -17,7 +17,7 @@ var testLog = zapr.NewLogger(zap.NewExample())
 
 func TestConfigure(t *testing.T) {
 	podAttr := pod.Attributes{
-		PodInfo: pod.PodInfo{
+		Info: pod.Info{
 			PodName:       "podname",
 			PodUID:        "poduid",
 			NamespaceName: "namespacename",

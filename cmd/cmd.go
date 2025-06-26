@@ -1,7 +1,7 @@
+// Package cmd provides the command-li		PersistentPreRunE:  func(_ *cobra.Command, _ []string) error { return nil },e interface for the Dynatrace bootstrapper.
 package cmd
 
 import (
-	"fmt"
 	"os"
 
 	"github.com/Dynatrace/dynatrace-bootstrapper/cmd/configure"
@@ -16,26 +16,36 @@ import (
 )
 
 const (
+	// Use is the name of the CLI application.
 	Use = "dynatrace-bootstrapper"
 
-	SourceFolderFlag   = "source"
-	TargetFolderFlag   = "target"
-	DebugFlag          = "debug"
+	// SourceFolderFlag is the flag for specifying the source folder.
+	SourceFolderFlag = "source"
+	// TargetFolderFlag is the flag for specifying the target folder.
+	TargetFolderFlag = "target"
+	// DebugFlag is the flag for enabling debug mode.
+	DebugFlag = "debug"
+	// SuppressErrorsFlag is the flag for suppressing errors.
 	SuppressErrorsFlag = "suppress-error"
 )
 
+// New creates a new cobra command for the Dynatrace bootstrapper.
 func New(fs afero.Fs) *cobra.Command {
 	cmd := &cobra.Command{
-		Use:                Use,
-		RunE:               run(fs),
-		FParseErrWhitelist: cobra.FParseErrWhitelist{UnknownFlags: true},
-		Version:            version.Version,
-		Short:              fmt.Sprintf("%s version %s", version.AppName, version.Version),
+		Use:               Use,
+		RunE:              run(fs),
+		Version:           version.Version,
+		SilenceUsage:      true,
+		PersistentPreRunE: func(_ *cobra.Command, _ []string) error { return nil },
 	}
 
-	AddFlags(cmd)
-	move.AddFlags(cmd)
+	cmd.PersistentFlags().String(SourceFolderFlag, "", "source folder of the DT OneAgent installer")
+	cmd.PersistentFlags().String(TargetFolderFlag, "", "target folder where the DT OneAgent should be copied to")
+	cmd.PersistentFlags().Bool(DebugFlag, false, "enable debug output")
+	cmd.PersistentFlags().Bool(SuppressErrorsFlag, false, "suppress one agent install errors")
+
 	configure.AddFlags(cmd)
+	move.AddFlags(cmd)
 
 	return cmd
 }
@@ -49,24 +59,8 @@ var (
 	targetFolder string
 )
 
-func AddFlags(cmd *cobra.Command) {
-	cmd.PersistentFlags().StringVar(&sourceFolder, SourceFolderFlag, "", "Base path where to copy the codemodule FROM.")
-	_ = cmd.MarkPersistentFlagRequired(SourceFolderFlag)
-
-	cmd.PersistentFlags().StringVar(&targetFolder, TargetFolderFlag, "", "Base path where to copy the codemodule TO.")
-	_ = cmd.MarkPersistentFlagRequired(TargetFolderFlag)
-
-	cmd.PersistentFlags().BoolVar(&isDebug, DebugFlag, false, "(Optional) Enables debug logs.")
-
-	cmd.PersistentFlags().Lookup(DebugFlag).NoOptDefVal = "true"
-
-	cmd.PersistentFlags().BoolVar(&areErrorsSuppressed, SuppressErrorsFlag, false, "(Optional) Always return exit code 0, even on error")
-
-	cmd.PersistentFlags().Lookup(SuppressErrorsFlag).NoOptDefVal = "true"
-}
-
-func run(fs afero.Fs) func(cmd *cobra.Command, _ []string) error {
-	return func(cmd *cobra.Command, _ []string) error {
+func run(fs afero.Fs) func(_ *cobra.Command, _ []string) error {
+	return func(_ *cobra.Command, _ []string) error {
 		setupLogger()
 
 		if isDebug {
@@ -135,5 +129,19 @@ func setupLogger() {
 	}
 
 	zapLog := zap.New(zapcore.NewCore(zapcore.NewJSONEncoder(config), os.Stdout, logLevel))
+
 	log = zapr.NewLogger(zapLog)
 }
+
+func init() {
+	cobra.OnInitialize(initConfig)
+}
+
+func initConfig() {
+	isDebug, _ = rootCommand.PersistentFlags().GetBool(DebugFlag)
+	areErrorsSuppressed, _ = rootCommand.PersistentFlags().GetBool(SuppressErrorsFlag)
+	sourceFolder, _ = rootCommand.PersistentFlags().GetString(SourceFolderFlag)
+	targetFolder, _ = rootCommand.PersistentFlags().GetString(TargetFolderFlag)
+}
+
+var rootCommand = New(afero.NewOsFs())

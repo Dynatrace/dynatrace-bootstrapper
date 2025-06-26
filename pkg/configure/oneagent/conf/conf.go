@@ -1,3 +1,4 @@
+// Package conf provides configuration for OneAgent container.conf files.
 package conf
 
 import (
@@ -12,9 +13,11 @@ import (
 )
 
 const (
+	// ConfigPath is the path to the container configuration file.
 	ConfigPath = "/oneagent/agent/config/container.conf"
 )
 
+// Configure sets up the container.conf file for OneAgent.
 func Configure(log logr.Logger, fs afero.Afero, configDirectory string, containerAttr container.Attributes, podAttr pod.Attributes, tenant string, isFullstack bool) error {
 	log.Info("configuring container.conf", "config-directory", configDirectory)
 

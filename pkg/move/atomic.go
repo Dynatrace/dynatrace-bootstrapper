@@ -7,7 +7,10 @@ import (
 	"github.com/spf13/afero"
 )
 
-func Atomic(work string, copy copyFunc) copyFunc {
+// Atomic provides atomic copy operations by copying to a work directory first, then renaming to target.
+// Note: The return type copyFunc is unexported and intended for internal use only.
+// Returns unexported type copyFunc, which is used internally in this package.
+func Atomic(work string, copyFn CopyFunc) CopyFunc {
 	return func(log logr.Logger, fs afero.Afero, from, to string) (err error) {
 		log.Info("setting up atomic operation", "from", from, "to", to, "work", work)
 
@@ -33,7 +36,7 @@ func Atomic(work string, copy copyFunc) copyFunc {
 			}
 		}()
 
-		err = copy(log, fs, from, work)
+		err = copyFn(log, fs, from, work)
 		if err != nil {
 			log.Error(err, "error copying folder")
 
