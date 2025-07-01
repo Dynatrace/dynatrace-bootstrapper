@@ -31,8 +31,8 @@ func CreateCurrentSymlink(log logr.Logger, fs afero.Afero, targetDir string) err
 	}
 
 	versionFilePath := filepath.Join(targetDir, InstallerVersionFilePath)
-	version, err := fs.ReadFile(versionFilePath)
 
+	version, err := fs.ReadFile(versionFilePath)
 	if err != nil {
 		log.Info("failed to get the version from the filesystem", "version-file", versionFilePath)
 

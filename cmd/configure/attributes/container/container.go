@@ -61,7 +61,6 @@ func parse(rawAttribute string) (*Attributes, error) {
 	var result Attributes
 
 	err := json.Unmarshal([]byte(rawAttribute), &result)
-
 	if err != nil {
 		return nil, err
 	}

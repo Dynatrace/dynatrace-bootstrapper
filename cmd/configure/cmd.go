@@ -38,6 +38,8 @@ var (
 )
 
 // AddFlags adds configuration-related flags to the provided command.
+//
+//nolint:deadcode
 func AddFlags(cmd *cobra.Command) {
 	// common
 	cmd.PersistentFlags().StringVar(&inputDir, InputFolderFlag, "", "(Optional) Base path where to look for the configuration files.")
