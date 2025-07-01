@@ -88,7 +88,7 @@ func TestToArgs(t *testing.T) {
 		},
 	}
 
-	expectedArgs := make([]string, len(attributes))
+	expectedArgs := make([]string, 0, len(attributes))
 
 	for _, attr := range attributes {
 		rawAttr, err := json.Marshal(attr)

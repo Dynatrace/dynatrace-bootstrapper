@@ -19,9 +19,9 @@ import (
 const (
 	Use = "dynatrace-bootstrapper"
 
-	SourceFolderFlag = "source"
-	TargetFolderFlag = "target"
-	DebugFlag        = "debug"
+	SourceFolderFlag   = "source"
+	TargetFolderFlag   = "target"
+	DebugFlag          = "debug"
 	SuppressErrorsFlag = "suppress-error"
 )
 
@@ -68,7 +68,7 @@ func AddFlags(cmd *cobra.Command) {
 }
 
 func run(fs afero.Fs) func(cmd *cobra.Command, _ []string) error {
-	return func(cmd *cobra.Command, _ []string) error {
+	return func(_ *cobra.Command, _ []string) error {
 		setupLogger()
 
 		if isDebug {

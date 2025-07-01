@@ -65,13 +65,39 @@ linters:
     - zerologlint
   settings:
     revive:
+      enable-all-rules: true
       rules:
-      # disable mandatory comments on each function/variable
+        # increase max cognitive complexity
+        - name: cognitive-complexity
+          arguments:
+            - 20
+        # disable mandatory comments on each function/variable
         - name: "exported"
+          disabled: true
+        # disable code line length limit
+        - name: line-length-limit
+          disabled: true
+        # disable magic numbers linting
+        - name: add-constant
+          disabled: true
+        # disable shadowing of variables
+        - name: import-shadowing
+          disabled: true
+        # increase function length limit
+        - name: function-length
+          arguments:
+            - 52
+            - 468
+        # disable linting of struct tags
+        - name: struct-tag
+          disabled: true
+        # allow control flag parameters
+        - name: flag-parameter
           disabled: true
     depguard:
       rules:
         all:
+          # allowed dependencies
           allow:
             - $gostd
             - github.com/Dynatrace/dynatrace-bootstrapper

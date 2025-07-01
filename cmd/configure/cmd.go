@@ -19,11 +19,11 @@ import (
 )
 
 const (
-	InputFolderFlag = "input-directory"
+	InputFolderFlag  = "input-directory"
 	ConfigFolderFlag = "config-directory"
-	InstallPathFlag = "install-path"
-	TenantFlag = "tenant"
-	IsFullstackFlag = "fullstack"
+	InstallPathFlag  = "install-path"
+	TenantFlag       = "tenant"
+	IsFullstackFlag  = "fullstack"
 )
 
 var (
