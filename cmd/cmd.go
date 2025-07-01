@@ -1,3 +1,4 @@
+// Package cmd provides the command-line interface for the Dynatrace bootstrapper.
 package cmd
 
 import (
@@ -18,12 +19,13 @@ import (
 const (
 	Use = "dynatrace-bootstrapper"
 
-	SourceFolderFlag   = "source"
-	TargetFolderFlag   = "target"
-	DebugFlag          = "debug"
+	SourceFolderFlag = "source"
+	TargetFolderFlag = "target"
+	DebugFlag        = "debug"
 	SuppressErrorsFlag = "suppress-error"
 )
 
+// New creates a new cobra command for the Dynatrace bootstrapper.
 func New(fs afero.Fs) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:                Use,
@@ -35,7 +37,6 @@ func New(fs afero.Fs) *cobra.Command {
 
 	AddFlags(cmd)
 	move.AddFlags(cmd)
-	configure.AddFlags(cmd)
 
 	return cmd
 }
@@ -49,6 +50,7 @@ var (
 	targetFolder string
 )
 
+// AddFlags adds flags to the provided command.
 func AddFlags(cmd *cobra.Command) {
 	cmd.PersistentFlags().StringVar(&sourceFolder, SourceFolderFlag, "", "Base path where to copy the codemodule FROM.")
 	_ = cmd.MarkPersistentFlagRequired(SourceFolderFlag)
@@ -135,5 +137,6 @@ func setupLogger() {
 	}
 
 	zapLog := zap.New(zapcore.NewCore(zapcore.NewJSONEncoder(config), os.Stdout, logLevel))
+
 	log = zapr.NewLogger(zapLog)
 }

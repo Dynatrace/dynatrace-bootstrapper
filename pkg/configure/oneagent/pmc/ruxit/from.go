@@ -1,3 +1,4 @@
+// Package ruxit provides parsing and conversion utilities for ruxit agent process module config files.
 package ruxit
 
 import (
@@ -10,9 +11,14 @@ import (
 	"github.com/pkg/errors"
 )
 
-// example match: [general]
+const (
+	expectedSectionParts = 2
+	expectedConfigParts  = 2
+)
+
 var sectionRegexp = regexp.MustCompile(`\[(.*)\]`)
 
+// FromMap converts a ProcMap to a ProcConf struct.
 func FromMap(procMap ProcMap) ProcConf {
 	var result ProcConf
 
@@ -29,25 +35,24 @@ func FromMap(procMap ProcMap) ProcConf {
 	return result
 }
 
-func FromJson(reader io.Reader) (ProcConf, error) {
+// FromJSON parses a ProcConf from a JSON reader.
+func FromJSON(reader io.Reader) (ProcConf, error) {
 	var result ProcConf
 
 	raw, err := io.ReadAll(reader)
 	if err != nil {
 		return result, errors.WithStack(err)
-
 	}
 
 	err = json.Unmarshal(raw, &result)
 	if err != nil {
 		return result, errors.WithStack(err)
-
 	}
 
 	return result, nil
 }
 
-// FromConf creates the ProcConf struct from an valid ruxitagentproc.conf config file.
+// FromConf creates the ProcConf struct from a valid ruxitagentproc.conf config file.
 func FromConf(reader io.Reader) (ProcConf, error) {
 	var result []Property
 
@@ -70,7 +75,7 @@ func FromConf(reader io.Reader) (ProcConf, error) {
 				Key:     strings.Trim(splitLine[0], whiteSpace),
 			}
 
-			if len(splitLine) == 2 {
+			if len(splitLine) == expectedConfigParts {
 				prop.Value = strings.Trim(splitLine[1], whiteSpace)
 			}
 
@@ -78,18 +83,14 @@ func FromConf(reader io.Reader) (ProcConf, error) {
 		}
 	}
 
-	if err := scanner.Err(); err != nil {
-		return ProcConf{}, errors.WithStack(err)
-	}
-
-	return ProcConf{
-		Properties: result,
-		Revision:   0,
-	}, nil
+	return ProcConf{Properties: result}, scanner.Err()
 }
 
-func confSectionHeader(confLine string) string {
-	if matches := sectionRegexp.FindStringSubmatch(confLine); len(matches) != 0 {
+// confSectionHeader extracts the section header from a line, if present.
+func confSectionHeader(line string) string {
+	matches := sectionRegexp.FindStringSubmatch(line)
+
+	if len(matches) == expectedSectionParts {
 		return matches[1]
 	}
 

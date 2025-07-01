@@ -27,6 +27,5 @@ func TestConfigure(t *testing.T) {
 		content, err := fs.ReadFile(filepath.Join(configDir, ConfigPath))
 		require.NoError(t, err)
 		assert.Equal(t, expectedContent, string(content))
-
 	})
 }

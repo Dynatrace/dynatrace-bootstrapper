@@ -11,23 +11,24 @@ import (
 )
 
 const (
-	JsonFilePath       = "enrichment/dt_metadata.json"
+	JSONFilePath       = "enrichment/dt_metadata.json"
 	PropertiesFilePath = "enrichment/dt_metadata.properties"
 )
 
+// Configure creates metadata enrichment files in JSON and properties formats.
 func Configure(log logr.Logger, fs afero.Afero, configDirectory string, podAttr pod.Attributes, containerAttr container.Attributes) error {
 	confContent := fromAttributes(containerAttr, podAttr)
 
 	log.V(1).Info("format content into a raw form", "struct", confContent)
 
-	confJson, err := confContent.toJson()
+	confJSON, err := confContent.toJSON()
 	if err != nil {
 		return err
 	}
 
-	jsonFilePath := filepath.Join(configDirectory, JsonFilePath)
+	jsonFilePath := filepath.Join(configDirectory, JSONFilePath)
 
-	err = fsutils.CreateFile(fs, jsonFilePath, string(confJson))
+	err = fsutils.CreateFile(fs, jsonFilePath, string(confJSON))
 	if err != nil {
 		log.Error(err, "failed to create metadata-enrichment properties file", "struct", jsonFilePath)
 

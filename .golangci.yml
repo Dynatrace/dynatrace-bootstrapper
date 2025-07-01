@@ -1,0 +1,97 @@
+version: "2"
+linters:
+  default: none
+  enable:
+    - asasalint
+    - asciicheck
+    - bidichk
+    - copyloopvar
+    - decorder
+    - depguard
+    - dogsled
+    - dupl
+    - durationcheck
+    - errorlint
+    - forbidigo
+    - gocheckcompilerdirectives
+    - gochecksumtype
+    - gocognit
+    - goconst
+    - gocritic
+    - gocyclo
+    - godot
+    - goheader
+    - gomoddirectives
+    - gomodguard
+    - goprintffuncname
+    - gosec
+    - gosmopolitan
+    - govet
+    - grouper
+    - importas
+    - ineffassign
+    - intrange
+    - loggercheck
+    - makezero
+    - mirror
+    - misspell
+    - mnd
+    - nakedret
+    - nilerr
+    - nilnil
+    - nlreturn
+    - noctx
+    - nolintlint
+    - nosprintfhostport
+    - perfsprint
+    - prealloc
+    - predeclared
+    - protogetter
+    - reassign
+    - revive
+    - sloglint
+    - staticcheck
+    - testableexamples
+    - testifylint
+    - thelper
+    - tparallel
+    - unconvert
+    - unparam
+    - unused
+    - usestdlibvars
+    - wastedassign
+    - whitespace
+    - wsl
+    - zerologlint
+  settings:
+    revive:
+      rules:
+      # disable mandatory comments on each function/variable
+        - name: "exported"
+          disabled: true
+    depguard:
+      rules:
+        all:
+          allow:
+            - $gostd
+            - github.com/Dynatrace/dynatrace-bootstrapper
+            - github.com/go-logr/logr
+            - github.com/go-logr/zapr
+            - github.com/pkg/errors
+            - github.com/spf13/afero
+            - github.com/spf13/cobra
+            - github.com/stretchr/testify
+            - go.uber.org/zap
+            - go.uber.org/zap/zapcore
+            - golang.org/x/sys/unix
+            - path/filepath
+            - encoding/json
+            - io
+            - os
+            - testing
+            - maps
+            - strings
+            - sort
+            - bufio
+            - regexp
+            - errors

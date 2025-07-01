@@ -7,7 +7,8 @@ import (
 	"github.com/spf13/afero"
 )
 
-func Atomic(work string, copy copyFunc) copyFunc {
+// Atomic provides atomic copy operations by copying to a work directory first, then renaming to target.
+func Atomic(work string, copyFunc CopyFunc) CopyFunc {
 	return func(log logr.Logger, fs afero.Afero, from, to string) (err error) {
 		log.Info("setting up atomic operation", "from", from, "to", to, "work", work)
 
@@ -33,7 +34,7 @@ func Atomic(work string, copy copyFunc) copyFunc {
 			}
 		}()
 
-		err = copy(log, fs, from, work)
+		err = copyFunc(log, fs, from, work)
 		if err != nil {
 			log.Error(err, "error copying folder")
 

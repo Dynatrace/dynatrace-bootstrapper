@@ -1,3 +1,4 @@
+// Package container provides utilities for handling container attributes.
 package container
 
 import (
@@ -12,17 +13,20 @@ const (
 	Flag = "attribute-container"
 )
 
+// Attributes represents container attributes including image info and container name.
 type Attributes struct {
 	ImageInfo     `json:",inline"`
 	ContainerName string `json:"k8s.container.name,omitempty"`
 }
 
+// ToMap converts Attributes to a map[string]string.
 func (attr Attributes) ToMap() (map[string]string, error) {
 	return structs.ToMap(attr)
 }
 
+// ParseAttributes parses a slice of raw attribute strings into a slice of Attributes.
 func ParseAttributes(rawAttributes []string) ([]Attributes, error) {
-	var attributeList []Attributes
+	var attributeList = make([]Attributes, 0, len(rawAttributes))
 
 	for _, attr := range rawAttributes {
 		parsedAttr, err := parse(attr)
@@ -36,9 +40,9 @@ func ParseAttributes(rawAttributes []string) ([]Attributes, error) {
 	return attributeList, nil
 }
 
-// ToArgs is a helper func to convert an []container.Attributes to a list of args that can be put into a Pod Template
+// ToArgs converts a slice of Attributes to a list of args for a Pod Template.
 func ToArgs(attributes []Attributes) ([]string, error) {
-	var args []string
+	var args = make([]string, 0, len(attributes))
 
 	for _, attr := range attributes {
 		jsonAttr, err := json.Marshal(attr)
@@ -52,10 +56,12 @@ func ToArgs(attributes []Attributes) ([]string, error) {
 	return args, nil
 }
 
+// parse unmarshals a raw attribute string into an Attributes struct.
 func parse(rawAttribute string) (*Attributes, error) {
 	var result Attributes
 
 	err := json.Unmarshal([]byte(rawAttribute), &result)
+
 	if err != nil {
 		return nil, err
 	}

@@ -1,9 +1,9 @@
 package move
 
 import (
-	"fmt"
 	"io/fs"
 	"path/filepath"
+	"strconv"
 	"testing"
 
 	"github.com/spf13/afero"
@@ -11,10 +11,12 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+const testSourceDir = "/source"
+
 func TestCopyFolderWithTechnologyFiltering(t *testing.T) {
 	fs := afero.Afero{Fs: afero.NewMemMapFs()}
 
-	sourceDir := "/source"
+	sourceDir := testSourceDir
 	targetDir := "/target"
 
 	_ = fs.MkdirAll(sourceDir, 0755)
@@ -130,17 +132,17 @@ func TestCopyByList(t *testing.T) {
 
 	fs := afero.Afero{Fs: afero.NewMemMapFs()}
 	// create an FS where there are multiple sub dirs and files, each with their own file modes
-	for i := range len(dirs) {
+	for i := range dirs {
 		err := fs.Mkdir(dirs[i], dirModes[i])
 		require.NoError(t, err)
-		err = fs.WriteFile(filepath.Join(dirs[i], filesNames[i]), []byte(fmt.Sprintf("%d", i)), fileModes[i])
+		err = fs.WriteFile(dirs[i]+"/"+filesNames[i], []byte(strconv.Itoa(i)), fileModes[i])
 		require.NoError(t, err)
 	}
 
 	// reverse the list, so the longest path is the first
 	fileList := []string{}
 	for i := len(dirs) - 1; i >= 0; i-- {
-		fileList = append(fileList, filepath.Join(dirs[i], filesNames[i]))
+		fileList = append(fileList, dirs[i]+"/"+filesNames[i])
 	}
 
 	targetDir := "./target"
@@ -148,8 +150,8 @@ func TestCopyByList(t *testing.T) {
 	err := copyByList(testLog, fs, "./", targetDir, fileList)
 	require.NoError(t, err)
 
-	for i := range len(dirs) {
-		targetStat, err := fs.Stat(filepath.Join(targetDir, dirs[i]))
+	for i := range dirs {
+		targetStat, err := fs.Stat(targetDir + "/" + dirs[i])
 		require.NoError(t, err)
 		assert.Equal(t, dirModes[i], targetStat.Mode().Perm(), targetStat.Name())
 
@@ -157,7 +159,7 @@ func TestCopyByList(t *testing.T) {
 		require.NoError(t, err)
 		assert.Equal(t, sourceStat.Mode(), targetStat.Mode(), targetStat.Name())
 
-		targetStat, err = fs.Stat(filepath.Join(targetDir, dirs[i], filesNames[i]))
+		targetStat, err = fs.Stat(targetDir + "/" + dirs[i] + "/" + filesNames[i])
 		require.NoError(t, err)
 		assert.Equal(t, fileModes[i], targetStat.Mode().Perm(), targetStat.Name())
 
@@ -170,7 +172,7 @@ func TestCopyByList(t *testing.T) {
 func TestFilterFilesByTechnology(t *testing.T) {
 	fs := afero.Afero{Fs: afero.NewMemMapFs()}
 
-	sourceDir := "/source"
+	sourceDir := testSourceDir
 	_ = fs.MkdirAll(sourceDir, 0755)
 	manifestContent := `{
         "version": "1.0",
@@ -194,26 +196,26 @@ func TestFilterFilesByTechnology(t *testing.T) {
 		paths, err := filterFilesByTechnology(testLog, fs, sourceDir, []string{"java"})
 		require.NoError(t, err)
 		assert.ElementsMatch(t, []string{
-			filepath.Join("fileA1.txt"),
-			filepath.Join("fileA2.txt"),
+			"fileA1.txt",
+			"fileA2.txt",
 		}, paths)
 	})
 	t.Run("filter multiple technologies", func(t *testing.T) {
 		paths, err := filterFilesByTechnology(testLog, fs, sourceDir, []string{"java", "python"})
 		require.NoError(t, err)
 		assert.ElementsMatch(t, []string{
-			filepath.Join("fileA1.txt"),
-			filepath.Join("fileA2.txt"),
-			filepath.Join("fileB1.txt"),
+			"fileA1.txt",
+			"fileA2.txt",
+			"fileB1.txt",
 		}, paths)
 	})
 	t.Run("filter multiple technologies with white spaces", func(t *testing.T) {
 		paths, err := filterFilesByTechnology(testLog, fs, sourceDir, []string{"java ", " python "})
 		require.NoError(t, err)
 		assert.ElementsMatch(t, []string{
-			filepath.Join("fileA1.txt"),
-			filepath.Join("fileA2.txt"),
-			filepath.Join("fileB1.txt"),
+			"fileA1.txt",
+			"fileA2.txt",
+			"fileB1.txt",
 		}, paths)
 	})
 	t.Run("not filter non-existing technology", func(t *testing.T) {
@@ -233,13 +235,13 @@ func assertFileExists(t *testing.T, fs afero.Fs, path string) {
 	t.Helper()
 
 	exists, err := afero.Exists(fs, path)
-	assert.NoError(t, err)
-	assert.True(t, exists, fmt.Sprintf("file should exist: %s", path))
+	require.NoError(t, err)
+	assert.True(t, exists, "file should exist: "+path)
 }
 func assertFileNotExists(t *testing.T, fs afero.Fs, path string) {
 	t.Helper()
 
 	exists, err := afero.Exists(fs, path)
-	assert.NoError(t, err)
-	assert.False(t, exists, fmt.Sprintf("file should not exist: %s", path))
+	require.NoError(t, err)
+	assert.False(t, exists, "file should not exist: "+path)
 }

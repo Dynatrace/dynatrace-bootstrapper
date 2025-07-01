@@ -1,3 +1,4 @@
+// Package version provides versioning information for the dynatrace-bootstrapper application.
 package version
 
 import (
@@ -7,8 +8,7 @@ import (
 )
 
 var (
-
-	// AppName contains the name of the application
+	// AppName contains the name of the application.
 	AppName = "dynatrace-bootstrapper"
 
 	// Version contains the version of the Bootstrapper. Assigned externally.
@@ -20,6 +20,7 @@ var (
 	// BuildDate is the date when the binary was build. Assigned externally.
 	BuildDate = ""
 
+	// ModuleSum is the module checksum of the main module. Assigned externally.
 	ModuleSum = ""
 )
 
@@ -34,9 +35,9 @@ func init() {
 	}
 
 	ModuleSum = i.Main.Sum
-
 }
 
+// Print logs the version information using the provided logger.
 func Print(log logr.Logger) {
 	keyValues := []any{"name", AppName, "version", Version}
 

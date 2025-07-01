@@ -1,3 +1,4 @@
+// Package preload provides configuration for OneAgent preload files.
 package preload
 
 import (
@@ -13,6 +14,7 @@ const (
 	ConfigPath       = "oneagent/ld.so.preload"
 )
 
+// Configure sets up the preload configuration file for OneAgent.
 func Configure(log logr.Logger, fs afero.Afero, configDir, installPath string) error {
 	log.Info("configuring ld.so.preload", "config-directory", configDir, "install-path", installPath)
 
