@@ -37,6 +37,7 @@ func New(fs afero.Fs) *cobra.Command {
 
 	AddFlags(cmd)
 	move.AddFlags(cmd)
+	configure.AddFlags(cmd)
 
 	return cmd
 }
