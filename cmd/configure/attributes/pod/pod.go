@@ -29,7 +29,7 @@ func (attr Attributes) ToMap() (map[string]string, error) {
 }
 
 // Info contains pod-related metadata.
-type PodInfo struct {
+type PodInfo struct { //nolint:revive
 	PodName       string `json:"k8s.pod.name,omitempty"`
 	PodUID        string `json:"k8s.pod.uid,omitempty"`
 	NodeName      string `json:"k8s.node.name,omitempty"`

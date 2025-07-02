@@ -72,8 +72,6 @@ linters:
         - name: cognitive-complexity
           arguments:
             - 20
-        - name: exported
-          disabled: true
         - name: flag-parameter
           disabled: true
         - name: function-length
