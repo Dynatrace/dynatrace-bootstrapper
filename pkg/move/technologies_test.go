@@ -1,9 +1,9 @@
 package move
 
 import (
+	"fmt"
 	"io/fs"
 	"path/filepath"
-	"strconv"
 	"testing"
 
 	"github.com/spf13/afero"
@@ -135,14 +135,14 @@ func TestCopyByList(t *testing.T) {
 	for i := range dirs {
 		err := fs.Mkdir(dirs[i], dirModes[i])
 		require.NoError(t, err)
-		err = fs.WriteFile(dirs[i]+"/"+filesNames[i], []byte(strconv.Itoa(i)), fileModes[i])
+		err = fs.WriteFile(filepath.Join(dirs[i], filesNames[i]), []byte(fmt.Sprintf("%d", i)), fileModes[i])
 		require.NoError(t, err)
 	}
 
 	// reverse the list, so the longest path is the first
 	fileList := []string{}
 	for i := len(dirs) - 1; i >= 0; i-- {
-		fileList = append(fileList, dirs[i]+"/"+filesNames[i])
+		fileList = append(fileList, filepath.Join(dirs[i], filesNames[i]))
 	}
 
 	targetDir := "./target"
@@ -151,7 +151,7 @@ func TestCopyByList(t *testing.T) {
 	require.NoError(t, err)
 
 	for i := range dirs {
-		targetStat, err := fs.Stat(targetDir + "/" + dirs[i])
+		targetStat, err := fs.Stat(filepath.Join(targetDir, dirs[i]))
 		require.NoError(t, err)
 		assert.Equal(t, dirModes[i], targetStat.Mode().Perm(), targetStat.Name())
 
@@ -159,7 +159,7 @@ func TestCopyByList(t *testing.T) {
 		require.NoError(t, err)
 		assert.Equal(t, sourceStat.Mode(), targetStat.Mode(), targetStat.Name())
 
-		targetStat, err = fs.Stat(targetDir + "/" + dirs[i] + "/" + filesNames[i])
+		targetStat, err = fs.Stat(filepath.Join(targetDir, dirs[i], filesNames[i]))
 		require.NoError(t, err)
 		assert.Equal(t, fileModes[i], targetStat.Mode().Perm(), targetStat.Name())
 

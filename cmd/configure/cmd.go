@@ -22,8 +22,8 @@ const (
 	InputFolderFlag  = "input-directory"
 	ConfigFolderFlag = "config-directory"
 	InstallPathFlag  = "install-path"
-	TenantFlag       = "tenant"
 	IsFullstackFlag  = "fullstack"
+	TenantFlag       = "tenant"
 )
 
 var (

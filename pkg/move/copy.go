@@ -9,7 +9,7 @@ import (
 )
 
 const (
-	defaultUmask = 0000
+	noPermissionsMask = 0000
 )
 
 // CopyFunc defines a function signature for copying files or directories.
@@ -21,7 +21,7 @@ var _ CopyFunc = SimpleCopy
 func SimpleCopy(log logr.Logger, fs afero.Afero, from, to string) error {
 	log.Info("starting to copy (simple)", "from", from, "to", to)
 
-	oldUmask := unix.Umask(defaultUmask)
+	oldUmask := unix.Umask(noPermissionsMask)
 	defer unix.Umask(oldUmask)
 
 	err := fsutils.CopyFolder(log, fs, from, to)

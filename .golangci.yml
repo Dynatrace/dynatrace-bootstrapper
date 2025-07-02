@@ -67,37 +67,28 @@ linters:
     revive:
       enable-all-rules: true
       rules:
-        # disable magic numbers linting
         - name: add-constant
           disabled: true
-        # increase max cognitive complexity
         - name: cognitive-complexity
           arguments:
             - 20
-        # disable mandatory comments on each function/variable
         - name: exported
           disabled: true
-        # allow control flag parameters
         - name: flag-parameter
           disabled: true
-        # increase function length limit
         - name: function-length
           arguments:
             - 52
             - 468
-        # disable shadowing of variables
         - name: import-shadowing
           disabled: true
-        # disable code line length limit
         - name: line-length-limit
           disabled: true
-        # disable linting of struct tags
         - name: struct-tag
           disabled: true
     depguard:
       rules:
         all:
-          # allowed dependencies
           allow:
             - $gostd
             - github.com/Dynatrace/dynatrace-bootstrapper
@@ -121,3 +112,16 @@ linters:
             - bufio
             - regexp
             - errors
+  exclusions:
+    generated: lax
+    presets:
+      - comments
+      - common-false-positives
+      - legacy
+      - std-error-handling
+    rules:
+      - linters:
+          - dupl
+          - perfsprint
+          - wsl
+        path: _(test|gen)\.go

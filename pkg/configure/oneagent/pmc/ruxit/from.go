@@ -12,8 +12,8 @@ import (
 )
 
 const (
-	expectedSectionParts = 2
-	expectedConfigParts  = 2
+	twoSectionParts = 2
+	twoConfigParts  = 2
 )
 
 var sectionRegexp = regexp.MustCompile(`\[(.*)\]`)
@@ -75,7 +75,7 @@ func FromConf(reader io.Reader) (ProcConf, error) {
 				Key:     strings.Trim(splitLine[0], whiteSpace),
 			}
 
-			if len(splitLine) == expectedConfigParts {
+			if len(splitLine) == twoConfigParts {
 				prop.Value = strings.Trim(splitLine[1], whiteSpace)
 			}
 
@@ -83,14 +83,21 @@ func FromConf(reader io.Reader) (ProcConf, error) {
 		}
 	}
 
-	return ProcConf{Properties: result}, scanner.Err()
+	if err := scanner.Err(); err != nil {
+		return ProcConf{}, errors.WithStack(err)
+	}
+
+	return ProcConf{
+		Properties: result,
+		Revision:   0,
+	}, nil
 }
 
 // confSectionHeader extracts the section header from a line, if present.
 func confSectionHeader(line string) string {
 	matches := sectionRegexp.FindStringSubmatch(line)
 
-	if len(matches) == expectedSectionParts {
+	if len(matches) == twoSectionParts {
 		return matches[1]
 	}
 

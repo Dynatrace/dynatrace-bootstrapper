@@ -55,7 +55,7 @@ func CopyByTechnology(log logr.Logger, fs afero.Afero, from string, to string, t
 
 // copyByList copies a list of files/directories from 'from' to 'to'.
 func copyByList(log logr.Logger, fs afero.Afero, from string, to string, paths []string) error {
-	oldUmask := unix.Umask(defaultUmask)
+	oldUmask := unix.Umask(noPermissionsMask)
 	defer unix.Umask(oldUmask)
 
 	fromStat, err := fs.Stat(from)
