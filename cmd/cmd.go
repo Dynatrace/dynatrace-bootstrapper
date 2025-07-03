@@ -51,7 +51,6 @@ var (
 	targetFolder string
 )
 
-// AddFlags adds flags to the provided command.
 func AddFlags(cmd *cobra.Command) {
 	cmd.PersistentFlags().StringVar(&sourceFolder, SourceFolderFlag, "", "Base path where to copy the codemodule FROM.")
 	_ = cmd.MarkPersistentFlagRequired(SourceFolderFlag)

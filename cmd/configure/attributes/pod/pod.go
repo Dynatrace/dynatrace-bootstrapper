@@ -23,12 +23,11 @@ type Attributes struct {
 	ClusterInfo  `json:",inline"`
 }
 
-// ToMap converts Attributes to a map[string]string.
 func (attr Attributes) ToMap() (map[string]string, error) {
 	return structs.ToMap(attr)
 }
 
-// Info contains pod-related metadata.
+// PodInfo contains pod-related metadata.
 type PodInfo struct { //nolint:revive
 	PodName       string `json:"k8s.pod.name,omitempty"`
 	PodUID        string `json:"k8s.pod.uid,omitempty"`

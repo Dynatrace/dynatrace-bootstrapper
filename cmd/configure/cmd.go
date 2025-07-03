@@ -32,9 +32,8 @@ var (
 	installPath   string
 	tenant        string
 	isFullstack   bool
-	podAttributes []string
-
 	containerAttributes []string
+	podAttributes []string
 )
 
 // AddFlags adds configuration-related flags to the provided command.

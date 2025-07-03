@@ -1,4 +1,3 @@
-// Package container provides utilities for handling container attributes.
 package container
 
 import (
@@ -19,7 +18,6 @@ type Attributes struct {
 	ContainerName string `json:"k8s.container.name,omitempty"`
 }
 
-// ToMap converts Attributes to a map[string]string.
 func (attr Attributes) ToMap() (map[string]string, error) {
 	return structs.ToMap(attr)
 }
