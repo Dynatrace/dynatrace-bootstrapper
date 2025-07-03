@@ -10,7 +10,11 @@ import (
 	"github.com/pkg/errors"
 )
 
-// example match: [general]
+const (
+	twoSectionParts = 2
+	twoConfigParts  = 2
+)
+
 var sectionRegexp = regexp.MustCompile(`\[(.*)\]`)
 
 func FromMap(procMap ProcMap) ProcConf {
@@ -29,25 +33,22 @@ func FromMap(procMap ProcMap) ProcConf {
 	return result
 }
 
-func FromJson(reader io.Reader) (ProcConf, error) {
+func FromJSON(reader io.Reader) (ProcConf, error) {
 	var result ProcConf
 
 	raw, err := io.ReadAll(reader)
 	if err != nil {
 		return result, errors.WithStack(err)
-
 	}
 
 	err = json.Unmarshal(raw, &result)
 	if err != nil {
 		return result, errors.WithStack(err)
-
 	}
 
 	return result, nil
 }
 
-// FromConf creates the ProcConf struct from an valid ruxitagentproc.conf config file.
 func FromConf(reader io.Reader) (ProcConf, error) {
 	var result []Property
 
@@ -70,7 +71,7 @@ func FromConf(reader io.Reader) (ProcConf, error) {
 				Key:     strings.Trim(splitLine[0], whiteSpace),
 			}
 
-			if len(splitLine) == 2 {
+			if len(splitLine) == twoConfigParts {
 				prop.Value = strings.Trim(splitLine[1], whiteSpace)
 			}
 
@@ -88,8 +89,10 @@ func FromConf(reader io.Reader) (ProcConf, error) {
 	}, nil
 }
 
-func confSectionHeader(confLine string) string {
-	if matches := sectionRegexp.FindStringSubmatch(confLine); len(matches) != 0 {
+func confSectionHeader(line string) string {
+	matches := sectionRegexp.FindStringSubmatch(line)
+
+	if len(matches) == twoSectionParts {
 		return matches[1]
 	}
 

@@ -21,6 +21,9 @@ import (
 
 var testLog = zapr.NewLogger(zap.NewExample())
 
+const testConfigDir = "/path/config"
+const testInputDir = "/path/input"
+
 // Only checking the counts of files in the folders, checking exact paths and contents are done in the sub-package tests.
 func TestSetupOneAgent(t *testing.T) {
 	targetFolder := "/path/target"
@@ -38,8 +41,8 @@ func TestSetupOneAgent(t *testing.T) {
 	}
 
 	t.Run("success", func(t *testing.T) {
-		inputDir = "/path/input"
-		configDir = "/path/config"
+		inputDir = testInputDir
+		configDir = testConfigDir
 
 		memFs := afero.Afero{Fs: afero.NewMemMapFs()}
 		setupInputFs(t, memFs, inputDir)
@@ -73,7 +76,7 @@ func TestSetupOneAgent(t *testing.T) {
 
 	t.Run("no input-directory ==> do nothing", func(t *testing.T) {
 		inputDir = ""
-		configDir = "/path/config"
+		configDir = testConfigDir
 		memFs := afero.Afero{Fs: afero.NewMemMapFs()}
 
 		err := SetupOneAgent(testLog, memFs, targetFolder)
@@ -88,7 +91,7 @@ func TestSetupOneAgent(t *testing.T) {
 
 	t.Run("no config-directory ==> do nothing", func(t *testing.T) {
 		configDir = ""
-		inputDir = "/path/config"
+		inputDir = testConfigDir
 		memFs := afero.Afero{Fs: afero.NewMemMapFs()}
 
 		err := SetupOneAgent(testLog, memFs, targetFolder)
@@ -118,8 +121,8 @@ func TestEnrichWithMetadata(t *testing.T) {
 	}
 
 	t.Run("success", func(t *testing.T) {
-		inputDir = "/path/input"
-		configDir = "/path/config"
+		inputDir = testInputDir
+		configDir = testConfigDir
 
 		memFs := afero.Afero{Fs: afero.NewMemMapFs()}
 		setupInputFs(t, memFs, inputDir)
@@ -147,7 +150,7 @@ func TestEnrichWithMetadata(t *testing.T) {
 
 	t.Run("no input-directory ==> do nothing", func(t *testing.T) {
 		inputDir = ""
-		configDir = "/path/config"
+		configDir = testConfigDir
 		memFs := afero.Afero{Fs: afero.NewMemMapFs()}
 
 		err := EnrichWithMetadata(testLog, memFs)
@@ -159,7 +162,7 @@ func TestEnrichWithMetadata(t *testing.T) {
 
 	t.Run("no config-directory ==> do nothing", func(t *testing.T) {
 		configDir = ""
-		inputDir = "/path/config"
+		inputDir = testConfigDir
 		memFs := afero.Afero{Fs: afero.NewMemMapFs()}
 
 		err := EnrichWithMetadata(testLog, memFs)
@@ -170,11 +173,12 @@ func TestEnrichWithMetadata(t *testing.T) {
 	})
 }
 
+// countFiles returns the number of non-directory files in the given path using the provided afero filesystem.
 func countFiles(t *testing.T, memFs afero.Afero, path string) int {
 	t.Helper()
 
 	count := 0
-	_ = memFs.Walk(path, func(path string, info fs.FileInfo, err error) error {
+	_ = memFs.Walk(path, func(_ string, info fs.FileInfo, err error) error {
 		if os.IsNotExist(err) {
 			return nil
 		}
@@ -191,6 +195,7 @@ func countFiles(t *testing.T, memFs afero.Afero, path string) int {
 	return count
 }
 
+// setupInputFs creates the necessary input files in the afero filesystem for testing.
 func setupInputFs(t *testing.T, fs afero.Afero, inputDir string) {
 	t.Helper()
 
@@ -225,6 +230,7 @@ func setupInputFs(t *testing.T, fs afero.Afero, inputDir string) {
 	require.NoError(t, fsutils.CreateFile(fs, filepath.Join(inputDir, pmc.InputFileName), string(rawProcConf)))
 }
 
+// setupTargetFs creates the necessary target files in the afero filesystem for testing.
 func setupTargetFs(t *testing.T, fs afero.Afero, targetDir string) {
 	t.Helper()
 

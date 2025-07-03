@@ -39,20 +39,20 @@ func TestExecute(t *testing.T) {
 		assert.True(t, exists)
 
 		file1Exists, err := afero.Exists(fs, targetDir+"/file1.txt")
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		assert.True(t, file1Exists)
 
 		file2Exists, err := afero.Exists(fs, targetDir+"/file2.txt")
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		assert.True(t, file2Exists)
 
 		// Check the content of the copied files
 		content, err := afero.ReadFile(fs, targetDir+"/file1.txt")
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		assert.Equal(t, "file1 content", string(content))
 
 		content, err = afero.ReadFile(fs, targetDir+"/file2.txt")
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		assert.Equal(t, "file2 content", string(content))
 
 		// Check the cleanup happened of the copied files
@@ -98,20 +98,20 @@ func TestExecute(t *testing.T) {
 		assert.True(t, exists)
 
 		file1Exists, err := afero.Exists(fs, targetDir+"/fileA1.txt")
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		assert.True(t, file1Exists)
 
 		file2Exists, err := afero.Exists(fs, targetDir+"/fileA2.txt")
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		assert.False(t, file2Exists)
 
 		// Check the content of the copied files
 		content, err := afero.ReadFile(fs, targetDir+"/fileA1.txt")
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		assert.Equal(t, "fileA1 content", string(content))
 
 		content, err = afero.ReadFile(fs, targetDir+"/fileA2.txt")
-		assert.Error(t, err)
+		require.Error(t, err)
 		assert.Empty(t, string(content))
 	})
 }

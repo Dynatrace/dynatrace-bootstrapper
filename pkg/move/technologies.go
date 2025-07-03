@@ -19,6 +19,7 @@ type Manifest struct {
 }
 
 type TechEntries map[string]ArchEntries
+
 type ArchEntries map[string][]FileEntry
 
 type FileEntry struct {
@@ -27,8 +28,7 @@ type FileEntry struct {
 	MD5     string `json:"md5"`
 }
 
-// CopyByTechnologyWrapper exists so CopyByTechnology can be used with Atomic wrapper as it expects a `copyFunc`.
-func CopyByTechnologyWrapper(technology string) copyFunc {
+func CopyByTechnologyWrapper(technology string) CopyFunc {
 	return func(log logr.Logger, fs afero.Afero, from, to string) error {
 		return CopyByTechnology(log, fs, from, to, technology)
 	}
@@ -42,16 +42,11 @@ func CopyByTechnology(log logr.Logger, fs afero.Afero, from string, to string, t
 		return err
 	}
 
-	err = copyByList(log, fs, from, to, filteredPaths)
-	if err != nil {
-		return err
-	}
-
-	return nil
+	return copyByList(log, fs, from, to, filteredPaths)
 }
 
 func copyByList(log logr.Logger, fs afero.Afero, from string, to string, paths []string) error {
-	oldUmask := unix.Umask(0000)
+	oldUmask := unix.Umask(noPermissionsMask)
 	defer unix.Umask(oldUmask)
 
 	fromStat, err := fs.Stat(from)
@@ -70,8 +65,8 @@ func copyByList(log logr.Logger, fs afero.Afero, from string, to string, paths [
 
 	for _, path := range paths {
 		splitPath := strings.Split(path, string(filepath.Separator))
-
 		walkedPath := ""
+
 		for _, subPath := range splitPath {
 			walkedPath = filepath.Join(walkedPath, subPath)
 			sourcePath := filepath.Join(from, walkedPath)
@@ -90,20 +85,21 @@ func copyByList(log logr.Logger, fs afero.Afero, from string, to string, paths [
 					log.Error(err, "failed to create new dir", "path", targetPath)
 
 					return err
-				} else {
-					log.V(1).Info("created new dir", "from", sourcePath, "to", targetPath, "mode", sourceStat.Mode())
 				}
-			} else {
-				log.V(1).Info("copying file", "from", sourcePath, "to", targetPath, "mode", sourceStat.Mode())
 
-				err = fsutils.CopyFile(fs, sourcePath, targetPath)
-				if err != nil {
-					log.Error(err, "error copying file")
+				log.V(1).Info("created new dir", "from", sourcePath, "to", targetPath, "mode", sourceStat.Mode())
 
-					return err
-				}
+				continue
 			}
 
+			log.V(1).Info("copying file", "from", sourcePath, "to", targetPath, "mode", sourceStat.Mode())
+
+			err = fsutils.CopyFile(fs, sourcePath, targetPath)
+			if err != nil {
+				log.Error(err, "error copying file")
+
+				return err
+			}
 		}
 	}
 
@@ -131,6 +127,7 @@ func filterFilesByTechnology(log logr.Logger, fs afero.Afero, source string, tec
 
 		if !exists {
 			log.Info("technology not found", "tech", tech)
+
 			continue
 		}
 

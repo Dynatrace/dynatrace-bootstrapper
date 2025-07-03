@@ -78,6 +78,8 @@ func TestCopyFile(t *testing.T) {
 }
 
 func checkFolder(t *testing.T, fs afero.Fs, src, dst string) {
+	t.Helper()
+
 	srcFiles, err := afero.ReadDir(fs, src)
 	require.NoError(t, err)
 	dstFiles, err := afero.ReadDir(fs, dst)

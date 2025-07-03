@@ -7,14 +7,18 @@ import (
 	"golang.org/x/sys/unix"
 )
 
-type copyFunc func(log logr.Logger, fs afero.Afero, from, to string) error
+const (
+	noPermissionsMask = 0000
+)
 
-var _ copyFunc = SimpleCopy
+type CopyFunc func(log logr.Logger, fs afero.Afero, from, to string) error
+
+var _ CopyFunc = SimpleCopy
 
 func SimpleCopy(log logr.Logger, fs afero.Afero, from, to string) error {
 	log.Info("starting to copy (simple)", "from", from, "to", to)
 
-	oldUmask := unix.Umask(0000)
+	oldUmask := unix.Umask(noPermissionsMask)
 	defer unix.Umask(oldUmask)
 
 	err := fsutils.CopyFolder(log, fs, from, to)

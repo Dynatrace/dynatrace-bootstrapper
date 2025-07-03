@@ -1,5 +1,6 @@
 package container
 
+// ImageInfo holds container image details.
 type ImageInfo struct {
 	Registry    string `json:"container_image.registry,omitempty"`
 	Repository  string `json:"container_image.repository,omitempty"`
@@ -7,6 +8,7 @@ type ImageInfo struct {
 	ImageDigest string `json:"container_image.digest,omitempty"`
 }
 
+// ToURI returns the full image URI for the container image.
 func (img ImageInfo) ToURI() string {
 	var imageName string
 

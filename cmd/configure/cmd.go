@@ -1,3 +1,4 @@
+// Package configure provides functionality for setting up OneAgent configuration.
 package configure
 
 import (
@@ -28,7 +29,7 @@ const (
 var (
 	inputDir    string
 	configDir   string
-	installPath = "/opt/dynatrace/oneagent"
+	installPath string
 	isFullstack bool
 	tenant      string
 
@@ -36,6 +37,7 @@ var (
 	containerAttributes []string
 )
 
+// AddFlags adds configuration-related flags to the provided command.
 func AddFlags(cmd *cobra.Command) {
 	// common
 	cmd.PersistentFlags().StringVar(&inputDir, InputFolderFlag, "", "(Optional) Base path where to look for the configuration files.")
@@ -51,6 +53,7 @@ func AddFlags(cmd *cobra.Command) {
 	cmd.PersistentFlags().Lookup(IsFullstackFlag).NoOptDefVal = "true"
 }
 
+// SetupOneAgent sets up OneAgent configuration files in the target directory.
 func SetupOneAgent(log logr.Logger, fs afero.Afero, targetDir string) error {
 	if configDir == "" || inputDir == "" {
 		return nil
@@ -124,6 +127,7 @@ func configureFromInputDir(log logr.Logger, fs afero.Afero, containerConfigDir, 
 	return nil
 }
 
+// EnrichWithMetadata enriches the configuration with metadata.
 func EnrichWithMetadata(log logr.Logger, fs afero.Afero) error {
 	if configDir == "" || inputDir == "" {
 		return nil
@@ -158,7 +162,6 @@ func EnrichWithMetadata(log logr.Logger, fs afero.Afero) error {
 
 			return err
 		}
-
 	}
 
 	log.Info("finished enrichment", "config-directory", configDir, "input-directory", inputDir)

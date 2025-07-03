@@ -44,7 +44,6 @@ func TestToMap(t *testing.T) {
 		require.Error(t, err)
 		assert.Nil(t, output)
 	})
-
 }
 
 func TestFromMap(t *testing.T) {
@@ -84,5 +83,4 @@ func TestFromMap(t *testing.T) {
 		require.Error(t, err)
 		assert.Nil(t, output)
 	})
-
 }

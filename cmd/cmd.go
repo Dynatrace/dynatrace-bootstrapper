@@ -1,3 +1,4 @@
+// Package cmd provides the command-line interface for the Dynatrace bootstrapper.
 package cmd
 
 import (
@@ -24,6 +25,7 @@ const (
 	SuppressErrorsFlag = "suppress-error"
 )
 
+// New creates a new cobra command for the Dynatrace bootstrapper.
 func New(fs afero.Fs) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:                Use,
@@ -66,7 +68,7 @@ func AddFlags(cmd *cobra.Command) {
 }
 
 func run(fs afero.Fs) func(cmd *cobra.Command, _ []string) error {
-	return func(cmd *cobra.Command, _ []string) error {
+	return func(_ *cobra.Command, _ []string) error {
 		setupLogger()
 
 		if isDebug {
@@ -135,5 +137,6 @@ func setupLogger() {
 	}
 
 	zapLog := zap.New(zapcore.NewCore(zapcore.NewJSONEncoder(config), os.Stdout, logLevel))
+
 	log = zapr.NewLogger(zapLog)
 }

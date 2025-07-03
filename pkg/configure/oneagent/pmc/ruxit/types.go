@@ -7,7 +7,6 @@ import (
 	"strings"
 )
 
-// ProcConf represents the response of the /deployment/installer/agent/processmoduleconfig endpoint from the Dynatrace Environment(v1) API.
 type ProcConf struct {
 	InstallPath *string    `json:"-"`
 	Properties  []Property `json:"properties"`
@@ -88,7 +87,7 @@ func (pm ProcMap) SetupReadonly(installPath string) ProcMap {
 	for section, entries := range pm {
 		for entry, value := range entries {
 			volume := filepath.VolumeName(value)
-			fmt.Printf("%s", volume)
+			fmt.Printf("%s", volume) //nolint:forbidigo
 
 			if strings.HasPrefix(entry, "libraryPath") {
 				sanitizedEntry := strings.ReplaceAll(value, "../", "")
@@ -107,7 +106,7 @@ func (pm ProcMap) SetupReadonly(installPath string) ProcMap {
 }
 
 func (pm ProcMap) ToString() string {
-	var sections []string
+	sections := make([]string, 0, len(pm))
 	for section := range pm {
 		sections = append(sections, section)
 	}

@@ -7,8 +7,6 @@ import (
 )
 
 var (
-
-	// AppName contains the name of the application
 	AppName = "dynatrace-bootstrapper"
 
 	// Version contains the version of the Bootstrapper. Assigned externally.
@@ -20,6 +18,7 @@ var (
 	// BuildDate is the date when the binary was build. Assigned externally.
 	BuildDate = ""
 
+	// ModuleSum is the module checksum of the main module. Assigned externally.
 	ModuleSum = ""
 )
 
@@ -34,7 +33,6 @@ func init() {
 	}
 
 	ModuleSum = i.Main.Sum
-
 }
 
 func Print(log logr.Logger) {
