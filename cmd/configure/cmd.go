@@ -27,11 +27,11 @@ const (
 )
 
 var (
-	inputDir            string
-	configDir           string
-	installPath         string
-	isFullstack         bool
-	tenant              string
+	inputDir    string
+	configDir   string
+	installPath string
+	isFullstack bool
+	tenant      string
 
 	podAttributes       []string
 	containerAttributes []string
