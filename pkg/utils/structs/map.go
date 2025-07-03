@@ -1,4 +1,3 @@
-// Package structs provides helpers for converting between structs and maps.
 package structs
 
 import (

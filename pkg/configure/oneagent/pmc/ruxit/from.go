@@ -1,4 +1,3 @@
-// Package ruxit provides parsing and conversion utilities for ruxit agent process module config files.
 package ruxit
 
 import (
@@ -18,7 +17,6 @@ const (
 
 var sectionRegexp = regexp.MustCompile(`\[(.*)\]`)
 
-// FromMap converts a ProcMap to a ProcConf struct.
 func FromMap(procMap ProcMap) ProcConf {
 	var result ProcConf
 
@@ -35,7 +33,6 @@ func FromMap(procMap ProcMap) ProcConf {
 	return result
 }
 
-// FromJSON parses a ProcConf from a JSON reader.
 func FromJSON(reader io.Reader) (ProcConf, error) {
 	var result ProcConf
 
@@ -52,7 +49,6 @@ func FromJSON(reader io.Reader) (ProcConf, error) {
 	return result, nil
 }
 
-// FromConf creates the ProcConf struct from a valid ruxitagentproc.conf config file.
 func FromConf(reader io.Reader) (ProcConf, error) {
 	var result []Property
 
@@ -93,7 +89,6 @@ func FromConf(reader io.Reader) (ProcConf, error) {
 	}, nil
 }
 
-// confSectionHeader extracts the section header from a line, if present.
 func confSectionHeader(line string) string {
 	matches := sectionRegexp.FindStringSubmatch(line)
 

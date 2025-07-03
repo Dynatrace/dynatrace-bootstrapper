@@ -8,7 +8,6 @@ import (
 	"github.com/spf13/afero"
 )
 
-// CreateFile creates a file with the given content at the specified path using the provided afero filesystem.
 func CreateFile(fs afero.Fs, path string, content string) error {
 	err := fs.MkdirAll(filepath.Dir(path), os.ModePerm)
 	if err != nil {

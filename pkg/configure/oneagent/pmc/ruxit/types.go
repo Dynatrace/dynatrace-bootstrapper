@@ -7,14 +7,12 @@ import (
 	"strings"
 )
 
-// ProcConf represents the response of the /deployment/installer/agent/processmoduleconfig endpoint from the Dynatrace Environment(v1) API.
 type ProcConf struct {
 	InstallPath *string    `json:"-"`
 	Properties  []Property `json:"properties"`
 	Revision    uint       `json:"revision"`
 }
 
-// Property represents a configuration property with section, key, and value.
 type Property struct {
 	Section string `json:"section"`
 	Key     string `json:"key"`
@@ -45,7 +43,6 @@ func (pc ProcConf) Merge(input ProcConf) ProcConf {
 	return updated
 }
 
-// ToMap converts ProcConf to ProcMap format for easier manipulation.
 func (pc ProcConf) ToMap() ProcMap {
 	sections := map[string]map[string]string{}
 	for _, prop := range pc.Properties {
@@ -75,7 +72,6 @@ var (
 	}
 )
 
-// SetupReadonly configures readonly paths by removing redundant entries and setting up library paths.
 func (pm ProcMap) SetupReadonly(installPath string) ProcMap {
 	for key, values := range redundantEntries {
 		_, ok := pm[key]
@@ -109,7 +105,6 @@ func (pm ProcMap) SetupReadonly(installPath string) ProcMap {
 	return pm.Merge(additionalEntries)
 }
 
-// ToString creates the content of the configuration file, the sections and properties are printed in a sorted order, so it can be tested.
 func (pm ProcMap) ToString() string {
 	sections := make([]string, 0, len(pm))
 	for section := range pm {
@@ -143,7 +138,6 @@ func (pm ProcMap) ToString() string {
 	return content.String()
 }
 
-// Merge merges the override ProcMap into the current ProcMap and returns the result.
 func (pm ProcMap) Merge(override ProcMap) ProcMap {
 	for section, props := range override {
 		_, ok := pm[section]

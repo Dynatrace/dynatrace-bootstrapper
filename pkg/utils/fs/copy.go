@@ -1,4 +1,3 @@
-// Package fs provides filesystem utilities for copying and managing files and directories.
 package fs
 
 import (
@@ -11,7 +10,6 @@ import (
 	"github.com/spf13/afero"
 )
 
-// CopyFolder recursively copies a folder from one location to another using the provided afero filesystem.
 func CopyFolder(log logr.Logger, fs afero.Fs, from string, to string) error {
 	fromInfo, err := fs.Stat(from)
 	if err != nil {
@@ -56,7 +54,6 @@ func CopyFolder(log logr.Logger, fs afero.Fs, from string, to string) error {
 	return nil
 }
 
-// CopyFile copies a file from sourcePath to destinationPath using the provided afero filesystem.
 func CopyFile(fs afero.Fs, sourcePath string, destinationPath string) error {
 	sourceFile, err := fs.Open(sourcePath)
 	if err != nil {

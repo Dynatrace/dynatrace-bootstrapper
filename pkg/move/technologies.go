@@ -1,4 +1,3 @@
-// Package move provides utilities for moving and copying files by technology.
 package move
 
 import (
@@ -14,26 +13,20 @@ import (
 	"golang.org/x/sys/unix"
 )
 
-// Manifest represents the manifest file structure for technologies.
 type Manifest struct {
 	Technologies TechEntries `json:"technologies"`
 	Version      string      `json:"version"`
 }
 
-// TechEntries maps technology names to architecture entries.
 type TechEntries map[string]ArchEntries
 
-// ArchEntries maps architecture names to file entries.
 type ArchEntries map[string][]FileEntry
 
-// FileEntry represents a file entry in the manifest.
 type FileEntry struct {
 	Path    string `json:"path"`
 	Version string `json:"version"`
 	MD5     string `json:"md5"`
 }
-
-// CopyByTechnologyWrapper exists so CopyByTechnology can be used with Atomic wrapper as it expects a `CopyFunc`.
 
 func CopyByTechnologyWrapper(technology string) CopyFunc {
 	return func(log logr.Logger, fs afero.Afero, from, to string) error {
@@ -41,7 +34,6 @@ func CopyByTechnologyWrapper(technology string) CopyFunc {
 	}
 }
 
-// CopyByTechnology copies files filtered by technology from one directory to another.
 func CopyByTechnology(log logr.Logger, fs afero.Afero, from string, to string, technology string) error {
 	log.Info("starting to copy (filtered)", "from", from, "to", to)
 
@@ -53,7 +45,6 @@ func CopyByTechnology(log logr.Logger, fs afero.Afero, from string, to string, t
 	return copyByList(log, fs, from, to, filteredPaths)
 }
 
-// copyByList copies a list of files/directories from 'from' to 'to'.
 func copyByList(log logr.Logger, fs afero.Afero, from string, to string, paths []string) error {
 	oldUmask := unix.Umask(noPermissionsMask)
 	defer unix.Umask(oldUmask)
@@ -115,7 +106,6 @@ func copyByList(log logr.Logger, fs afero.Afero, from string, to string, paths [
 	return nil
 }
 
-// filterFilesByTechnology filters files in the manifest by the given technologies.
 func filterFilesByTechnology(log logr.Logger, fs afero.Afero, source string, technologies []string) ([]string, error) {
 	manifestPath := filepath.Join(source, "manifest.json")
 
