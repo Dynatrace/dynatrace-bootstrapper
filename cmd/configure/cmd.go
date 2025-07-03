@@ -27,13 +27,14 @@ const (
 )
 
 var (
-	inputDir      string
-	configDir     string
-	installPath   string
-	tenant        string
-	isFullstack   bool
+	inputDir            string
+	configDir           string
+	installPath         string
+	isFullstack         bool
+	tenant              string
+	
 	containerAttributes []string
-	podAttributes []string
+	podAttributes       []string
 )
 
 // AddFlags adds configuration-related flags to the provided command.
