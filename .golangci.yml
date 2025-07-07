@@ -19,7 +19,6 @@ linters:
     - goconst
     - gocritic
     - gocyclo
-    - godot
     - goheader
     - gomoddirectives
     - gomodguard
