@@ -7,6 +7,7 @@ import (
 	"strings"
 )
 
+// ProcConf represents the response of the /deployment/installer/agent/processmoduleconfig endpoint from the Dynatrace Environment(v1) API.
 type ProcConf struct {
 	InstallPath *string    `json:"-"`
 	Properties  []Property `json:"properties"`

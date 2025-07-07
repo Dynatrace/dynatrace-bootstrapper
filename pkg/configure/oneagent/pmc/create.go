@@ -54,12 +54,10 @@ func Create(log logr.Logger, fs afero.Fs, srcPath, dstPath string, conf ruxit.Pr
 
 	_, err = dstFile.WriteString(mergedConf.ToString())
 	if err != nil {
-		log.Info("failed to write to destination file", "path", dstPath)
+		log.Info("failed to write merged config into destination file", "path", dstPath)
 
 		return errors.WithStack(err)
 	}
-
-	log.Info("created new config", "from", srcPath, "to", dstPath)
 
 	return nil
 }
