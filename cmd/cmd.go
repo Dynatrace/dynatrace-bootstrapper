@@ -1,4 +1,3 @@
-// Package cmd provides the command-line interface for the Dynatrace bootstrapper.
 package cmd
 
 import (
@@ -25,7 +24,6 @@ const (
 	SuppressErrorsFlag = "suppress-error"
 )
 
-// New creates a new cobra command for the Dynatrace bootstrapper.
 func New(fs afero.Fs) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:                Use,

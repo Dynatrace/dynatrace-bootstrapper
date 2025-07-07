@@ -12,7 +12,6 @@ const (
 	Flag = "attribute-container"
 )
 
-// Attributes represents container attributes including image info and container name.
 type Attributes struct {
 	ImageInfo     `json:",inline"`
 	ContainerName string `json:"k8s.container.name,omitempty"`
@@ -22,7 +21,6 @@ func (attr Attributes) ToMap() (map[string]string, error) {
 	return structs.ToMap(attr)
 }
 
-// ParseAttributes parses a slice of raw attribute strings into a slice of Attributes.
 func ParseAttributes(rawAttributes []string) ([]Attributes, error) {
 	var attributeList = make([]Attributes, 0, len(rawAttributes))
 
@@ -38,7 +36,7 @@ func ParseAttributes(rawAttributes []string) ([]Attributes, error) {
 	return attributeList, nil
 }
 
-// ToArgs converts a slice of Attributes to a list of args for a Pod Template.
+// ToArgs is a helper func to convert an []container.Attributes to a list of args that can be put into a Pod Template
 func ToArgs(attributes []Attributes) ([]string, error) {
 	var args = make([]string, 0, len(attributes))
 
@@ -54,7 +52,6 @@ func ToArgs(attributes []Attributes) ([]string, error) {
 	return args, nil
 }
 
-// parse unmarshals a raw attribute string into an Attributes struct.
 func parse(rawAttribute string) (*Attributes, error) {
 	var result Attributes
 

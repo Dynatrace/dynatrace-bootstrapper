@@ -1,4 +1,3 @@
-// Package pod provides utilities for handling pod attributes.
 package pod
 
 import (
@@ -15,7 +14,6 @@ const (
 	expectedKeyValueParts = 2
 )
 
-// Attributes represents pod attributes including user-defined, pod, workload, and cluster info.
 type Attributes struct {
 	UserDefined  map[string]string `json:"-"`
 	PodInfo      `json:",inline"`
@@ -27,7 +25,6 @@ func (attr Attributes) ToMap() (map[string]string, error) {
 	return structs.ToMap(attr)
 }
 
-// PodInfo contains pod-related metadata.
 type PodInfo struct { //nolint:revive
 	PodName       string `json:"k8s.pod.name,omitempty"`
 	PodUID        string `json:"k8s.pod.uid,omitempty"`
@@ -35,20 +32,17 @@ type PodInfo struct { //nolint:revive
 	NamespaceName string `json:"k8s.namespace.name,omitempty"`
 }
 
-// WorkloadInfo contains workload-related metadata.
 type WorkloadInfo struct {
 	WorkloadKind string `json:"k8s.workload.kind,omitempty"`
 	WorkloadName string `json:"k8s.workload.name,omitempty"`
 }
 
-// ClusterInfo contains cluster-related metadata.
 type ClusterInfo struct {
 	ClusterUID      string `json:"k8s.cluster.uid,omitempty"`
 	ClusterName     string `json:"k8s.cluster.name,omitempty"`
 	DTClusterEntity string `json:"dt.entity.kubernetes_cluster,omitempty"`
 }
 
-// ParseAttributes parses a slice of raw attribute strings into an Attributes struct.
 func ParseAttributes(rawAttributes []string) (Attributes, error) {
 	rawMap := make(map[string]string, len(rawAttributes))
 
