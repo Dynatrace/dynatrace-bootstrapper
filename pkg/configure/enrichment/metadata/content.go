@@ -1,4 +1,3 @@
-// Package metadata provides types and helpers for enrichment metadata content.
 package metadata
 
 import (
@@ -12,7 +11,6 @@ import (
 	"github.com/pkg/errors"
 )
 
-// fileContent represents the structure of the metadata file content.
 type fileContent struct {
 	pod.Attributes `json:",inline"`
 
@@ -26,7 +24,6 @@ type fileContent struct {
 	DTWorkloadName string `json:"dt.kubernetes.workload.name,omitempty"`
 }
 
-// toMap converts fileContent to a map[string]string, merging user-defined attributes.
 func (c fileContent) toMap() (map[string]string, error) {
 	baseMap, err := structs.ToMap(c)
 	if err != nil {
@@ -38,7 +35,6 @@ func (c fileContent) toMap() (map[string]string, error) {
 	return baseMap, nil
 }
 
-// toJSON marshals fileContent to JSON, making UserDefined visible.
 func (c fileContent) toJSON() ([]byte, error) {
 	rawMap, err := c.toMap() // needed to make the pod.Attributes.UserDefined visible
 	if err != nil {
@@ -53,7 +49,6 @@ func (c fileContent) toJSON() ([]byte, error) {
 	return raw, nil
 }
 
-// toProperties converts fileContent to a properties-like string format.
 func (c fileContent) toProperties() (string, error) {
 	var confContent strings.Builder
 

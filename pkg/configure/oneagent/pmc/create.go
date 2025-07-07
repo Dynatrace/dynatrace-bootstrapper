@@ -1,4 +1,3 @@
-// Package pmc provides process module config utilities for OneAgent configuration.
 package pmc
 
 import (
@@ -11,7 +10,6 @@ import (
 	"github.com/spf13/afero"
 )
 
-// Create creates a new process module config file by merging the source config with the provided config.
 func Create(log logr.Logger, fs afero.Fs, srcPath, dstPath string, conf ruxit.ProcConf) error {
 	srcFile, err := fs.Open(srcPath)
 	if err != nil {

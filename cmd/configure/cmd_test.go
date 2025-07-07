@@ -173,7 +173,6 @@ func TestEnrichWithMetadata(t *testing.T) {
 	})
 }
 
-// countFiles returns the number of non-directory files in the given path using the provided afero filesystem.
 func countFiles(t *testing.T, memFs afero.Afero, path string) int {
 	t.Helper()
 
@@ -195,7 +194,6 @@ func countFiles(t *testing.T, memFs afero.Afero, path string) int {
 	return count
 }
 
-// setupInputFs creates the necessary input files in the afero filesystem for testing.
 func setupInputFs(t *testing.T, fs afero.Afero, inputDir string) {
 	t.Helper()
 
@@ -230,7 +228,6 @@ func setupInputFs(t *testing.T, fs afero.Afero, inputDir string) {
 	require.NoError(t, fsutils.CreateFile(fs, filepath.Join(inputDir, pmc.InputFileName), string(rawProcConf)))
 }
 
-// setupTargetFs creates the necessary target files in the afero filesystem for testing.
 func setupTargetFs(t *testing.T, fs afero.Afero, targetDir string) {
 	t.Helper()
 

@@ -16,17 +16,14 @@ const (
 	DestinationRuxitAgentProcPath = "oneagent/agent/config/ruxitagentproc.conf"
 )
 
-// GetSourceRuxitAgentProcFilePath returns the full path to the source ruxit agent process configuration file.
 func GetSourceRuxitAgentProcFilePath(targetDir string) string {
 	return filepath.Join(targetDir, SourceRuxitAgentProcPath)
 }
 
-// GetDestinationRuxitAgentProcFilePath returns the full path to the destination ruxit agent process configuration file.
 func GetDestinationRuxitAgentProcFilePath(configDir string) string {
 	return filepath.Join(configDir, DestinationRuxitAgentProcPath)
 }
 
-// Configure applies the configuration from the input file to the ruxit agent process configuration.
 func Configure(log logr.Logger, fs afero.Afero, inputDir, targetDir, configDir, installPath string) error {
 	inputFilePath := filepath.Join(inputDir, InputFileName)
 

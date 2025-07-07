@@ -1,4 +1,3 @@
-// Package move provides the CLI for moving files and folders atomically.
 package move
 
 import (
@@ -18,7 +17,6 @@ var (
 	technology string
 )
 
-// AddFlags adds move-related flags to the provided command.
 func AddFlags(cmd *cobra.Command) {
 	cmd.PersistentFlags().StringVar(&workFolder, WorkFolderFlag, "", "(Optional) Base path for a tmp folder, this is where the command will do its work, to make sure the operations are atomic. It must be on the same disk as the target folder.")
 

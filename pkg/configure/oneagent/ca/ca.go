@@ -1,4 +1,3 @@
-// Package ca provides configuration for OneAgent certificate authority files.
 package ca
 
 import (
@@ -19,7 +18,6 @@ const (
 	AgCertsInputFile      = "activegate.pem"
 )
 
-// Configure sets up the certificate files for OneAgent.
 func Configure(log logr.Logger, fs afero.Afero, inputDir, configDir string) error {
 	trustedCerts, err := GetFromFs(fs, inputDir, TrustedCertsInputFile)
 	if err != nil && !os.IsNotExist(err) {
@@ -54,7 +52,6 @@ func Configure(log logr.Logger, fs afero.Afero, inputDir, configDir string) erro
 	return nil
 }
 
-// GetFromFs reads a certificate file from the filesystem.
 func GetFromFs(fs afero.Afero, inputDir, certFileName string) (string, error) {
 	inputFile := filepath.Join(inputDir, certFileName)
 

@@ -15,7 +15,6 @@ const (
 	PropertiesFilePath = "enrichment/dt_metadata.properties"
 )
 
-// Configure creates metadata enrichment files in JSON and properties formats.
 func Configure(log logr.Logger, fs afero.Afero, configDirectory string, podAttr pod.Attributes, containerAttr container.Attributes) error {
 	confContent := fromAttributes(containerAttr, podAttr)
 

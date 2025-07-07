@@ -1,4 +1,3 @@
-// Package configure provides functionality for setting up OneAgent configuration.
 package configure
 
 import (
@@ -37,7 +36,6 @@ var (
 	containerAttributes []string
 )
 
-// AddFlags adds configuration-related flags to the provided command.
 func AddFlags(cmd *cobra.Command) {
 	// common
 	cmd.PersistentFlags().StringVar(&inputDir, InputFolderFlag, "", "(Optional) Base path where to look for the configuration files.")
@@ -53,7 +51,6 @@ func AddFlags(cmd *cobra.Command) {
 	cmd.PersistentFlags().Lookup(IsFullstackFlag).NoOptDefVal = "true"
 }
 
-// SetupOneAgent sets up OneAgent configuration files in the target directory.
 func SetupOneAgent(log logr.Logger, fs afero.Afero, targetDir string) error {
 	if configDir == "" || inputDir == "" {
 		return nil
@@ -127,7 +124,6 @@ func configureFromInputDir(log logr.Logger, fs afero.Afero, containerConfigDir, 
 	return nil
 }
 
-// EnrichWithMetadata enriches the configuration with metadata.
 func EnrichWithMetadata(log logr.Logger, fs afero.Afero) error {
 	if configDir == "" || inputDir == "" {
 		return nil

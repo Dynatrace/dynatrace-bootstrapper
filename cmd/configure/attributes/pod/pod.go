@@ -88,7 +88,7 @@ func filterOutUserDefined(rawInput map[string]string, parsedInput Attributes) er
 	return nil
 }
 
-// ToArgs is a helper func to convert an pod.Attributes to a list of args that can be put into a Pod Template.
+// ToArgs is a helper func to convert an pod.Attributes to a list of args that can be put into a Pod Template
 func ToArgs(attributes Attributes) ([]string, error) {
 	attrMap, err := attributes.ToMap()
 	if err != nil {

@@ -1,4 +1,3 @@
-// Package endpoint provides configuration for enrichment endpoint files.
 package endpoint
 
 import (
@@ -15,7 +14,6 @@ const (
 	InputFileName  = "endpoint.properties"
 )
 
-// Configure sets up the endpoint enrichment configuration file.
 func Configure(log logr.Logger, fs afero.Afero, inputDir, configDir string) error {
 	properties, err := getFromFs(fs, inputDir)
 	if err != nil {
