@@ -58,10 +58,10 @@ func (c fileContent) toProperties() (string, error) {
 	}
 
 	for key, value := range contentMap {
-		confContent.WriteString(key)
-		confContent.WriteString("=")
-		confContent.WriteString(value)
-		confContent.WriteString("\n")
+		_, _ = confContent.WriteString(key)
+		_, _ = confContent.WriteString("=")
+		_, _ = confContent.WriteString(value)
+		_, _ = confContent.WriteString("\n")
 	}
 
 	return confContent.String(), nil

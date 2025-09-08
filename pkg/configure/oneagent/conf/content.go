@@ -26,8 +26,8 @@ func (fc fileContent) toString() (string, error) {
 			return "", err
 		}
 
-		content.WriteString(sectionContent)
-		content.WriteString("\n")
+		_, _ = content.WriteString(sectionContent)
+		_, _ = content.WriteString("\n")
 	}
 
 	if fc.hostSection != nil {
@@ -36,8 +36,8 @@ func (fc fileContent) toString() (string, error) {
 			return "", err
 		}
 
-		content.WriteString(sectionContent)
-		content.WriteString("\n")
+		_, _ = content.WriteString(sectionContent)
+		_, _ = content.WriteString("\n")
 	}
 
 	return content.String(), nil
@@ -66,18 +66,18 @@ func (cs containerSection) toString() (string, error) {
 		return "", err
 	}
 
-	content.WriteString("[container]")
-	content.WriteString("\n")
+	_, _ = content.WriteString("[container]")
+	_, _ = content.WriteString("\n")
 
 	for key, value := range contentMap {
 		if value == "" {
 			continue
 		}
 
-		content.WriteString(key)
-		content.WriteString(" ")
-		content.WriteString(value)
-		content.WriteString("\n")
+		_, _ = content.WriteString(key)
+		_, _ = content.WriteString(" ")
+		_, _ = content.WriteString(value)
+		_, _ = content.WriteString("\n")
 	}
 
 	return content.String(), nil
@@ -100,18 +100,18 @@ func (hs hostSection) toString() (string, error) {
 		return "", err
 	}
 
-	content.WriteString("[host]")
-	content.WriteString("\n")
+	_, _ = content.WriteString("[host]")
+	_, _ = content.WriteString("\n")
 
 	for key, value := range contentMap {
 		if value == "" {
 			continue
 		}
 
-		content.WriteString(key)
-		content.WriteString(" ")
-		content.WriteString(value)
-		content.WriteString("\n")
+		_, _ = content.WriteString(key)
+		_, _ = content.WriteString(" ")
+		_, _ = content.WriteString(value)
+		_, _ = content.WriteString("\n")
 	}
 
 	return content.String(), nil
