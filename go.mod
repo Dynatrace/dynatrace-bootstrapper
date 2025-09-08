@@ -1,6 +1,8 @@
 module github.com/Dynatrace/dynatrace-bootstrapper
 
-go 1.23.4
+go 1.24.0
+
+toolchain go1.24.6
 
 require (
 	github.com/go-logr/logr v1.4.3
