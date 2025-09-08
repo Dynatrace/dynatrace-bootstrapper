@@ -1,6 +1,8 @@
 package move
 
 import (
+	"strings"
+
 	impl "github.com/Dynatrace/dynatrace-bootstrapper/pkg/move"
 	"github.com/go-logr/logr"
 	"github.com/spf13/afero"
@@ -10,6 +12,8 @@ import (
 const (
 	WorkFolderFlag = "work"
 	TechnologyFlag = "technology"
+
+	AllTechValue = "all" // if set all technologies will be copied, basically reverting back to simple copy
 )
 
 var (
@@ -28,7 +32,7 @@ func AddFlags(cmd *cobra.Command) {
 func Execute(log logr.Logger, fs afero.Afero, from, to string) error {
 	copyFunc := impl.SimpleCopy
 
-	if technology != "" {
+	if technology != "" && strings.TrimSpace(technology) != AllTechValue {
 		copyFunc = impl.CopyByTechnologyWrapper(technology)
 	}
 
