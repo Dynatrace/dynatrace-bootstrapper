@@ -76,6 +76,7 @@ func FromConf(reader io.Reader) (ProcConf, error) {
 			}
 
 			result = append(result, prop)
+		default:
 		}
 	}
 
