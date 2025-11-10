@@ -177,10 +177,6 @@ func TestCopyByList(t *testing.T) {
 }
 
 func TestFilterFilesByTechnology(t *testing.T) {
-	tmpDir := t.TempDir()
-
-	sourceDir := filepath.Join(tmpDir, testSourceDir)
-	_ = os.MkdirAll(sourceDir, 0755)
 	manifestContent := `{
         "version": "1.0",
         "technologies": {
@@ -197,9 +193,13 @@ func TestFilterFilesByTechnology(t *testing.T) {
             }
         }
     }`
-	_ = os.WriteFile(filepath.Join(sourceDir, "manifest.json"), []byte(manifestContent), 0600)
 
 	t.Run("filter single technology", func(t *testing.T) {
+		tmpDir := t.TempDir()
+
+		sourceDir := filepath.Join(tmpDir, testSourceDir)
+		_ = os.MkdirAll(sourceDir, 0755)
+		_ = os.WriteFile(filepath.Join(sourceDir, "manifest.json"), []byte(manifestContent), 0600)
 		paths, err := filterFilesByTechnology(testLog, sourceDir, []string{"java"})
 		require.NoError(t, err)
 		assert.ElementsMatch(t, []string{
@@ -208,6 +208,11 @@ func TestFilterFilesByTechnology(t *testing.T) {
 		}, paths)
 	})
 	t.Run("filter multiple technologies", func(t *testing.T) {
+		tmpDir := t.TempDir()
+
+		sourceDir := filepath.Join(tmpDir, testSourceDir)
+		_ = os.MkdirAll(sourceDir, 0755)
+		_ = os.WriteFile(filepath.Join(sourceDir, "manifest.json"), []byte(manifestContent), 0600)
 		paths, err := filterFilesByTechnology(testLog, sourceDir, []string{"java", "python"})
 		require.NoError(t, err)
 		assert.ElementsMatch(t, []string{
@@ -217,6 +222,11 @@ func TestFilterFilesByTechnology(t *testing.T) {
 		}, paths)
 	})
 	t.Run("filter multiple technologies with white spaces", func(t *testing.T) {
+		tmpDir := t.TempDir()
+
+		sourceDir := filepath.Join(tmpDir, testSourceDir)
+		_ = os.MkdirAll(sourceDir, 0755)
+		_ = os.WriteFile(filepath.Join(sourceDir, "manifest.json"), []byte(manifestContent), 0600)
 		paths, err := filterFilesByTechnology(testLog, sourceDir, []string{"java ", " python "})
 		require.NoError(t, err)
 		assert.ElementsMatch(t, []string{
@@ -226,11 +236,22 @@ func TestFilterFilesByTechnology(t *testing.T) {
 		}, paths)
 	})
 	t.Run("not filter non-existing technology", func(t *testing.T) {
+		tmpDir := t.TempDir()
+
+		sourceDir := filepath.Join(tmpDir, testSourceDir)
+		_ = os.MkdirAll(sourceDir, 0755)
+		_ = os.WriteFile(filepath.Join(sourceDir, "manifest.json"), []byte(manifestContent), 0600)
+
 		paths, err := filterFilesByTechnology(testLog, sourceDir, []string{"php"})
 		require.NoError(t, err)
 		assert.Empty(t, paths)
 	})
 	t.Run("filter with missing manifest", func(t *testing.T) {
+		tmpDir := t.TempDir()
+
+		sourceDir := filepath.Join(tmpDir, testSourceDir)
+		_ = os.MkdirAll(sourceDir, 0755)
+
 		paths, err := filterFilesByTechnology(testLog, sourceDir, []string{"java"})
 		require.Error(t, err)
 		assert.Nil(t, paths)
