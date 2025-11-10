@@ -8,14 +8,13 @@ import (
 	"github.com/Dynatrace/dynatrace-bootstrapper/cmd/configure/attributes/pod"
 	fsutils "github.com/Dynatrace/dynatrace-bootstrapper/pkg/utils/fs"
 	"github.com/go-logr/logr"
-	"github.com/spf13/afero"
 )
 
 const (
 	ConfigPath = "/oneagent/agent/config/container.conf"
 )
 
-func Configure(log logr.Logger, fs afero.Afero, configDirectory string, containerAttr container.Attributes, podAttr pod.Attributes, tenant string, isFullstack bool) error {
+func Configure(log logr.Logger, configDirectory string, containerAttr container.Attributes, podAttr pod.Attributes, tenant string, isFullstack bool) error {
 	log.Info("configuring container.conf", "config-directory", configDirectory)
 
 	if isFullstack {
@@ -37,7 +36,7 @@ func Configure(log logr.Logger, fs afero.Afero, configDirectory string, containe
 
 	configFilePath := filepath.Join(configDirectory, ConfigPath)
 
-	err = fsutils.CreateFile(fs, configFilePath, stringContent)
+	err = fsutils.CreateFile(configFilePath, stringContent)
 	if err != nil {
 		log.Error(err, "failed to create container conf file", "struct", configFilePath)
 

@@ -1,13 +1,13 @@
 package conf
 
 import (
+	"os"
 	"path/filepath"
 	"testing"
 
 	"github.com/Dynatrace/dynatrace-bootstrapper/cmd/configure/attributes/container"
 	"github.com/Dynatrace/dynatrace-bootstrapper/cmd/configure/attributes/pod"
 	"github.com/go-logr/zapr"
-	"github.com/spf13/afero"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"go.uber.org/zap"
@@ -36,18 +36,18 @@ func TestConfigure(t *testing.T) {
 			ImageDigest: "imagedigest",
 		},
 	}
-	configDir := "path/conf"
 
 	t.Run("success - not fullstack", func(t *testing.T) {
-		fs := afero.Afero{Fs: afero.NewMemMapFs()}
+		tmpDir := t.TempDir()
+		configDir := filepath.Join(tmpDir, "path", "conf")
 
-		err := Configure(testLog, fs, configDir, containerAttr, podAttr, "", false)
+		err := Configure(testLog, configDir, containerAttr, podAttr, "", false)
 		require.NoError(t, err)
 
 		expectedMap, err := fromAttributes(containerAttr, podAttr, "", false).toMap()
 		require.NoError(t, err)
 
-		content, err := fs.ReadFile(filepath.Join(configDir, ConfigPath))
+		content, err := os.ReadFile(filepath.Join(configDir, ConfigPath))
 		require.NoError(t, err)
 
 		missingEntries := []string{}
@@ -73,16 +73,18 @@ func TestConfigure(t *testing.T) {
 	})
 
 	t.Run("success - fullstack", func(t *testing.T) {
-		fs := afero.Afero{Fs: afero.NewMemMapFs()}
+		tmpDir := t.TempDir()
+		configDir := filepath.Join(tmpDir, "path", "conf")
+
 		tenant := "test-tenant"
 
-		err := Configure(testLog, fs, configDir, containerAttr, podAttr, tenant, true)
+		err := Configure(testLog, configDir, containerAttr, podAttr, tenant, true)
 		require.NoError(t, err)
 
 		expectedMap, err := fromAttributes(containerAttr, podAttr, tenant, true).toMap()
 		require.NoError(t, err)
 
-		content, err := fs.ReadFile(filepath.Join(configDir, ConfigPath))
+		content, err := os.ReadFile(filepath.Join(configDir, ConfigPath))
 		require.NoError(t, err)
 
 		for key, value := range expectedMap {
@@ -94,9 +96,10 @@ func TestConfigure(t *testing.T) {
 	})
 
 	t.Run("error - fullstack but no tenant", func(t *testing.T) {
-		fs := afero.Afero{Fs: afero.NewMemMapFs()}
+		tmpDir := t.TempDir()
+		configDir := filepath.Join(tmpDir, "path", "conf")
 
-		err := Configure(testLog, fs, configDir, containerAttr, podAttr, "", true)
+		err := Configure(testLog, configDir, containerAttr, podAttr, "", true)
 		require.Error(t, err)
 	})
 }

@@ -9,7 +9,6 @@ import (
 	"github.com/Dynatrace/dynatrace-bootstrapper/pkg/version"
 	"github.com/go-logr/logr"
 	"github.com/go-logr/zapr"
-	"github.com/spf13/afero"
 	"github.com/spf13/cobra"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
@@ -24,10 +23,10 @@ const (
 	SuppressErrorsFlag = "suppress-error"
 )
 
-func New(fs afero.Fs) *cobra.Command {
+func New() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:                Use,
-		RunE:               run(fs),
+		RunE:               run(),
 		FParseErrWhitelist: cobra.FParseErrWhitelist{UnknownFlags: true},
 		Version:            version.Version,
 		Short:              fmt.Sprintf("%s version %s", version.AppName, version.Version),
@@ -65,7 +64,7 @@ func AddFlags(cmd *cobra.Command) {
 	cmd.PersistentFlags().Lookup(SuppressErrorsFlag).NoOptDefVal = "true"
 }
 
-func run(fs afero.Fs) func(cmd *cobra.Command, _ []string) error {
+func run() func(cmd *cobra.Command, _ []string) error {
 	return func(_ *cobra.Command, _ []string) error {
 		setupLogger()
 
@@ -75,11 +74,7 @@ func run(fs afero.Fs) func(cmd *cobra.Command, _ []string) error {
 
 		version.Print(log)
 
-		aferoFs := afero.Afero{
-			Fs: fs,
-		}
-
-		err := move.Execute(log, aferoFs, sourceFolder, targetFolder)
+		err := move.Execute(log, sourceFolder, targetFolder)
 		if err != nil {
 			if areErrorsSuppressed {
 				log.Error(err, "error during moving, the error was suppressed")
@@ -92,7 +87,7 @@ func run(fs afero.Fs) func(cmd *cobra.Command, _ []string) error {
 			return err
 		}
 
-		err = configure.SetupOneAgent(log, aferoFs, targetFolder)
+		err = configure.SetupOneAgent(log, targetFolder)
 		if err != nil {
 			if areErrorsSuppressed {
 				log.Error(err, "error during oneagent setup, the error was suppressed")
@@ -105,7 +100,7 @@ func run(fs afero.Fs) func(cmd *cobra.Command, _ []string) error {
 			return err
 		}
 
-		err = configure.EnrichWithMetadata(log, aferoFs)
+		err = configure.EnrichWithMetadata(log)
 		if err != nil {
 			if areErrorsSuppressed {
 				log.Error(err, "error during enrichment, the error was suppressed")

@@ -7,11 +7,10 @@ import (
 
 	"github.com/go-logr/logr"
 	"github.com/pkg/errors"
-	"github.com/spf13/afero"
 )
 
-func CopyFolder(log logr.Logger, fs afero.Fs, from string, to string) error {
-	fromInfo, err := fs.Stat(from)
+func CopyFolder(log logr.Logger, from string, to string) error {
+	fromInfo, err := os.Stat(from)
 	if err != nil {
 		return errors.WithStack(err)
 	}
@@ -20,12 +19,12 @@ func CopyFolder(log logr.Logger, fs afero.Fs, from string, to string) error {
 		return errors.Errorf("%s is not a directory", from)
 	}
 
-	err = fs.MkdirAll(to, fromInfo.Mode())
+	err = os.MkdirAll(to, fromInfo.Mode())
 	if err != nil {
 		return errors.WithStack(err)
 	}
 
-	entries, err := afero.ReadDir(fs, from)
+	entries, err := os.ReadDir(from)
 	if err != nil {
 		return errors.WithStack(err)
 	}
@@ -37,14 +36,14 @@ func CopyFolder(log logr.Logger, fs afero.Fs, from string, to string) error {
 		if entry.IsDir() {
 			log.V(1).Info("copying directory", "from", fromPath, "to", toPath)
 
-			err = CopyFolder(log, fs, fromPath, toPath)
+			err = CopyFolder(log, fromPath, toPath)
 			if err != nil {
 				return err
 			}
 		} else {
 			log.V(1).Info("copying file", "from", fromPath, "to", toPath)
 
-			err = CopyFile(fs, fromPath, toPath)
+			err = CopyFile(fromPath, toPath)
 			if err != nil {
 				return err
 			}
@@ -54,8 +53,8 @@ func CopyFolder(log logr.Logger, fs afero.Fs, from string, to string) error {
 	return nil
 }
 
-func CopyFile(fs afero.Fs, sourcePath string, destinationPath string) error {
-	sourceFile, err := fs.Open(sourcePath)
+func CopyFile(sourcePath string, destinationPath string) error {
+	sourceFile, err := os.Open(sourcePath)
 	if err != nil {
 		return errors.WithStack(err)
 	}
@@ -67,7 +66,7 @@ func CopyFile(fs afero.Fs, sourcePath string, destinationPath string) error {
 		return errors.WithStack(err)
 	}
 
-	destinationFile, err := fs.OpenFile(destinationPath, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, sourceInfo.Mode())
+	destinationFile, err := os.OpenFile(destinationPath, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, sourceInfo.Mode())
 	if err != nil {
 		return errors.WithStack(err)
 	}

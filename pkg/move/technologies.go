@@ -9,7 +9,6 @@ import (
 	fsutils "github.com/Dynatrace/dynatrace-bootstrapper/pkg/utils/fs"
 	"github.com/go-logr/logr"
 	"github.com/pkg/errors"
-	"github.com/spf13/afero"
 	"golang.org/x/sys/unix"
 )
 
@@ -29,34 +28,34 @@ type FileEntry struct {
 }
 
 func CopyByTechnologyWrapper(technology string) CopyFunc {
-	return func(log logr.Logger, fs afero.Afero, from, to string) error {
-		return CopyByTechnology(log, fs, from, to, technology)
+	return func(log logr.Logger, from, to string) error {
+		return CopyByTechnology(log, from, to, technology)
 	}
 }
 
-func CopyByTechnology(log logr.Logger, fs afero.Afero, from string, to string, technology string) error {
+func CopyByTechnology(log logr.Logger, from string, to string, technology string) error {
 	log.Info("starting to copy (filtered)", "from", from, "to", to)
 
-	filteredPaths, err := filterFilesByTechnology(log, fs, from, strings.Split(technology, ","))
+	filteredPaths, err := filterFilesByTechnology(log, from, strings.Split(technology, ","))
 	if err != nil {
 		return err
 	}
 
-	return copyByList(log, fs, from, to, filteredPaths)
+	return copyByList(log, from, to, filteredPaths)
 }
 
-func copyByList(log logr.Logger, fs afero.Afero, from string, to string, paths []string) error {
+func copyByList(log logr.Logger, from string, to string, paths []string) error {
 	oldUmask := unix.Umask(noPermissionsMask)
 	defer unix.Umask(oldUmask)
 
-	fromStat, err := fs.Stat(from)
+	fromStat, err := os.Stat(from)
 	if err != nil {
 		log.Error(err, "error checking stat mode from source folder")
 
 		return err
 	}
 
-	err = fs.MkdirAll(to, fromStat.Mode())
+	err = os.MkdirAll(to, fromStat.Mode())
 	if err != nil {
 		log.Error(err, "error creating target folder")
 
@@ -72,7 +71,7 @@ func copyByList(log logr.Logger, fs afero.Afero, from string, to string, paths [
 			sourcePath := filepath.Join(from, walkedPath)
 			targetPath := filepath.Join(to, walkedPath)
 
-			sourceStat, err := fs.Stat(sourcePath)
+			sourceStat, err := os.Stat(sourcePath)
 			if err != nil {
 				log.Error(err, "failed checking stat mode from source", "path", sourcePath)
 
@@ -80,7 +79,7 @@ func copyByList(log logr.Logger, fs afero.Afero, from string, to string, paths [
 			}
 
 			if sourceStat.IsDir() {
-				err := fs.Mkdir(targetPath, sourceStat.Mode())
+				err := os.Mkdir(targetPath, sourceStat.Mode())
 				if err != nil && !os.IsExist(err) {
 					log.Error(err, "failed to create new dir", "path", targetPath)
 
@@ -94,7 +93,7 @@ func copyByList(log logr.Logger, fs afero.Afero, from string, to string, paths [
 
 			log.V(1).Info("copying file", "from", sourcePath, "to", targetPath, "mode", sourceStat.Mode())
 
-			err = fsutils.CopyFile(fs, sourcePath, targetPath)
+			err = fsutils.CopyFile(sourcePath, targetPath)
 			if err != nil {
 				log.Error(err, "error copying file")
 
@@ -106,10 +105,10 @@ func copyByList(log logr.Logger, fs afero.Afero, from string, to string, paths [
 	return nil
 }
 
-func filterFilesByTechnology(log logr.Logger, fs afero.Afero, source string, technologies []string) ([]string, error) {
+func filterFilesByTechnology(log logr.Logger, source string, technologies []string) ([]string, error) {
 	manifestPath := filepath.Join(source, "manifest.json")
 
-	manifestFile, err := fs.ReadFile(manifestPath)
+	manifestFile, err := os.ReadFile(manifestPath)
 	if err != nil {
 		return nil, errors.WithMessage(err, "failed to open manifest.json")
 	}

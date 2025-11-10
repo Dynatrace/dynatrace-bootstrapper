@@ -14,20 +14,14 @@ import (
 	"github.com/Dynatrace/dynatrace-bootstrapper/pkg/configure/oneagent/pmc/ruxit"
 	fsutils "github.com/Dynatrace/dynatrace-bootstrapper/pkg/utils/fs"
 	"github.com/go-logr/zapr"
-	"github.com/spf13/afero"
 	"github.com/stretchr/testify/require"
 	"go.uber.org/zap"
 )
 
 var testLog = zapr.NewLogger(zap.NewExample())
 
-const testConfigDir = "/path/config"
-const testInputDir = "/path/input"
-
 // Only checking the counts of files in the folders, checking exact paths and contents are done in the sub-package tests.
 func TestSetupOneAgent(t *testing.T) {
-	targetFolder := "/path/target"
-
 	podAttributes = []string{
 		"k8s.pod.name=pod1",
 		"k8s.pod.uid=123",
@@ -41,20 +35,21 @@ func TestSetupOneAgent(t *testing.T) {
 	}
 
 	t.Run("success", func(t *testing.T) {
-		inputDir = testInputDir
-		configDir = testConfigDir
+		tmpDir := t.TempDir()
+		configDir = filepath.Join(tmpDir, "path", "conf")
+		inputDir = filepath.Join(tmpDir, "path", "input")
+		targetFolder := filepath.Join(tmpDir, "path", "target")
 
-		memFs := afero.Afero{Fs: afero.NewMemMapFs()}
-		setupInputFs(t, memFs, inputDir)
-		setupTargetFs(t, memFs, targetFolder)
+		setupInputFs(t, inputDir)
+		setupTargetFs(t, targetFolder)
 
-		preExecuteConfigCount := countFiles(t, memFs, configDir)
+		preExecuteConfigCount := countFiles(t, configDir)
 		require.Equal(t, 0, preExecuteConfigCount)
 
-		preExecuteTargetCount := countFiles(t, memFs, targetFolder)
+		preExecuteTargetCount := countFiles(t, targetFolder)
 		require.Equal(t, 1, preExecuteTargetCount) // for ruxitagentproc.conf, you need a source file
 
-		err := SetupOneAgent(testLog, memFs, targetFolder)
+		err := SetupOneAgent(testLog, targetFolder)
 		require.NoError(t, err)
 
 		expectedContainerSpecificConfigCount := 5 // curl(1) + ca(2) + conf(1) + ruxitagentproc.conf(1)
@@ -62,52 +57,52 @@ func TestSetupOneAgent(t *testing.T) {
 		for _, name := range containerNames {
 			containerConfigFolder := filepath.Join(configDir, name)
 
-			containerSpecificConfigCount := countFiles(t, memFs, containerConfigFolder)
+			containerSpecificConfigCount := countFiles(t, containerConfigFolder)
 			require.Equal(t, expectedContainerSpecificConfigCount, containerSpecificConfigCount)
 		}
 
 		expectedPostExecuteConfigCount := 1 + len(containerNames)*expectedContainerSpecificConfigCount // preload(1) + len(containers) * container-specific-files
-		postExecuteConfigCount := countFiles(t, memFs, configDir)
+		postExecuteConfigCount := countFiles(t, configDir)
 		require.Equal(t, expectedPostExecuteConfigCount, postExecuteConfigCount)
 
-		postExecuteTargetCount := countFiles(t, memFs, targetFolder)
+		postExecuteTargetCount := countFiles(t, targetFolder)
 		require.Equal(t, preExecuteTargetCount, postExecuteTargetCount) // no change to the target folder during configuration
 	})
 
 	t.Run("no input-directory ==> do nothing", func(t *testing.T) {
+		tmpDir := t.TempDir()
+		configDir = filepath.Join(tmpDir, "path", "conf")
 		inputDir = ""
-		configDir = testConfigDir
-		memFs := afero.Afero{Fs: afero.NewMemMapFs()}
+		targetFolder := filepath.Join(tmpDir, "path", "target")
 
-		err := SetupOneAgent(testLog, memFs, targetFolder)
+		err := SetupOneAgent(testLog, targetFolder)
 		require.NoError(t, err)
 
-		postExecuteConfigCount := countFiles(t, memFs, configDir)
+		postExecuteConfigCount := countFiles(t, configDir)
 		require.Equal(t, 0, postExecuteConfigCount)
 
-		postExecuteTargetCount := countFiles(t, memFs, targetFolder)
+		postExecuteTargetCount := countFiles(t, targetFolder)
 		require.Equal(t, 0, postExecuteTargetCount)
 	})
 
 	t.Run("no config-directory ==> do nothing", func(t *testing.T) {
+		tmpDir := t.TempDir()
 		configDir = ""
-		inputDir = testConfigDir
-		memFs := afero.Afero{Fs: afero.NewMemMapFs()}
+		inputDir = filepath.Join(tmpDir, "path", "input")
+		targetFolder := filepath.Join(tmpDir, "path", "target")
 
-		err := SetupOneAgent(testLog, memFs, targetFolder)
+		err := SetupOneAgent(testLog, targetFolder)
 		require.NoError(t, err)
 
-		postExecuteConfigCount := countFiles(t, memFs, configDir)
+		postExecuteConfigCount := countFiles(t, configDir)
 		require.Equal(t, 0, postExecuteConfigCount)
 
-		postExecuteTargetCount := countFiles(t, memFs, targetFolder)
+		postExecuteTargetCount := countFiles(t, targetFolder)
 		require.Equal(t, 0, postExecuteTargetCount)
 	})
 }
 
 func TestEnrichWithMetadata(t *testing.T) {
-	targetFolder := "/path/target"
-
 	podAttributes = []string{
 		"k8s.pod.name=pod1",
 		"k8s.pod.uid=123",
@@ -121,17 +116,16 @@ func TestEnrichWithMetadata(t *testing.T) {
 	}
 
 	t.Run("success", func(t *testing.T) {
-		inputDir = testInputDir
-		configDir = testConfigDir
+		tmpDir := t.TempDir()
+		configDir = filepath.Join(tmpDir, "path", "conf")
+		inputDir = filepath.Join(tmpDir, "path", "input")
 
-		memFs := afero.Afero{Fs: afero.NewMemMapFs()}
-		setupInputFs(t, memFs, inputDir)
-		setupTargetFs(t, memFs, targetFolder)
+		setupInputFs(t, inputDir)
 
-		preExecuteConfigCount := countFiles(t, memFs, configDir)
+		preExecuteConfigCount := countFiles(t, configDir)
 		require.Equal(t, 0, preExecuteConfigCount)
 
-		err := EnrichWithMetadata(testLog, memFs)
+		err := EnrichWithMetadata(testLog)
 		require.NoError(t, err)
 
 		expectedContainerSpecificConfigCount := 3 // endpoint(1) + metadata(2)
@@ -139,45 +133,45 @@ func TestEnrichWithMetadata(t *testing.T) {
 		for _, name := range containerNames {
 			containerConfigFolder := filepath.Join(configDir, name)
 
-			containerSpecificConfigCount := countFiles(t, memFs, containerConfigFolder)
+			containerSpecificConfigCount := countFiles(t, containerConfigFolder)
 			require.Equal(t, expectedContainerSpecificConfigCount, containerSpecificConfigCount)
 		}
 
 		expectedPostExecuteConfigCount := len(containerNames) * expectedContainerSpecificConfigCount // len(containers) * container-specific-files
-		postExecuteConfigCount := countFiles(t, memFs, configDir)
+		postExecuteConfigCount := countFiles(t, configDir)
 		require.Equal(t, expectedPostExecuteConfigCount, postExecuteConfigCount)
 	})
 
 	t.Run("no input-directory ==> do nothing", func(t *testing.T) {
+		tmpDir := t.TempDir()
+		configDir = filepath.Join(tmpDir, "path", "conf")
 		inputDir = ""
-		configDir = testConfigDir
-		memFs := afero.Afero{Fs: afero.NewMemMapFs()}
 
-		err := EnrichWithMetadata(testLog, memFs)
+		err := EnrichWithMetadata(testLog)
 		require.NoError(t, err)
 
-		postExecuteConfigCount := countFiles(t, memFs, configDir)
+		postExecuteConfigCount := countFiles(t, configDir)
 		require.Equal(t, 0, postExecuteConfigCount)
 	})
 
 	t.Run("no config-directory ==> do nothing", func(t *testing.T) {
+		tmpDir := t.TempDir()
 		configDir = ""
-		inputDir = testConfigDir
-		memFs := afero.Afero{Fs: afero.NewMemMapFs()}
+		inputDir = filepath.Join(tmpDir, "path", "input")
 
-		err := EnrichWithMetadata(testLog, memFs)
+		err := EnrichWithMetadata(testLog)
 		require.NoError(t, err)
 
-		postExecuteConfigCount := countFiles(t, memFs, configDir)
+		postExecuteConfigCount := countFiles(t, configDir)
 		require.Equal(t, 0, postExecuteConfigCount)
 	})
 }
 
-func countFiles(t *testing.T, memFs afero.Afero, path string) int {
+func countFiles(t *testing.T, path string) int {
 	t.Helper()
 
 	count := 0
-	_ = memFs.Walk(path, func(_ string, info fs.FileInfo, err error) error {
+	_ = filepath.Walk(path, func(_ string, info fs.FileInfo, err error) error {
 		if os.IsNotExist(err) {
 			return nil
 		}
@@ -194,18 +188,18 @@ func countFiles(t *testing.T, memFs afero.Afero, path string) int {
 	return count
 }
 
-func setupInputFs(t *testing.T, fs afero.Afero, inputDir string) {
+func setupInputFs(t *testing.T, inputDir string) {
 	t.Helper()
 
 	// endpoint
-	require.NoError(t, fsutils.CreateFile(fs, filepath.Join(inputDir, endpoint.InputFileName), "endpoint"))
+	require.NoError(t, fsutils.CreateFile(filepath.Join(inputDir, endpoint.InputFileName), "endpoint"))
 
 	// ca
-	require.NoError(t, fsutils.CreateFile(fs, filepath.Join(inputDir, ca.TrustedCertsInputFile), "trusted"))
-	require.NoError(t, fsutils.CreateFile(fs, filepath.Join(inputDir, ca.AgCertsInputFile), "ag"))
+	require.NoError(t, fsutils.CreateFile(filepath.Join(inputDir, ca.TrustedCertsInputFile), "trusted"))
+	require.NoError(t, fsutils.CreateFile(filepath.Join(inputDir, ca.AgCertsInputFile), "ag"))
 
 	// curl
-	require.NoError(t, fsutils.CreateFile(fs, filepath.Join(inputDir, curl.InputFileName), "123"))
+	require.NoError(t, fsutils.CreateFile(filepath.Join(inputDir, curl.InputFileName), "123"))
 
 	// pmc
 	procConf := ruxit.ProcConf{
@@ -225,10 +219,10 @@ func setupInputFs(t *testing.T, fs afero.Afero, inputDir string) {
 
 	rawProcConf, err := json.Marshal(procConf)
 	require.NoError(t, err)
-	require.NoError(t, fsutils.CreateFile(fs, filepath.Join(inputDir, pmc.InputFileName), string(rawProcConf)))
+	require.NoError(t, fsutils.CreateFile(filepath.Join(inputDir, pmc.InputFileName), string(rawProcConf)))
 }
 
-func setupTargetFs(t *testing.T, fs afero.Afero, targetDir string) {
+func setupTargetFs(t *testing.T, targetDir string) {
 	t.Helper()
 
 	procConf := ruxit.ProcConf{
@@ -246,5 +240,5 @@ func setupTargetFs(t *testing.T, fs afero.Afero, targetDir string) {
 		},
 	}
 
-	require.NoError(t, fsutils.CreateFile(fs, filepath.Join(targetDir, pmc.SourceRuxitAgentProcPath), procConf.ToString()))
+	require.NoError(t, fsutils.CreateFile(filepath.Join(targetDir, pmc.SourceRuxitAgentProcPath), procConf.ToString()))
 }

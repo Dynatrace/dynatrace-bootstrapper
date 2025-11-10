@@ -6,7 +6,6 @@ import (
 
 	fsutils "github.com/Dynatrace/dynatrace-bootstrapper/pkg/utils/fs"
 	"github.com/go-logr/logr"
-	"github.com/spf13/afero"
 )
 
 const (
@@ -18,13 +17,13 @@ const (
 	AgCertsInputFile      = "activegate.pem"
 )
 
-func Configure(log logr.Logger, fs afero.Afero, inputDir, configDir string) error {
-	trustedCerts, err := GetFromFs(fs, inputDir, TrustedCertsInputFile)
+func Configure(log logr.Logger, inputDir, configDir string) error {
+	trustedCerts, err := GetFromFs(inputDir, TrustedCertsInputFile)
 	if err != nil && !os.IsNotExist(err) {
 		return err
 	}
 
-	agCerts, err := GetFromFs(fs, inputDir, AgCertsInputFile)
+	agCerts, err := GetFromFs(inputDir, AgCertsInputFile)
 	if err != nil && !os.IsNotExist(err) {
 		return err
 	}
@@ -33,7 +32,7 @@ func Configure(log logr.Logger, fs afero.Afero, inputDir, configDir string) erro
 		certFilePath := filepath.Join(configDir, ConfigBasePath, CertsFileName)
 		log.Info("creating cert file", "path", certFilePath)
 
-		err := fsutils.CreateFile(fs, certFilePath, agCerts+"\n"+trustedCerts)
+		err := fsutils.CreateFile(certFilePath, agCerts+"\n"+trustedCerts)
 		if err != nil {
 			return err
 		}
@@ -43,7 +42,7 @@ func Configure(log logr.Logger, fs afero.Afero, inputDir, configDir string) erro
 		proxyCertFilePath := filepath.Join(configDir, ConfigBasePath, ProxyCertsFileName)
 		log.Info("creating cert file", "path", proxyCertFilePath)
 
-		err := fsutils.CreateFile(fs, proxyCertFilePath, trustedCerts)
+		err := fsutils.CreateFile(proxyCertFilePath, trustedCerts)
 		if err != nil {
 			return err
 		}
@@ -52,10 +51,10 @@ func Configure(log logr.Logger, fs afero.Afero, inputDir, configDir string) erro
 	return nil
 }
 
-func GetFromFs(fs afero.Afero, inputDir, certFileName string) (string, error) {
+func GetFromFs(inputDir, certFileName string) (string, error) {
 	inputFile := filepath.Join(inputDir, certFileName)
 
-	content, err := fs.ReadFile(inputFile)
+	content, err := os.ReadFile(inputFile)
 	if err != nil {
 		return "", err
 	}
