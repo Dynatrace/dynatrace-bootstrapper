@@ -5,16 +5,15 @@ import (
 	"path/filepath"
 
 	"github.com/pkg/errors"
-	"github.com/spf13/afero"
 )
 
-func CreateFile(fs afero.Fs, path string, content string) error {
-	err := fs.MkdirAll(filepath.Dir(path), os.ModePerm)
+func CreateFile(path string, content string) error {
+	err := os.MkdirAll(filepath.Dir(path), os.ModePerm)
 	if err != nil {
 		return errors.WithStack(err)
 	}
 
-	file, err := fs.OpenFile(path, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, os.ModePerm)
+	file, err := os.OpenFile(path, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, os.ModePerm)
 	if err != nil {
 		return errors.WithStack(err)
 	}

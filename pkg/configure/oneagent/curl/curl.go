@@ -7,7 +7,6 @@ import (
 
 	fsutils "github.com/Dynatrace/dynatrace-bootstrapper/pkg/utils/fs"
 	"github.com/go-logr/logr"
-	"github.com/spf13/afero"
 )
 
 const (
@@ -16,8 +15,8 @@ const (
 	InputFileName       = "initial-connect-retry"
 )
 
-func Configure(log logr.Logger, fs afero.Afero, inputDir, configDir string) error {
-	content, err := getFromFs(fs, inputDir)
+func Configure(log logr.Logger, inputDir, configDir string) error {
+	content, err := getFromFs(inputDir)
 	if err != nil {
 		if os.IsNotExist(err) {
 			log.Info("input file not present, skipping curl options configuration", "path", filepath.Join(inputDir, InputFileName))
@@ -32,13 +31,13 @@ func Configure(log logr.Logger, fs afero.Afero, inputDir, configDir string) erro
 
 	log.Info("configuring curl_options.conf", "config-path", configFile)
 
-	return fsutils.CreateFile(fs, configFile, content)
+	return fsutils.CreateFile(configFile, content)
 }
 
-func getFromFs(fs afero.Afero, inputDir string) (string, error) {
+func getFromFs(inputDir string) (string, error) {
 	inputFile := filepath.Join(inputDir, InputFileName)
 
-	content, err := fs.ReadFile(inputFile)
+	content, err := os.ReadFile(inputFile)
 	if err != nil {
 		return "", err
 	}

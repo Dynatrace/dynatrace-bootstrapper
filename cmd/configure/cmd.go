@@ -13,7 +13,6 @@ import (
 	"github.com/Dynatrace/dynatrace-bootstrapper/pkg/configure/oneagent/pmc"
 	"github.com/Dynatrace/dynatrace-bootstrapper/pkg/configure/oneagent/preload"
 	"github.com/go-logr/logr"
-	"github.com/spf13/afero"
 	"github.com/spf13/cobra"
 )
 
@@ -51,14 +50,14 @@ func AddFlags(cmd *cobra.Command) {
 	cmd.PersistentFlags().Lookup(IsFullstackFlag).NoOptDefVal = "true"
 }
 
-func SetupOneAgent(log logr.Logger, fs afero.Afero, targetDir string) error {
+func SetupOneAgent(log logr.Logger, targetDir string) error {
 	if configDir == "" || inputDir == "" {
 		return nil
 	}
 
 	log.Info("starting configuration", "config-directory", configDir, "input-directory", inputDir)
 
-	err := preload.Configure(log, fs, configDir, installPath)
+	err := preload.Configure(log, configDir, installPath)
 	if err != nil {
 		log.Info("failed to configure the ld.so.preload", "config-directory", configDir)
 
@@ -79,21 +78,21 @@ func SetupOneAgent(log logr.Logger, fs afero.Afero, targetDir string) error {
 		containerConfigDir := filepath.Join(configDir, containerAttr.ContainerName)
 		log.Info("starting to configure the container", "path", containerConfigDir)
 
-		err = pmc.Configure(log, fs, inputDir, targetDir, containerConfigDir, installPath)
+		err = pmc.Configure(log, inputDir, targetDir, containerConfigDir, installPath)
 		if err != nil {
 			log.Info("failed to configure the ruxitagentproc.conf", "config-directory", containerConfigDir)
 
 			return err
 		}
 
-		err = conf.Configure(log, fs, containerConfigDir, containerAttr, podAttr, tenant, isFullstack)
+		err = conf.Configure(log, containerConfigDir, containerAttr, podAttr, tenant, isFullstack)
 		if err != nil {
 			log.Info("failed to configure the container-conf files", "config-directory", containerConfigDir)
 
 			return err
 		}
 
-		err = configureFromInputDir(log, fs, containerConfigDir, inputDir)
+		err = configureFromInputDir(log, containerConfigDir, inputDir)
 		if err != nil {
 			log.Info("failed to configure container", "config-directory", containerConfigDir)
 
@@ -106,15 +105,15 @@ func SetupOneAgent(log logr.Logger, fs afero.Afero, targetDir string) error {
 	return nil
 }
 
-func configureFromInputDir(log logr.Logger, fs afero.Afero, containerConfigDir, inputDir string) error {
-	err := curl.Configure(log, fs, inputDir, containerConfigDir)
+func configureFromInputDir(log logr.Logger, containerConfigDir, inputDir string) error {
+	err := curl.Configure(log, inputDir, containerConfigDir)
 	if err != nil {
 		log.Info("failed to configure the curl options", "config-directory", containerConfigDir)
 
 		return err
 	}
 
-	err = ca.Configure(log, fs, inputDir, containerConfigDir)
+	err = ca.Configure(log, inputDir, containerConfigDir)
 	if err != nil {
 		log.Info("failed to configure the CAs", "config-directory", containerConfigDir)
 
@@ -124,7 +123,7 @@ func configureFromInputDir(log logr.Logger, fs afero.Afero, containerConfigDir, 
 	return nil
 }
 
-func EnrichWithMetadata(log logr.Logger, fs afero.Afero) error {
+func EnrichWithMetadata(log logr.Logger) error {
 	if configDir == "" || inputDir == "" {
 		return nil
 	}
@@ -145,14 +144,14 @@ func EnrichWithMetadata(log logr.Logger, fs afero.Afero) error {
 		containerConfigDir := filepath.Join(configDir, containerAttr.ContainerName)
 		log.Info("starting to enrich the container", "path", containerConfigDir)
 
-		err = endpoint.Configure(log, fs, inputDir, containerConfigDir)
+		err = endpoint.Configure(log, inputDir, containerConfigDir)
 		if err != nil {
 			log.Info("failed to configure the endpoint.properties", "config-directory", configDir)
 
 			return err
 		}
 
-		err = metadata.Configure(log, fs, containerConfigDir, podAttr, containerAttr)
+		err = metadata.Configure(log, containerConfigDir, podAttr, containerAttr)
 		if err != nil {
 			log.Info("failed to configure the enrichment files", "config-directory", containerConfigDir)
 

@@ -1,11 +1,11 @@
 package fs
 
 import (
+	"os"
 	"path/filepath"
 	"testing"
 
 	"github.com/go-logr/zapr"
-	"github.com/spf13/afero"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"go.uber.org/zap"
@@ -14,75 +14,77 @@ import (
 var testLog = zapr.NewLogger(zap.NewExample())
 
 func TestCopyFolder(t *testing.T) {
-	fs := afero.NewMemMapFs()
-	src := "/src"
-	err := fs.MkdirAll(src, 0755)
+	tmpDir := t.TempDir()
+
+	src := filepath.Join(tmpDir, "src")
+	err := os.MkdirAll(src, 0755)
 	require.NoError(t, err)
 
-	err = afero.WriteFile(fs, filepath.Join(src, "file1.txt"), []byte("Hello"), 0644)
+	err = os.WriteFile(filepath.Join(src, "file1.txt"), []byte("Hello"), 0644)
 	require.NoError(t, err)
 
-	err = fs.MkdirAll(filepath.Join(src, "subdir"), 0755)
+	err = os.MkdirAll(filepath.Join(src, "subdir"), 0755)
 	require.NoError(t, err)
 
-	err = afero.WriteFile(fs, filepath.Join(src, "subdir", "file2.txt"), []byte("World"), 0644)
+	err = os.WriteFile(filepath.Join(src, "subdir", "file2.txt"), []byte("World"), 0644)
 	require.NoError(t, err)
 
-	dst := "/dst"
-	err = fs.MkdirAll(dst, 0755)
+	dst := filepath.Join(tmpDir, "dst")
+	err = os.MkdirAll(dst, 0755)
 	require.NoError(t, err)
 
-	err = CopyFolder(testLog, fs, src, dst)
+	err = CopyFolder(testLog, src, dst)
 	require.NoError(t, err)
 
-	srcFiles, err := afero.ReadDir(fs, src)
+	srcFiles, err := os.ReadDir(src)
 	require.NoError(t, err)
-	dstFiles, err := afero.ReadDir(fs, dst)
+	dstFiles, err := os.ReadDir(dst)
 	require.NoError(t, err)
 	require.Len(t, dstFiles, len(srcFiles))
 
-	checkFolder(t, fs, src, dst)
+	checkFolder(t, src, dst)
 }
 
 func TestCopyFile(t *testing.T) {
-	fs := afero.NewMemMapFs()
-	source := "/source"
-	target := "/target"
+	tmpDir := t.TempDir()
 
-	err := fs.MkdirAll(source, 0755)
+	source := filepath.Join(tmpDir, "/source")
+	target := filepath.Join(tmpDir, "/target")
+
+	err := os.MkdirAll(source, 0755)
 	require.NoError(t, err)
 
-	err = afero.WriteFile(fs, filepath.Join(source, "file1.txt"), []byte("some content"), 0644)
+	err = os.WriteFile(filepath.Join(source, "file1.txt"), []byte("some content"), 0644)
 	require.NoError(t, err)
 
-	err = fs.MkdirAll(target, 0755)
+	err = os.MkdirAll(target, 0755)
 	require.NoError(t, err)
 
-	err = CopyFile(fs, filepath.Join(source, "file1.txt"), filepath.Join(target, "file1.txt"))
+	err = CopyFile(filepath.Join(source, "file1.txt"), filepath.Join(target, "file1.txt"))
 	require.NoError(t, err)
 
-	sourceContent, err := afero.ReadFile(fs, filepath.Join(source, "file1.txt"))
+	sourceContent, err := os.ReadFile(filepath.Join(source, "file1.txt"))
 	require.NoError(t, err)
 	assert.Equal(t, "some content", string(sourceContent))
 
-	targetContent, err := afero.ReadFile(fs, filepath.Join(source, "file1.txt"))
+	targetContent, err := os.ReadFile(filepath.Join(source, "file1.txt"))
 	require.NoError(t, err)
 	assert.Equal(t, "some content", string(targetContent))
 
-	sourceFiles, err := afero.ReadDir(fs, source)
+	sourceFiles, err := os.ReadDir(source)
 	require.NoError(t, err)
 
-	targetFiles, err := afero.ReadDir(fs, target)
+	targetFiles, err := os.ReadDir(target)
 	require.NoError(t, err)
 	require.Len(t, targetFiles, len(sourceFiles))
 }
 
-func checkFolder(t *testing.T, fs afero.Fs, src, dst string) {
+func checkFolder(t *testing.T, src, dst string) {
 	t.Helper()
 
-	srcFiles, err := afero.ReadDir(fs, src)
+	srcFiles, err := os.ReadDir(src)
 	require.NoError(t, err)
-	dstFiles, err := afero.ReadDir(fs, dst)
+	dstFiles, err := os.ReadDir(dst)
 	require.NoError(t, err)
 	require.Len(t, dstFiles, len(srcFiles))
 
@@ -94,22 +96,22 @@ func checkFolder(t *testing.T, fs afero.Fs, src, dst string) {
 		srcPath := filepath.Join(src, srcName)
 		dstPath := filepath.Join(dst, dstName)
 
-		srcInfo, err := fs.Stat(srcPath)
+		srcInfo, err := os.Stat(srcPath)
 		require.NoError(t, err)
 
-		dstInfo, err := fs.Stat(dstPath)
+		dstInfo, err := os.Stat(dstPath)
 		require.NoError(t, err)
 
 		assert.Equal(t, srcInfo.Mode(), dstInfo.Mode())
 
 		if srcInfo.IsDir() {
 			assert.True(t, dstInfo.IsDir())
-			checkFolder(t, fs, srcPath, dstPath)
+			checkFolder(t, srcPath, dstPath)
 		} else {
-			srcData, err := afero.ReadFile(fs, srcPath)
+			srcData, err := os.ReadFile(srcPath)
 			require.NoError(t, err)
 
-			dstData, err := afero.ReadFile(fs, dstPath)
+			dstData, err := os.ReadFile(dstPath)
 			require.NoError(t, err)
 
 			assert.Equal(t, srcData, dstData)
