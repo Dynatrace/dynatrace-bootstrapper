@@ -20,13 +20,13 @@ func TestCopyFolder(t *testing.T) {
 	err := os.MkdirAll(src, 0755)
 	require.NoError(t, err)
 
-	err = os.WriteFile(filepath.Join(src, "file1.txt"), []byte("Hello"), 0644)
+	err = os.WriteFile(filepath.Join(src, "file1.txt"), []byte("Hello"), 0600)
 	require.NoError(t, err)
 
 	err = os.MkdirAll(filepath.Join(src, "subdir"), 0755)
 	require.NoError(t, err)
 
-	err = os.WriteFile(filepath.Join(src, "subdir", "file2.txt"), []byte("World"), 0644)
+	err = os.WriteFile(filepath.Join(src, "subdir", "file2.txt"), []byte("World"), 0600)
 	require.NoError(t, err)
 
 	dst := filepath.Join(tmpDir, "dst")
@@ -54,7 +54,7 @@ func TestCopyFile(t *testing.T) {
 	err := os.MkdirAll(source, 0755)
 	require.NoError(t, err)
 
-	err = os.WriteFile(filepath.Join(source, "file1.txt"), []byte("some content"), 0644)
+	err = os.WriteFile(filepath.Join(source, "file1.txt"), []byte("some content"), 0600)
 	require.NoError(t, err)
 
 	err = os.MkdirAll(target, 0755)

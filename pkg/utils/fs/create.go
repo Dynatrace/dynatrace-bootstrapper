@@ -17,8 +17,9 @@ func CreateFile(path string, content string) error {
 	if err != nil {
 		return errors.WithStack(err)
 	}
+	defer file.Close()
 
-	_, err = file.Write([]byte(content))
+	_, err = file.WriteString(content)
 	if err != nil {
 		return errors.WithStack(err)
 	}

@@ -3,7 +3,6 @@ package move
 import (
 	"fmt"
 	"os"
-
 	"path/filepath"
 	"testing"
 
