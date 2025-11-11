@@ -4,11 +4,10 @@ import (
 	"os"
 
 	bootstrapper "github.com/Dynatrace/dynatrace-bootstrapper/cmd"
-	"github.com/spf13/afero"
 )
 
 func main() {
-	err := bootstrapper.New(afero.NewOsFs()).Execute()
+	err := bootstrapper.New().Execute()
 	if err != nil {
 		os.Exit(1)
 	}

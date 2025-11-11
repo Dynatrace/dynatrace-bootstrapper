@@ -1,12 +1,12 @@
 package move
 
 import (
+	"os"
 	"path/filepath"
 	"testing"
 
 	impl "github.com/Dynatrace/dynatrace-bootstrapper/pkg/move"
 	"github.com/go-logr/zapr"
-	"github.com/spf13/afero"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"go.uber.org/zap"
@@ -15,63 +15,51 @@ import (
 var testLog = zapr.NewLogger(zap.NewExample())
 
 func TestExecute(t *testing.T) {
-	sourceDir := "/source"
-	targetDir := "/target"
+	const (
+		file1 = "fileA1.txt"
+		file2 = "fileA2.txt"
+	)
 
 	t.Run("simple copy", func(t *testing.T) {
-		fs := afero.Afero{Fs: afero.NewMemMapFs()}
+		tmpDir := t.TempDir()
+		sourceDir := filepath.Join(tmpDir, "source")
+		targetDir := filepath.Join(tmpDir, "target")
+		workDir := filepath.Join(tmpDir, "work")
 
-		// Create source directory and files
-		workDir := "/work"
-		_ = fs.MkdirAll(sourceDir, 0755)
-		_ = afero.WriteFile(fs, sourceDir+"/file1.txt", []byte("file1 content"), 0644)
-		_ = afero.WriteFile(fs, sourceDir+"/file2.txt", []byte("file2 content"), 0644)
-		_ = afero.WriteFile(fs, filepath.Join(sourceDir, impl.InstallerVersionFilePath), []byte("123"), 0644)
+		files := map[string]string{
+			file1: "file1 content",
+			file2: "file2 content",
+		}
+
+		setupSource(t, sourceDir, "123", files)
 
 		workFolder = workDir
 
 		technology = " " + AllTechValue + " "
 
-		err := Execute(testLog, fs, sourceDir, targetDir)
+		err := Execute(testLog, sourceDir, targetDir)
 		require.NoError(t, err)
 
-		// Check if the target directory and files exist
-		exists, err := afero.DirExists(fs, targetDir)
-		require.NoError(t, err)
-		assert.True(t, exists)
-
-		file1Exists, err := afero.Exists(fs, targetDir+"/file1.txt")
-		require.NoError(t, err)
-		assert.True(t, file1Exists)
-
-		file2Exists, err := afero.Exists(fs, targetDir+"/file2.txt")
-		require.NoError(t, err)
-		assert.True(t, file2Exists)
-
-		// Check the content of the copied files
-		content, err := afero.ReadFile(fs, targetDir+"/file1.txt")
-		require.NoError(t, err)
-		assert.Equal(t, "file1 content", string(content))
-
-		content, err = afero.ReadFile(fs, targetDir+"/file2.txt")
-		require.NoError(t, err)
-		assert.Equal(t, "file2 content", string(content))
+		verifyTarget(t, targetDir, files)
 
 		// Check the cleanup happened of the copied files
-		exists, err = afero.DirExists(fs, workDir)
-		require.NoError(t, err)
-		assert.False(t, exists)
+		_, err = os.Stat(workDir)
+		require.Error(t, err)
 	})
 	t.Run("execute with technology param", func(t *testing.T) {
-		fs := afero.Afero{Fs: afero.NewMemMapFs()}
+		tmpDir := t.TempDir()
+		sourceDir := filepath.Join(tmpDir, "source")
+		targetDir := filepath.Join(tmpDir, "target")
 
+		manifestFile := "manifest.json"
 		manifestContent := `{
 			"version": "1.0",
 			"technologies": {
 				"java": {
 					"x86": [
 						{"path": "fileA1.txt", "version": "1.0", "md5": "abc123"},
-						{"path": "agent/installer.version", "version": "1.0", "md5": "abc123"}
+						{"path": "agent/installer.version", "version": "1.0", "md5": "abc123"},
+						{"path": "agent/bin/123", "version": "1.0", "md5": "abc123"}
 					]
 				},
 				"python": {
@@ -82,38 +70,56 @@ func TestExecute(t *testing.T) {
 			}
 		}`
 
+		files := map[string]string{
+			manifestFile: manifestContent,
+			file1:        "file1 content",
+			file2:        "file2 content",
+		}
+
+		expectedFiles := map[string]string{
+			file1: "file1 content",
+		}
+
+		setupSource(t, sourceDir, "123", files)
+
 		technologyList := "java"
-		_ = fs.MkdirAll(sourceDir, 0755)
-		_ = afero.WriteFile(fs, sourceDir+"/manifest.json", []byte(manifestContent), 0644)
-		_ = afero.WriteFile(fs, sourceDir+"/fileA1.txt", []byte("fileA1 content"), 0644)
-		_ = afero.WriteFile(fs, sourceDir+"/fileA2.txt", []byte("fileA2 content"), 0644)
-		_ = afero.WriteFile(fs, filepath.Join(sourceDir, impl.InstallerVersionFilePath), []byte("123"), 0644)
 
 		technology = technologyList
 
-		err := Execute(testLog, fs, sourceDir, targetDir)
+		err := Execute(testLog, sourceDir, targetDir)
 		require.NoError(t, err)
 
-		// Check if the target directory and files exist
-		exists, err := afero.DirExists(fs, targetDir)
-		require.NoError(t, err)
-		assert.True(t, exists)
-
-		file1Exists, err := afero.Exists(fs, targetDir+"/fileA1.txt")
-		require.NoError(t, err)
-		assert.True(t, file1Exists)
-
-		file2Exists, err := afero.Exists(fs, targetDir+"/fileA2.txt")
-		require.NoError(t, err)
-		assert.False(t, file2Exists)
-
-		// Check the content of the copied files
-		content, err := afero.ReadFile(fs, targetDir+"/fileA1.txt")
-		require.NoError(t, err)
-		assert.Equal(t, "fileA1 content", string(content))
-
-		content, err = afero.ReadFile(fs, targetDir+"/fileA2.txt")
-		require.Error(t, err)
-		assert.Empty(t, string(content))
+		verifyTarget(t, targetDir, expectedFiles, file2)
 	})
+}
+
+func setupSource(t *testing.T, folder, version string, filesToCreate map[string]string) {
+	t.Helper()
+
+	require.NoError(t, os.Mkdir(folder, os.ModePerm))
+
+	for path, content := range filesToCreate {
+		require.NoError(t, os.WriteFile(filepath.Join(folder, path), []byte(content), 0600))
+	}
+
+	versionFilePath := filepath.Join(folder, impl.InstallerVersionFilePath)
+	require.NoError(t, os.MkdirAll(filepath.Dir(versionFilePath), os.ModePerm))
+	require.NoError(t, os.WriteFile(versionFilePath, []byte(version), 0600))
+
+	agentBinFolder := filepath.Join(folder, filepath.Dir(impl.CurrentDir), version)
+	require.NoError(t, os.MkdirAll(agentBinFolder, 0700))
+}
+
+func verifyTarget(t *testing.T, folder string, copiedFiles map[string]string, missingFiles ...string) {
+	t.Helper()
+
+	for path, expectedContent := range copiedFiles {
+		content, err := os.ReadFile(filepath.Join(folder, path))
+		require.NoError(t, err)
+		assert.Equal(t, expectedContent, string(content))
+	}
+
+	for _, path := range missingFiles {
+		assert.NoFileExists(t, filepath.Join(folder, path))
+	}
 }

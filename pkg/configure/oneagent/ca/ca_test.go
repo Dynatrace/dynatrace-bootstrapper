@@ -7,7 +7,6 @@ import (
 
 	fsutils "github.com/Dynatrace/dynatrace-bootstrapper/pkg/utils/fs"
 	"github.com/go-logr/zapr"
-	"github.com/spf13/afero"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"go.uber.org/zap"
@@ -16,96 +15,102 @@ import (
 var testLog = zapr.NewLogger(zap.NewExample())
 
 func TestConfigure(t *testing.T) {
-	configDir := "path/conf"
-	inputDir := "/path/input"
 	expectedTrusted := "trusted-cert"
 	expectedAG := "ag-cert"
 
 	t.Run("success - both present", func(t *testing.T) {
-		fs := afero.Afero{Fs: afero.NewMemMapFs()}
+		baseTempDir := filepath.Join(t.TempDir(), "path")
+		configDir := filepath.Join(baseTempDir, "config")
+		inputDir := filepath.Join(baseTempDir, "input")
 
-		setupTrusted(t, fs, inputDir, expectedTrusted)
-		setupAG(t, fs, inputDir, expectedAG)
+		setupTrusted(t, inputDir, expectedTrusted)
+		setupAG(t, inputDir, expectedAG)
 
-		err := Configure(testLog, fs, inputDir, configDir)
+		err := Configure(testLog, inputDir, configDir)
 		require.NoError(t, err)
 
 		certFilePath := filepath.Join(configDir, ConfigBasePath, CertsFileName)
-		content, err := fs.ReadFile(certFilePath)
+		content, err := os.ReadFile(certFilePath)
 		require.NoError(t, err)
 		assert.Contains(t, string(content), expectedTrusted)
 		assert.Contains(t, string(content), expectedAG)
 
 		proxyCertFilePath := filepath.Join(configDir, ConfigBasePath, ProxyCertsFileName)
-		content, err = fs.ReadFile(proxyCertFilePath)
+		content, err = os.ReadFile(proxyCertFilePath)
 		require.NoError(t, err)
 		assert.Contains(t, string(content), expectedTrusted)
 		assert.NotContains(t, string(content), expectedAG)
 	})
 
 	t.Run("success - only trusted present", func(t *testing.T) {
-		fs := afero.Afero{Fs: afero.NewMemMapFs()}
+		baseTempDir := filepath.Join(t.TempDir(), "path")
+		configDir := filepath.Join(baseTempDir, "config")
+		inputDir := filepath.Join(baseTempDir, "input")
 
-		setupTrusted(t, fs, inputDir, expectedTrusted)
+		setupTrusted(t, inputDir, expectedTrusted)
 
-		err := Configure(testLog, fs, inputDir, configDir)
+		err := Configure(testLog, inputDir, configDir)
 		require.NoError(t, err)
 
 		certFilePath := filepath.Join(configDir, ConfigBasePath, CertsFileName)
-		content, err := fs.ReadFile(certFilePath)
+		content, err := os.ReadFile(certFilePath)
 		require.NoError(t, err)
 		assert.Contains(t, string(content), expectedTrusted)
 		assert.NotContains(t, string(content), expectedAG)
 
 		proxyCertFilePath := filepath.Join(configDir, ConfigBasePath, ProxyCertsFileName)
-		content, err = fs.ReadFile(proxyCertFilePath)
+		content, err = os.ReadFile(proxyCertFilePath)
 		require.NoError(t, err)
 		assert.Contains(t, string(content), expectedTrusted)
 	})
 
 	t.Run("success - only ag present", func(t *testing.T) {
-		fs := afero.Afero{Fs: afero.NewMemMapFs()}
+		baseTempDir := filepath.Join(t.TempDir(), "path")
+		configDir := filepath.Join(baseTempDir, "config")
+		inputDir := filepath.Join(baseTempDir, "input")
 
-		setupAG(t, fs, inputDir, expectedAG)
+		setupAG(t, inputDir, expectedAG)
 
-		err := Configure(testLog, fs, inputDir, configDir)
+		err := Configure(testLog, inputDir, configDir)
 		require.NoError(t, err)
 
 		certFilePath := filepath.Join(configDir, ConfigBasePath, CertsFileName)
-		content, err := fs.ReadFile(certFilePath)
+		content, err := os.ReadFile(certFilePath)
 		require.NoError(t, err)
 		assert.NotContains(t, string(content), expectedTrusted)
 		assert.Contains(t, string(content), expectedAG)
 
 		proxyCertFilePath := filepath.Join(configDir, ConfigBasePath, ProxyCertsFileName)
-		_, err = fs.ReadFile(proxyCertFilePath)
+		_, err = os.ReadFile(proxyCertFilePath)
 		require.True(t, os.IsNotExist(err))
 	})
 
 	t.Run("missing files == skip", func(t *testing.T) {
-		fs := afero.Afero{Fs: afero.NewMemMapFs()}
+		baseTempDir := filepath.Join(t.TempDir(), "path")
+		configDir := filepath.Join(baseTempDir, "config")
+		inputDir := filepath.Join(baseTempDir, "input")
 
-		err := Configure(testLog, fs, inputDir, configDir)
+		err := Configure(testLog, inputDir, configDir)
 		require.NoError(t, err)
 
 		certFilePath := filepath.Join(configDir, ConfigBasePath, CertsFileName)
-		_, err = fs.ReadFile(certFilePath)
+		_, err = os.ReadFile(certFilePath)
 		require.True(t, os.IsNotExist(err))
 
 		proxyCertFilePath := filepath.Join(configDir, ConfigBasePath, ProxyCertsFileName)
-		_, err = fs.ReadFile(proxyCertFilePath)
+		_, err = os.ReadFile(proxyCertFilePath)
 		require.True(t, os.IsNotExist(err))
 	})
 }
 
-func setupTrusted(t *testing.T, fs afero.Afero, inputDir, value string) {
+func setupTrusted(t *testing.T, inputDir, value string) {
 	t.Helper()
 
-	require.NoError(t, fsutils.CreateFile(fs, filepath.Join(inputDir, TrustedCertsInputFile), value))
+	require.NoError(t, fsutils.CreateFile(filepath.Join(inputDir, TrustedCertsInputFile), value))
 }
 
-func setupAG(t *testing.T, fs afero.Afero, inputDir, value string) {
+func setupAG(t *testing.T, inputDir, value string) {
 	t.Helper()
 
-	require.NoError(t, fsutils.CreateFile(fs, filepath.Join(inputDir, AgCertsInputFile), value))
+	require.NoError(t, fsutils.CreateFile(filepath.Join(inputDir, AgCertsInputFile), value))
 }

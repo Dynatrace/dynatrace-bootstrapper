@@ -7,7 +7,6 @@ import (
 
 	fsutils "github.com/Dynatrace/dynatrace-bootstrapper/pkg/utils/fs"
 	"github.com/go-logr/zapr"
-	"github.com/spf13/afero"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"go.uber.org/zap"
@@ -17,34 +16,37 @@ var testLog = zapr.NewLogger(zap.NewExample())
 
 func TestConfigure(t *testing.T) {
 	expectedValue := "123"
-	configDir := "path/conf"
-	inputDir := "/path/input"
 
 	t.Run("success", func(t *testing.T) {
-		fs := afero.Afero{Fs: afero.NewMemMapFs()}
-		setupFs(t, fs, inputDir, expectedValue)
+		baseTempDir := filepath.Join(t.TempDir(), "path")
+		configDir := filepath.Join(baseTempDir, "config", "container")
+		inputDir := filepath.Join(baseTempDir, "input")
 
-		err := Configure(testLog, fs, inputDir, configDir)
+		setupFs(t, inputDir, expectedValue)
+
+		err := Configure(testLog, inputDir, configDir)
 		require.NoError(t, err)
 
-		content, err := fs.ReadFile(filepath.Join(configDir, ConfigPath))
+		content, err := os.ReadFile(filepath.Join(configDir, ConfigPath))
 		require.NoError(t, err)
 		assert.Contains(t, string(content), expectedValue)
 	})
 
 	t.Run("missing file == skip", func(t *testing.T) {
-		fs := afero.Afero{Fs: afero.NewMemMapFs()}
+		baseTempDir := filepath.Join(t.TempDir(), "path")
+		configDir := filepath.Join(baseTempDir, "config", "container")
+		inputDir := filepath.Join(baseTempDir, "input")
 
-		err := Configure(testLog, fs, inputDir, configDir)
+		err := Configure(testLog, inputDir, configDir)
 		require.NoError(t, err)
 
-		_, err = fs.ReadFile(filepath.Join(configDir, ConfigPath))
+		_, err = os.ReadFile(filepath.Join(configDir, ConfigPath))
 		require.True(t, os.IsNotExist(err))
 	})
 }
 
-func setupFs(t *testing.T, fs afero.Afero, inputDir, value string) {
+func setupFs(t *testing.T, inputDir, value string) {
 	t.Helper()
 
-	require.NoError(t, fsutils.CreateFile(fs, filepath.Join(inputDir, InputFileName), value))
+	require.NoError(t, fsutils.CreateFile(filepath.Join(inputDir, InputFileName), value))
 }

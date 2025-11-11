@@ -7,11 +7,10 @@ import (
 	"github.com/Dynatrace/dynatrace-bootstrapper/pkg/configure/oneagent/pmc/ruxit"
 	"github.com/go-logr/logr"
 	"github.com/pkg/errors"
-	"github.com/spf13/afero"
 )
 
-func Create(log logr.Logger, fs afero.Fs, srcPath, dstPath string, conf ruxit.ProcConf) error {
-	srcFile, err := fs.Open(srcPath)
+func Create(log logr.Logger, srcPath, dstPath string, conf ruxit.ProcConf) error {
+	srcFile, err := os.Open(srcPath)
 	if err != nil {
 		log.Info("failed to open source file", "path", srcPath)
 
@@ -36,14 +35,14 @@ func Create(log logr.Logger, fs afero.Fs, srcPath, dstPath string, conf ruxit.Pr
 
 	mergedConf := srcConf.Merge(conf)
 
-	err = fs.MkdirAll(filepath.Dir(dstPath), os.ModePerm)
+	err = os.MkdirAll(filepath.Dir(dstPath), os.ModePerm)
 	if err != nil {
 		log.Info("failed to create destination dir", "path", filepath.Dir(filepath.Dir(dstPath)))
 
 		return err
 	}
 
-	dstFile, err := fs.OpenFile(dstPath, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, srcInfo.Mode())
+	dstFile, err := os.OpenFile(dstPath, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, srcInfo.Mode())
 	if err != nil {
 		log.Info("failed to open destination file to write", "path", dstPath)
 

@@ -7,7 +7,6 @@ import (
 	"github.com/Dynatrace/dynatrace-bootstrapper/cmd/configure/attributes/pod"
 	fsutils "github.com/Dynatrace/dynatrace-bootstrapper/pkg/utils/fs"
 	"github.com/go-logr/logr"
-	"github.com/spf13/afero"
 )
 
 const (
@@ -15,7 +14,7 @@ const (
 	PropertiesFilePath = "enrichment/dt_metadata.properties"
 )
 
-func Configure(log logr.Logger, fs afero.Afero, configDirectory string, podAttr pod.Attributes, containerAttr container.Attributes) error {
+func Configure(log logr.Logger, configDirectory string, podAttr pod.Attributes, containerAttr container.Attributes) error {
 	confContent := fromAttributes(containerAttr, podAttr)
 
 	log.V(1).Info("format content into a raw form", "struct", confContent)
@@ -27,7 +26,7 @@ func Configure(log logr.Logger, fs afero.Afero, configDirectory string, podAttr 
 
 	jsonFilePath := filepath.Join(configDirectory, JSONFilePath)
 
-	err = fsutils.CreateFile(fs, jsonFilePath, string(confJSON))
+	err = fsutils.CreateFile(jsonFilePath, string(confJSON))
 	if err != nil {
 		log.Error(err, "failed to create metadata-enrichment properties file", "struct", jsonFilePath)
 
@@ -41,7 +40,7 @@ func Configure(log logr.Logger, fs afero.Afero, configDirectory string, podAttr 
 
 	propsFilePath := filepath.Join(configDirectory, PropertiesFilePath)
 
-	err = fsutils.CreateFile(fs, propsFilePath, confProperties)
+	err = fsutils.CreateFile(propsFilePath, confProperties)
 	if err != nil {
 		log.Error(err, "failed to create metadata-enrichment properties file", "struct", propsFilePath)
 

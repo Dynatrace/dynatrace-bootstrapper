@@ -6,34 +6,12 @@ else
 	GCI_TARGET ?= $(LINT_TARGET)
 endif
 
-## Runs go fmt
-go/fmt:
-	go fmt $(LINT_TARGET)
-
-## Runs gci
-go/gci:
-	gci write --skip-generated $(GCI_TARGET)
-
-## Runs linters that format/change the code in place
-go/format: go/fmt go/gci
-
-## Runs go vet
-go/vet:
-	go vet -copylocks=false $(LINT_TARGET)
-
-## Runs go wsl linter
-go/wsl:
-	wsl -fix -allow-trailing-comment ./...
-
 ## Runs golangci-lint
 go/golangci:
-	golangci-lint run --timeout 300s
-
-go/betteralign:
-	betteralign -apply ./...
+	golangci-lint run --fix --timeout 300s
 
 ## Runs all the linting tools
-go/lint: prerequisites/go-linting go/format go/vet go/wsl go/betteralign go/golangci go/deadcode
+go/lint: prerequisites/go-linting go/golangci go/deadcode
 
 ## Runs all go unit tests and writes the coverprofile to coverage.txt
 go/test:

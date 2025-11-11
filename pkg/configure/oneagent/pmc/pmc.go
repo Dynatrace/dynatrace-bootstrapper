@@ -6,7 +6,6 @@ import (
 
 	"github.com/Dynatrace/dynatrace-bootstrapper/pkg/configure/oneagent/pmc/ruxit"
 	"github.com/go-logr/logr"
-	"github.com/spf13/afero"
 )
 
 const (
@@ -24,10 +23,10 @@ func GetDestinationRuxitAgentProcFilePath(configDir string) string {
 	return filepath.Join(configDir, DestinationRuxitAgentProcPath)
 }
 
-func Configure(log logr.Logger, fs afero.Afero, inputDir, targetDir, configDir, installPath string) error {
+func Configure(log logr.Logger, inputDir, targetDir, configDir, installPath string) error {
 	inputFilePath := filepath.Join(inputDir, InputFileName)
 
-	inputFile, err := fs.Open(inputFilePath)
+	inputFile, err := os.Open(inputFilePath)
 	if err != nil {
 		if os.IsNotExist(err) {
 			log.Info("Input file not present, skipping ruxitagentproc.conf configuration", "path", inputFilePath)
@@ -56,5 +55,5 @@ func Configure(log logr.Logger, fs afero.Afero, inputDir, targetDir, configDir, 
 
 	log.Info("creating ruxitagentproc.conf", "source", srcPath, "destination", dstPath)
 
-	return Create(log, fs, srcPath, dstPath, conf)
+	return Create(log, srcPath, dstPath, conf)
 }
