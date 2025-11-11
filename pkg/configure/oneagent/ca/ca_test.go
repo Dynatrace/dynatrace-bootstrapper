@@ -19,9 +19,9 @@ func TestConfigure(t *testing.T) {
 	expectedAG := "ag-cert"
 
 	t.Run("success - both present", func(t *testing.T) {
-		tmpDir := t.TempDir()
-		configDir := filepath.Join(tmpDir, "path", "conf")
-		inputDir := filepath.Join(tmpDir, "path", "input")
+		baseTempDir := filepath.Join(t.TempDir(), "path")
+		configDir := filepath.Join(baseTempDir, "config")
+		inputDir := filepath.Join(baseTempDir, "input")
 
 		setupTrusted(t, inputDir, expectedTrusted)
 		setupAG(t, inputDir, expectedAG)
@@ -43,9 +43,9 @@ func TestConfigure(t *testing.T) {
 	})
 
 	t.Run("success - only trusted present", func(t *testing.T) {
-		tmpDir := t.TempDir()
-		configDir := filepath.Join(tmpDir, "path", "conf")
-		inputDir := filepath.Join(tmpDir, "path", "input")
+		baseTempDir := filepath.Join(t.TempDir(), "path")
+		configDir := filepath.Join(baseTempDir, "config")
+		inputDir := filepath.Join(baseTempDir, "input")
 
 		setupTrusted(t, inputDir, expectedTrusted)
 
@@ -65,9 +65,9 @@ func TestConfigure(t *testing.T) {
 	})
 
 	t.Run("success - only ag present", func(t *testing.T) {
-		tmpDir := t.TempDir()
-		configDir := filepath.Join(tmpDir, "path", "conf")
-		inputDir := filepath.Join(tmpDir, "path", "input")
+		baseTempDir := filepath.Join(t.TempDir(), "path")
+		configDir := filepath.Join(baseTempDir, "config")
+		inputDir := filepath.Join(baseTempDir, "input")
 
 		setupAG(t, inputDir, expectedAG)
 
@@ -86,9 +86,9 @@ func TestConfigure(t *testing.T) {
 	})
 
 	t.Run("missing files == skip", func(t *testing.T) {
-		tmpDir := t.TempDir()
-		configDir := filepath.Join(tmpDir, "path", "conf")
-		inputDir := filepath.Join(tmpDir, "path", "input")
+		baseTempDir := filepath.Join(t.TempDir(), "path")
+		configDir := filepath.Join(baseTempDir, "config")
+		inputDir := filepath.Join(baseTempDir, "input")
 
 		err := Configure(testLog, inputDir, configDir)
 		require.NoError(t, err)

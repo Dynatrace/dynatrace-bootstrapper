@@ -36,9 +36,5 @@ func TestCreateFile(t *testing.T) {
 		content, err := os.ReadFile(fileName)
 		require.NoError(t, err)
 		assert.Equal(t, expectedContent, string(content))
-
-		stat, err := os.Stat(filepath.Dir(fileName))
-		require.NoError(t, err)
-		assert.True(t, stat.IsDir())
 	})
 }

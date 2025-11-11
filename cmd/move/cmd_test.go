@@ -15,17 +15,23 @@ import (
 var testLog = zapr.NewLogger(zap.NewExample())
 
 func TestExecute(t *testing.T) {
+	const (
+		file1 = "fileA1.txt"
+		file2 = "fileA2.txt"
+	)
+
 	t.Run("simple copy", func(t *testing.T) {
 		tmpDir := t.TempDir()
 		sourceDir := filepath.Join(tmpDir, "source")
 		targetDir := filepath.Join(tmpDir, "target")
-
-		// Create source directory and files
 		workDir := filepath.Join(tmpDir, "work")
-		_ = os.MkdirAll(sourceDir, 0755)
-		_ = os.WriteFile(sourceDir+"/file1.txt", []byte("file1 content"), 0600)
-		_ = os.WriteFile(sourceDir+"/file2.txt", []byte("file2 content"), 0600)
-		setupSource(t, sourceDir, "123")
+
+		files := map[string]string{
+			file1: "file1 content",
+			file2: "file2 content",
+		}
+
+		setupSource(t, sourceDir, "123", files)
 
 		workFolder = workDir
 
@@ -34,24 +40,7 @@ func TestExecute(t *testing.T) {
 		err := Execute(testLog, sourceDir, targetDir)
 		require.NoError(t, err)
 
-		// Check if the target directory and files exist
-		_, err = os.Stat(targetDir)
-		require.NoError(t, err)
-
-		_, err = os.Stat(targetDir + "/file1.txt")
-		require.NoError(t, err)
-
-		_, err = os.Stat(targetDir + "/file2.txt")
-		require.NoError(t, err)
-
-		// Check the content of the copied files
-		content, err := os.ReadFile(targetDir + "/file1.txt")
-		require.NoError(t, err)
-		assert.Equal(t, "file1 content", string(content))
-
-		content, err = os.ReadFile(targetDir + "/file2.txt")
-		require.NoError(t, err)
-		assert.Equal(t, "file2 content", string(content))
+		verifyTarget(t, targetDir, files)
 
 		// Check the cleanup happened of the copied files
 		_, err = os.Stat(workDir)
@@ -62,6 +51,7 @@ func TestExecute(t *testing.T) {
 		sourceDir := filepath.Join(tmpDir, "source")
 		targetDir := filepath.Join(tmpDir, "target")
 
+		manifestFile := "manifest.json"
 		manifestContent := `{
 			"version": "1.0",
 			"technologies": {
@@ -80,41 +70,37 @@ func TestExecute(t *testing.T) {
 			}
 		}`
 
+		files := map[string]string{
+			manifestFile: manifestContent,
+			file1:        "file1 content",
+			file2:        "file2 content",
+		}
+
+		expectedFiles := map[string]string{
+			file1: "file1 content",
+		}
+
+		setupSource(t, sourceDir, "123", files)
+
 		technologyList := "java"
-		_ = os.MkdirAll(sourceDir, 0755)
-		_ = os.WriteFile(sourceDir+"/manifest.json", []byte(manifestContent), 0600)
-		_ = os.WriteFile(sourceDir+"/fileA1.txt", []byte("fileA1 content"), 0600)
-		_ = os.WriteFile(sourceDir+"/fileA2.txt", []byte("fileA2 content"), 0600)
-		setupSource(t, sourceDir, "123")
 
 		technology = technologyList
 
 		err := Execute(testLog, sourceDir, targetDir)
 		require.NoError(t, err)
 
-		// Check if the target directory and files exist
-		_, err = os.Stat(targetDir)
-		require.NoError(t, err)
-
-		_, err = os.Stat(targetDir + "/fileA1.txt")
-		require.NoError(t, err)
-
-		_, err = os.Stat(targetDir + "/fileA2.txt")
-		require.Error(t, err)
-
-		// Check the content of the copied files
-		content, err := os.ReadFile(targetDir + "/fileA1.txt")
-		require.NoError(t, err)
-		assert.Equal(t, "fileA1 content", string(content))
-
-		content, err = os.ReadFile(targetDir + "/fileA2.txt")
-		require.Error(t, err)
-		assert.Empty(t, string(content))
+		verifyTarget(t, targetDir, expectedFiles, file2)
 	})
 }
 
-func setupSource(t *testing.T, folder, version string) {
+func setupSource(t *testing.T, folder, version string, filesToCreate map[string]string) {
 	t.Helper()
+
+	require.NoError(t, os.Mkdir(folder, os.ModePerm))
+
+	for path, content := range filesToCreate {
+		require.NoError(t, os.WriteFile(filepath.Join(folder, path), []byte(content), 0600))
+	}
 
 	versionFilePath := filepath.Join(folder, impl.InstallerVersionFilePath)
 	require.NoError(t, os.MkdirAll(filepath.Dir(versionFilePath), os.ModePerm))
@@ -122,4 +108,18 @@ func setupSource(t *testing.T, folder, version string) {
 
 	agentBinFolder := filepath.Join(folder, filepath.Dir(impl.CurrentDir), version)
 	require.NoError(t, os.MkdirAll(agentBinFolder, 0700))
+}
+
+func verifyTarget(t *testing.T, folder string, copiedFiles map[string]string, missingFiles ...string) {
+	t.Helper()
+
+	for path, expectedContent := range copiedFiles {
+		content, err := os.ReadFile(filepath.Join(folder, path))
+		require.NoError(t, err)
+		assert.Equal(t, expectedContent, string(content))
+	}
+
+	for _, path := range missingFiles {
+		assert.NoFileExists(t, filepath.Join(folder, path))
+	}
 }

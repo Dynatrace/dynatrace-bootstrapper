@@ -27,7 +27,7 @@ func Atomic(work string, copyFunc CopyFunc) CopyFunc {
 		defer func() {
 			if err != nil {
 				if cleanupErr := os.RemoveAll(work); cleanupErr != nil {
-					log.Error(err, "failed cleanup of workdir after failure")
+					log.Error(cleanupErr, "failed cleanup of workdir after failure")
 				}
 			}
 		}()

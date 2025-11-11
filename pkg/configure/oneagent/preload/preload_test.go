@@ -15,10 +15,9 @@ var testLog = zapr.NewLogger(zap.NewExample())
 
 func TestConfigure(t *testing.T) {
 	t.Run("success", func(t *testing.T) {
-		tmpDir := t.TempDir()
-
-		configDir := filepath.Join(tmpDir, "path", "conf")
-		installPath := filepath.Join(tmpDir, "path", "install")
+		baseTempDir := filepath.Join(t.TempDir(), "path")
+		configDir := filepath.Join(baseTempDir, "conf")
+		installPath := filepath.Join(baseTempDir, "install")
 		expectedContent := filepath.Join(installPath, LibAgentProcPath)
 
 		err := Configure(testLog, configDir, installPath)

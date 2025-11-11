@@ -43,8 +43,8 @@ func TestConfigure(t *testing.T) {
 	}
 
 	t.Run("success", func(t *testing.T) {
-		tmpDir := t.TempDir()
-		configDir := filepath.Join(tmpDir, "path", "conf")
+		baseTempDir := filepath.Join(t.TempDir(), "path")
+		configDir := filepath.Join(baseTempDir, "config")
 
 		err := Configure(testLog, configDir, podAttr, containerAttr)
 		require.NoError(t, err)

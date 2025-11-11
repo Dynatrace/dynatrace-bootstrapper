@@ -24,9 +24,7 @@ func mockCopyFuncWithAtomicCheck(t *testing.T, workFolder string, isSuccessful b
 		require.Equal(t, workFolder, target)
 
 		// the atomic wrapper should already have created the base workFolder
-		stat, err := os.Stat(target)
-		require.NoError(t, err)
-		require.True(t, stat.IsDir())
+		assert.DirExists(t, target)
 
 		if isSuccessful {
 			file, err := os.Create(filepath.Join(target, "test.txt"))
@@ -57,12 +55,8 @@ func TestAtomic(t *testing.T) {
 
 		require.NotEqual(t, work, target)
 
-		_, err = os.Stat(work)
-		require.True(t, os.IsNotExist(err))
-
-		stat, err := os.Stat(target)
-		require.NoError(t, err)
-		require.True(t, stat.IsDir())
+		assert.NoDirExists(t, work)
+		require.DirExists(t, target)
 
 		files, err := os.ReadDir(target)
 		require.NoError(t, err)
@@ -82,10 +76,7 @@ func TestAtomic(t *testing.T) {
 
 		require.NotEqual(t, work, target)
 
-		_, err = os.Stat(work)
-		require.True(t, os.IsNotExist(err))
-
-		_, err = os.Stat(target)
-		require.True(t, os.IsNotExist(err))
+		assert.NoDirExists(t, work)
+		assert.NoDirExists(t, target)
 	})
 }

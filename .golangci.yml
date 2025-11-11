@@ -92,7 +92,6 @@ linters:
             - github.com/go-logr/logr
             - github.com/go-logr/zapr
             - github.com/pkg/errors
-            - github.com/spf13/afero
             - github.com/spf13/cobra
             - github.com/stretchr/testify
             - go.uber.org/zap

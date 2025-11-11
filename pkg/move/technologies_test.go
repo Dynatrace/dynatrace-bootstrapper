@@ -54,10 +54,10 @@ func TestCopyFolderWithTechnologyFiltering(t *testing.T) {
 		err := CopyByTechnology(testLog, sourceDir, targetDir, technology)
 		require.NoError(t, err)
 
-		assertFileExists(t, filepath.Join(targetDir, "fileA1.txt"))
-		assertFileExists(t, filepath.Join(targetDir, "fileA2.txt"))
-		assertFileNotExists(t, filepath.Join(targetDir, "fileB1.txt"))
-		assertFileNotExists(t, filepath.Join(targetDir, "fileC1.txt"))
+		assert.FileExists(t, filepath.Join(targetDir, "fileA1.txt"))
+		assert.FileExists(t, filepath.Join(targetDir, "fileA2.txt"))
+		assert.NoFileExists(t, filepath.Join(targetDir, "fileB1.txt"))
+		assert.NoFileExists(t, filepath.Join(targetDir, "fileC1.txt"))
 	})
 	t.Run("copy with multiple technology filter", func(t *testing.T) {
 		t.Cleanup(func() {
@@ -69,10 +69,10 @@ func TestCopyFolderWithTechnologyFiltering(t *testing.T) {
 		err := CopyByTechnology(testLog, sourceDir, targetDir, technology)
 		require.NoError(t, err)
 
-		assertFileExists(t, filepath.Join(targetDir, "fileA1.txt"))
-		assertFileExists(t, filepath.Join(targetDir, "fileA2.txt"))
-		assertFileExists(t, filepath.Join(targetDir, "fileB1.txt"))
-		assertFileNotExists(t, filepath.Join(targetDir, "fileC1.txt"))
+		assert.FileExists(t, filepath.Join(targetDir, "fileA1.txt"))
+		assert.FileExists(t, filepath.Join(targetDir, "fileA2.txt"))
+		assert.FileExists(t, filepath.Join(targetDir, "fileB1.txt"))
+		assert.NoFileExists(t, filepath.Join(targetDir, "fileC1.txt"))
 	})
 	t.Run("copy with multiple technology filter with whitespace", func(t *testing.T) {
 		t.Cleanup(func() {
@@ -84,10 +84,10 @@ func TestCopyFolderWithTechnologyFiltering(t *testing.T) {
 		err := CopyByTechnology(testLog, sourceDir, targetDir, technology)
 		require.NoError(t, err)
 
-		assertFileExists(t, filepath.Join(targetDir, "fileA1.txt"))
-		assertFileExists(t, filepath.Join(targetDir, "fileA2.txt"))
-		assertFileExists(t, filepath.Join(targetDir, "fileB1.txt"))
-		assertFileNotExists(t, filepath.Join(targetDir, "fileC1.txt"))
+		assert.FileExists(t, filepath.Join(targetDir, "fileA1.txt"))
+		assert.FileExists(t, filepath.Join(targetDir, "fileA2.txt"))
+		assert.FileExists(t, filepath.Join(targetDir, "fileB1.txt"))
+		assert.NoFileExists(t, filepath.Join(targetDir, "fileC1.txt"))
 	})
 	t.Run("copy with invalid technology filter", func(t *testing.T) {
 		t.Cleanup(func() {
@@ -99,10 +99,10 @@ func TestCopyFolderWithTechnologyFiltering(t *testing.T) {
 		err := CopyByTechnology(testLog, sourceDir, targetDir, technology)
 		require.NoError(t, err)
 
-		assertFileNotExists(t, filepath.Join(targetDir, "fileA1.txt"))
-		assertFileNotExists(t, filepath.Join(targetDir, "fileA2.txt"))
-		assertFileNotExists(t, filepath.Join(targetDir, "fileB1.txt"))
-		assertFileNotExists(t, filepath.Join(targetDir, "fileC1.txt"))
+		assert.NoFileExists(t, filepath.Join(targetDir, "fileA1.txt"))
+		assert.NoFileExists(t, filepath.Join(targetDir, "fileA2.txt"))
+		assert.NoFileExists(t, filepath.Join(targetDir, "fileB1.txt"))
+		assert.NoFileExists(t, filepath.Join(targetDir, "fileC1.txt"))
 	})
 }
 
@@ -256,18 +256,4 @@ func TestFilterFilesByTechnology(t *testing.T) {
 		require.Error(t, err)
 		assert.Nil(t, paths)
 	})
-}
-
-func assertFileExists(t *testing.T, path string) {
-	t.Helper()
-
-	stat, err := os.Stat(path)
-	require.NoError(t, err)
-	assert.NotNil(t, stat, "file should exist: "+path)
-}
-func assertFileNotExists(t *testing.T, path string) {
-	t.Helper()
-
-	_, err := os.Stat(path)
-	require.True(t, os.IsNotExist(err))
 }

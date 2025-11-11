@@ -18,12 +18,11 @@ var testLog = zapr.NewLogger(zap.NewExample())
 
 func TestConfigure(t *testing.T) {
 	t.Run("success", func(t *testing.T) {
-		tmpDir := t.TempDir()
-
-		targetDir := filepath.Join(tmpDir, "path", "target")
-		inputDir := filepath.Join(tmpDir, "path", "input")
-		configDir := filepath.Join(tmpDir, "path", "config", "container")
-		installPath := filepath.Join(tmpDir, "path", "install")
+		baseTempDir := filepath.Join(t.TempDir(), "path")
+		configDir := filepath.Join(baseTempDir, "config", "container")
+		installPath := filepath.Join(baseTempDir, "install")
+		targetDir := filepath.Join(baseTempDir, "target")
+		inputDir := filepath.Join(baseTempDir, "input")
 
 		source := ruxit.ProcConf{
 			Properties: []ruxit.Property{
@@ -71,12 +70,11 @@ func TestConfigure(t *testing.T) {
 		assert.Equal(t, source.Merge(override).ToString(), string(content))
 	})
 	t.Run("missing file == skip", func(t *testing.T) {
-		tmpDir := t.TempDir()
-
-		targetDir := filepath.Join(tmpDir, "path", "target")
-		inputDir := filepath.Join(tmpDir, "path", "input")
-		configDir := filepath.Join(tmpDir, "path", "config", "container")
-		installPath := filepath.Join(tmpDir, "path", "install")
+		baseTempDir := filepath.Join(t.TempDir(), "path")
+		configDir := filepath.Join(baseTempDir, "config", "container")
+		installPath := filepath.Join(baseTempDir, "install")
+		targetDir := filepath.Join(baseTempDir, "target")
+		inputDir := filepath.Join(baseTempDir, "input")
 
 		source := ruxit.ProcConf{
 			Properties: []ruxit.Property{

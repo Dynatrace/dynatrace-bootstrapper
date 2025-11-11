@@ -38,8 +38,8 @@ func TestConfigure(t *testing.T) {
 	}
 
 	t.Run("success - not fullstack", func(t *testing.T) {
-		tmpDir := t.TempDir()
-		configDir := filepath.Join(tmpDir, "path", "conf")
+		baseTempDir := filepath.Join(t.TempDir(), "path")
+		configDir := filepath.Join(baseTempDir, "config")
 
 		err := Configure(testLog, configDir, containerAttr, podAttr, "", false)
 		require.NoError(t, err)
@@ -73,8 +73,8 @@ func TestConfigure(t *testing.T) {
 	})
 
 	t.Run("success - fullstack", func(t *testing.T) {
-		tmpDir := t.TempDir()
-		configDir := filepath.Join(tmpDir, "path", "conf")
+		baseTempDir := filepath.Join(t.TempDir(), "path")
+		configDir := filepath.Join(baseTempDir, "config")
 
 		tenant := "test-tenant"
 
@@ -96,8 +96,8 @@ func TestConfigure(t *testing.T) {
 	})
 
 	t.Run("error - fullstack but no tenant", func(t *testing.T) {
-		tmpDir := t.TempDir()
-		configDir := filepath.Join(tmpDir, "path", "conf")
+		baseTempDir := filepath.Join(t.TempDir(), "path")
+		configDir := filepath.Join(baseTempDir, "config")
 
 		err := Configure(testLog, configDir, containerAttr, podAttr, "", true)
 		require.Error(t, err)

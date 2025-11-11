@@ -18,9 +18,9 @@ func TestConfigure(t *testing.T) {
 	expectedValue := "123"
 
 	t.Run("success", func(t *testing.T) {
-		tmpDir := t.TempDir()
-		configDir := filepath.Join(tmpDir, "path", "conf")
-		inputDir := filepath.Join(tmpDir, "path", "input")
+		baseTempDir := filepath.Join(t.TempDir(), "path")
+		configDir := filepath.Join(baseTempDir, "config", "container")
+		inputDir := filepath.Join(baseTempDir, "input")
 
 		setupFs(t, inputDir, expectedValue)
 
@@ -33,9 +33,9 @@ func TestConfigure(t *testing.T) {
 	})
 
 	t.Run("missing file == skip", func(t *testing.T) {
-		tmpDir := t.TempDir()
-		configDir := filepath.Join(tmpDir, "path", "conf")
-		inputDir := filepath.Join(tmpDir, "path", "input")
+		baseTempDir := filepath.Join(t.TempDir(), "path")
+		configDir := filepath.Join(baseTempDir, "config", "container")
+		inputDir := filepath.Join(baseTempDir, "input")
 
 		err := Configure(testLog, inputDir, configDir)
 		require.NoError(t, err)

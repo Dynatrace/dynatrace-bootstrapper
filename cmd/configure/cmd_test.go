@@ -35,10 +35,10 @@ func TestSetupOneAgent(t *testing.T) {
 	}
 
 	t.Run("success", func(t *testing.T) {
-		tmpDir := t.TempDir()
-		configDir = filepath.Join(tmpDir, "path", "conf")
-		inputDir = filepath.Join(tmpDir, "path", "input")
-		targetFolder := filepath.Join(tmpDir, "path", "target")
+		baseTempDir := filepath.Join(t.TempDir(), "path")
+		configDir = filepath.Join(baseTempDir, "conf")
+		inputDir = filepath.Join(baseTempDir, "input")
+		targetFolder := filepath.Join(baseTempDir, "target")
 
 		setupInputFs(t, inputDir)
 		setupTargetFs(t, targetFolder)
@@ -70,10 +70,10 @@ func TestSetupOneAgent(t *testing.T) {
 	})
 
 	t.Run("no input-directory ==> do nothing", func(t *testing.T) {
-		tmpDir := t.TempDir()
-		configDir = filepath.Join(tmpDir, "path", "conf")
+		baseTempDir := filepath.Join(t.TempDir(), "path")
+		configDir = filepath.Join(baseTempDir, "conf")
+		targetFolder := filepath.Join(baseTempDir, "target")
 		inputDir = ""
-		targetFolder := filepath.Join(tmpDir, "path", "target")
 
 		err := SetupOneAgent(testLog, targetFolder)
 		require.NoError(t, err)
@@ -86,10 +86,10 @@ func TestSetupOneAgent(t *testing.T) {
 	})
 
 	t.Run("no config-directory ==> do nothing", func(t *testing.T) {
-		tmpDir := t.TempDir()
+		baseTempDir := filepath.Join(t.TempDir(), "path")
+		inputDir = filepath.Join(baseTempDir, "input")
+		targetFolder := filepath.Join(baseTempDir, "target")
 		configDir = ""
-		inputDir = filepath.Join(tmpDir, "path", "input")
-		targetFolder := filepath.Join(tmpDir, "path", "target")
 
 		err := SetupOneAgent(testLog, targetFolder)
 		require.NoError(t, err)
@@ -116,9 +116,9 @@ func TestEnrichWithMetadata(t *testing.T) {
 	}
 
 	t.Run("success", func(t *testing.T) {
-		tmpDir := t.TempDir()
-		configDir = filepath.Join(tmpDir, "path", "conf")
-		inputDir = filepath.Join(tmpDir, "path", "input")
+		baseTempDir := filepath.Join(t.TempDir(), "path")
+		configDir = filepath.Join(baseTempDir, "conf")
+		inputDir = filepath.Join(baseTempDir, "input")
 
 		setupInputFs(t, inputDir)
 
@@ -143,8 +143,8 @@ func TestEnrichWithMetadata(t *testing.T) {
 	})
 
 	t.Run("no input-directory ==> do nothing", func(t *testing.T) {
-		tmpDir := t.TempDir()
-		configDir = filepath.Join(tmpDir, "path", "conf")
+		baseTempDir := filepath.Join(t.TempDir(), "path")
+		configDir = filepath.Join(baseTempDir, "conf")
 		inputDir = ""
 
 		err := EnrichWithMetadata(testLog)
@@ -155,9 +155,9 @@ func TestEnrichWithMetadata(t *testing.T) {
 	})
 
 	t.Run("no config-directory ==> do nothing", func(t *testing.T) {
-		tmpDir := t.TempDir()
+		baseTempDir := filepath.Join(t.TempDir(), "path")
 		configDir = ""
-		inputDir = filepath.Join(tmpDir, "path", "input")
+		inputDir = filepath.Join(baseTempDir, "input")
 
 		err := EnrichWithMetadata(testLog)
 		require.NoError(t, err)
