@@ -1,11 +1,11 @@
-package init
+package k8sinit
 
 import (
 	"fmt"
 	"os"
 
-	"github.com/Dynatrace/dynatrace-bootstrapper/cmd/init/configure"
-	"github.com/Dynatrace/dynatrace-bootstrapper/cmd/init/move"
+	"github.com/Dynatrace/dynatrace-bootstrapper/cmd/k8sinit/configure"
+	"github.com/Dynatrace/dynatrace-bootstrapper/cmd/k8sinit/move"
 	"github.com/Dynatrace/dynatrace-bootstrapper/pkg/version"
 	"github.com/go-logr/logr"
 	"github.com/go-logr/zapr"
@@ -15,7 +15,7 @@ import (
 )
 
 const (
-	Use = "init"
+	Use = "k8s-init"
 
 	SourceFolderFlag   = "source"
 	TargetFolderFlag   = "target"

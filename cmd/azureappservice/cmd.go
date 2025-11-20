@@ -1,4 +1,4 @@
-package serverless
+package azureappservice
 
 import (
 	"context"
@@ -18,7 +18,7 @@ import (
 )
 
 const (
-	Use = "serverless"
+	Use = "azure-app-service"
 )
 
 func New() *cobra.Command {
@@ -55,7 +55,10 @@ func run(_ *cobra.Command, _ []string) error {
 		default:
 			sync.OnceFunc(func() {
 				log.Info("I am serverless")
+
 				// wait for lock file
+
+				// do work
 			})()
 
 			time.Sleep(time.Second)

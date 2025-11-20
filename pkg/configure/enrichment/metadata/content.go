@@ -5,8 +5,8 @@ import (
 	"maps"
 	"strings"
 
-	"github.com/Dynatrace/dynatrace-bootstrapper/cmd/init/configure/attributes/container"
-	"github.com/Dynatrace/dynatrace-bootstrapper/cmd/init/configure/attributes/pod"
+	"github.com/Dynatrace/dynatrace-bootstrapper/cmd/k8sinit/configure/attributes/container"
+	"github.com/Dynatrace/dynatrace-bootstrapper/cmd/k8sinit/configure/attributes/pod"
 	"github.com/Dynatrace/dynatrace-bootstrapper/pkg/utils/structs"
 	"github.com/pkg/errors"
 )

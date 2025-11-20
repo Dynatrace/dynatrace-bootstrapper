@@ -3,8 +3,8 @@ package configure
 import (
 	"path/filepath"
 
-	"github.com/Dynatrace/dynatrace-bootstrapper/cmd/init/configure/attributes/container"
-	"github.com/Dynatrace/dynatrace-bootstrapper/cmd/init/configure/attributes/pod"
+	"github.com/Dynatrace/dynatrace-bootstrapper/cmd/k8sinit/configure/attributes/container"
+	"github.com/Dynatrace/dynatrace-bootstrapper/cmd/k8sinit/configure/attributes/pod"
 	"github.com/Dynatrace/dynatrace-bootstrapper/pkg/configure/enrichment/endpoint"
 	"github.com/Dynatrace/dynatrace-bootstrapper/pkg/configure/enrichment/metadata"
 	"github.com/Dynatrace/dynatrace-bootstrapper/pkg/configure/oneagent/ca"
