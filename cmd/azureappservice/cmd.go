@@ -44,6 +44,8 @@ func run(_ *cobra.Command, _ []string) error {
 	ctx, cancel := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
 	defer cancel()
 
+	configureOnce := sync.OnceFunc(configureStuff)
+
 	for {
 		select {
 		case <-ctx.Done():
@@ -53,18 +55,22 @@ func run(_ *cobra.Command, _ []string) error {
 
 			return nil
 		default:
-			sync.OnceFunc(func() {
-				log.Info("I am serverless")
-
-				// wait for lock file
-
-				// do work
-			})()
+			configureOnce()
 
 			time.Sleep(time.Second)
 			log.Info("I am alive !!!!!!")
 		}
 	}
+}
+
+func configureStuff() {
+		log.Info("I am serverless, doing some config, beep-boop")
+
+		// wait for lock file
+
+		// do work
+
+		log.Info("config done")
 }
 
 func setupLogger() {
