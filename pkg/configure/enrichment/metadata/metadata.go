@@ -3,8 +3,8 @@ package metadata
 import (
 	"path/filepath"
 
-	"github.com/Dynatrace/dynatrace-bootstrapper/cmd/configure/attributes/container"
-	"github.com/Dynatrace/dynatrace-bootstrapper/cmd/configure/attributes/pod"
+	"github.com/Dynatrace/dynatrace-bootstrapper/cmd/init/configure/attributes/container"
+	"github.com/Dynatrace/dynatrace-bootstrapper/cmd/init/configure/attributes/pod"
 	fsutils "github.com/Dynatrace/dynatrace-bootstrapper/pkg/utils/fs"
 	"github.com/go-logr/logr"
 )

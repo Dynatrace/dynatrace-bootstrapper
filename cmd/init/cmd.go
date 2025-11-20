@@ -1,11 +1,11 @@
-package cmd
+package init
 
 import (
 	"fmt"
 	"os"
 
-	"github.com/Dynatrace/dynatrace-bootstrapper/cmd/configure"
-	"github.com/Dynatrace/dynatrace-bootstrapper/cmd/move"
+	"github.com/Dynatrace/dynatrace-bootstrapper/cmd/init/configure"
+	"github.com/Dynatrace/dynatrace-bootstrapper/cmd/init/move"
 	"github.com/Dynatrace/dynatrace-bootstrapper/pkg/version"
 	"github.com/go-logr/logr"
 	"github.com/go-logr/zapr"
@@ -15,7 +15,7 @@ import (
 )
 
 const (
-	Use = "dynatrace-bootstrapper"
+	Use = "init"
 
 	SourceFolderFlag   = "source"
 	TargetFolderFlag   = "target"
