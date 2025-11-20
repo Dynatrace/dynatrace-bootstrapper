@@ -1,8 +1,13 @@
 package serverless
 
 import (
+	"context"
 	"fmt"
 	"os"
+	"os/signal"
+	"sync"
+	"syscall"
+	"time"
 
 	"github.com/Dynatrace/dynatrace-bootstrapper/pkg/version"
 	"github.com/go-logr/logr"
@@ -36,9 +41,27 @@ var (
 func run(_ *cobra.Command, _ []string) error {
 	setupLogger()
 
-	log.Info("I am serverless")
+	ctx, cancel := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
+	defer cancel()
 
-	return nil
+	for {
+		select {
+		case <-ctx.Done():
+			log.Info("Got interrupted, shutting down")
+
+			// do cleanup...
+
+			return nil
+		default:
+			sync.OnceFunc(func() {
+				log.Info("I am serverless")
+				// wait for lock file
+			})()
+
+			time.Sleep(time.Second)
+			log.Info("I am alive !!!!!!")
+		}
+	}
 }
 
 func setupLogger() {
