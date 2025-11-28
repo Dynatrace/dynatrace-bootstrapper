@@ -4,6 +4,7 @@ import (
 	"os"
 
 	"github.com/Dynatrace/dynatrace-bootstrapper/cmd/k8sinit"
+	"github.com/Dynatrace/dynatrace-bootstrapper/cmd/serverless"
 	"github.com/spf13/cobra"
 )
 
@@ -21,6 +22,7 @@ func main() {
 
 	rootCmd.AddCommand(
 		k8sinit.New(),
+		serverless.New(),
 	)
 
 	err := rootCmd.Execute()
