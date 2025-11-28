@@ -21,9 +21,9 @@ var (
 )
 
 func AddFlags(cmd *cobra.Command) {
-	cmd.PersistentFlags().StringVar(&workFolder, WorkFolderFlag, "", "(Optional) Base path for a tmp folder, this is where the command will do its work, to make sure the operations are atomic. It must be on the same disk as the target folder.")
+	cmd.Flags().StringVar(&workFolder, WorkFolderFlag, "", "(Optional) Base path for a tmp folder, this is where the command will do its work, to make sure the operations are atomic. It must be on the same disk as the target folder.")
 
-	cmd.PersistentFlags().StringVar(&technology, TechnologyFlag, "", "(Optional) Comma-separated list of technologies to filter files.")
+	cmd.Flags().StringVar(&technology, TechnologyFlag, "", "(Optional) Comma-separated list of technologies to filter files.")
 }
 
 // Execute moves the contents of a folder to another via copying.

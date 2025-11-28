@@ -3,8 +3,8 @@ package configure
 import (
 	"path/filepath"
 
-	"github.com/Dynatrace/dynatrace-bootstrapper/cmd/configure/attributes/container"
-	"github.com/Dynatrace/dynatrace-bootstrapper/cmd/configure/attributes/pod"
+	"github.com/Dynatrace/dynatrace-bootstrapper/cmd/k8sinit/configure/attributes/container"
+	"github.com/Dynatrace/dynatrace-bootstrapper/cmd/k8sinit/configure/attributes/pod"
 	"github.com/Dynatrace/dynatrace-bootstrapper/pkg/configure/enrichment/endpoint"
 	"github.com/Dynatrace/dynatrace-bootstrapper/pkg/configure/enrichment/metadata"
 	"github.com/Dynatrace/dynatrace-bootstrapper/pkg/configure/oneagent/ca"
@@ -37,17 +37,17 @@ var (
 
 func AddFlags(cmd *cobra.Command) {
 	// common
-	cmd.PersistentFlags().StringVar(&inputDir, InputFolderFlag, "", "(Optional) Base path where to look for the configuration files.")
-	cmd.PersistentFlags().StringVar(&configDir, ConfigFolderFlag, "", "(Optional) Base path where to put the configuration files.")
-	cmd.PersistentFlags().StringArrayVar(&containerAttributes, container.Flag, []string{}, "(Optional) Container-specific attributes in JSON format.")
-	cmd.PersistentFlags().StringArrayVar(&podAttributes, pod.Flag, []string{}, "(Optional) Pod-specific attributes in key=value format.")
+	cmd.Flags().StringVar(&inputDir, InputFolderFlag, "", "(Optional) Base path where to look for the configuration files.")
+	cmd.Flags().StringVar(&configDir, ConfigFolderFlag, "", "(Optional) Base path where to put the configuration files.")
+	cmd.Flags().StringArrayVar(&containerAttributes, container.Flag, []string{}, "(Optional) Container-specific attributes in JSON format.")
+	cmd.Flags().StringArrayVar(&podAttributes, pod.Flag, []string{}, "(Optional) Pod-specific attributes in key=value format.")
 
 	// oneagent
-	cmd.PersistentFlags().StringVar(&installPath, InstallPathFlag, "/opt/dynatrace/oneagent", "(Optional) Base path where the agent binary will be put.")
-	cmd.PersistentFlags().BoolVar(&isFullstack, IsFullstackFlag, false, "(Optional) Configure the CodeModule to be fullstack.")
-	cmd.PersistentFlags().StringVar(&tenant, TenantFlag, "", "The name of the tenant that the CodeModule will communicate with. Mandatory in case of --fullstack.")
+	cmd.Flags().StringVar(&installPath, InstallPathFlag, "/opt/dynatrace/oneagent", "(Optional) Base path where the agent binary will be put.")
+	cmd.Flags().BoolVar(&isFullstack, IsFullstackFlag, false, "(Optional) Configure the CodeModule to be fullstack.")
+	cmd.Flags().StringVar(&tenant, TenantFlag, "", "The name of the tenant that the CodeModule will communicate with. Mandatory in case of --fullstack.")
 
-	cmd.PersistentFlags().Lookup(IsFullstackFlag).NoOptDefVal = "true"
+	cmd.Flags().Lookup(IsFullstackFlag).NoOptDefVal = "true"
 }
 
 func SetupOneAgent(log logr.Logger, targetDir string) error {

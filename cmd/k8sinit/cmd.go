@@ -1,11 +1,10 @@
-package cmd
+package k8sinit
 
 import (
-	"fmt"
 	"os"
 
-	"github.com/Dynatrace/dynatrace-bootstrapper/cmd/configure"
-	"github.com/Dynatrace/dynatrace-bootstrapper/cmd/move"
+	"github.com/Dynatrace/dynatrace-bootstrapper/cmd/k8sinit/configure"
+	"github.com/Dynatrace/dynatrace-bootstrapper/cmd/k8sinit/move"
 	"github.com/Dynatrace/dynatrace-bootstrapper/pkg/version"
 	"github.com/go-logr/logr"
 	"github.com/go-logr/zapr"
@@ -15,7 +14,7 @@ import (
 )
 
 const (
-	Use = "dynatrace-bootstrapper"
+	Use = "k8s-init"
 
 	SourceFolderFlag   = "source"
 	TargetFolderFlag   = "target"
@@ -26,15 +25,13 @@ const (
 func New() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:                Use,
-		RunE:               run,
+		RunE:               RunE,
 		FParseErrWhitelist: cobra.FParseErrWhitelist{UnknownFlags: true},
 		Version:            version.Version,
-		Short:              fmt.Sprintf("%s version %s", version.AppName, version.Version),
+		Short:              "Deploy the OneAgent CodeModule in a Kubernetes environment",
 	}
 
 	AddFlags(cmd)
-	move.AddFlags(cmd)
-	configure.AddFlags(cmd)
 
 	return cmd
 }
@@ -49,22 +46,25 @@ var (
 )
 
 func AddFlags(cmd *cobra.Command) {
-	cmd.PersistentFlags().StringVar(&sourceFolder, SourceFolderFlag, "", "Base path where to copy the codemodule FROM.")
-	_ = cmd.MarkPersistentFlagRequired(SourceFolderFlag)
+	cmd.Flags().StringVar(&sourceFolder, SourceFolderFlag, "", "Base path where to copy the codemodule FROM.")
+	_ = cmd.MarkFlagRequired(SourceFolderFlag)
 
-	cmd.PersistentFlags().StringVar(&targetFolder, TargetFolderFlag, "", "Base path where to copy the codemodule TO.")
-	_ = cmd.MarkPersistentFlagRequired(TargetFolderFlag)
+	cmd.Flags().StringVar(&targetFolder, TargetFolderFlag, "", "Base path where to copy the codemodule TO.")
+	_ = cmd.MarkFlagRequired(TargetFolderFlag)
 
-	cmd.PersistentFlags().BoolVar(&isDebug, DebugFlag, false, "(Optional) Enables debug logs.")
+	cmd.Flags().BoolVar(&isDebug, DebugFlag, false, "(Optional) Enables debug logs.")
 
-	cmd.PersistentFlags().Lookup(DebugFlag).NoOptDefVal = "true"
+	cmd.Flags().Lookup(DebugFlag).NoOptDefVal = "true"
 
-	cmd.PersistentFlags().BoolVar(&areErrorsSuppressed, SuppressErrorsFlag, false, "(Optional) Always return exit code 0, even on error")
+	cmd.Flags().BoolVar(&areErrorsSuppressed, SuppressErrorsFlag, false, "(Optional) Always return exit code 0, even on error")
 
-	cmd.PersistentFlags().Lookup(SuppressErrorsFlag).NoOptDefVal = "true"
+	cmd.Flags().Lookup(SuppressErrorsFlag).NoOptDefVal = "true"
+
+	move.AddFlags(cmd)
+	configure.AddFlags(cmd)
 }
 
-func run(_ *cobra.Command, _ []string) error {
+func RunE(_ *cobra.Command, _ []string) error {
 	setupLogger()
 
 	if isDebug {
