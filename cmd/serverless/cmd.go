@@ -2,6 +2,7 @@ package serverless
 
 import (
 	"os"
+	"time"
 
 	"github.com/Dynatrace/dynatrace-bootstrapper/pkg/version"
 	"github.com/go-logr/logr"
@@ -20,6 +21,8 @@ const (
 	DebugFlag        = "debug"
 )
 
+const checkDeploymentStatusInterval = 1 * time.Second
+
 func New() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:                Use,
@@ -35,7 +38,7 @@ func New() *cobra.Command {
 }
 
 var (
-	log     logr.Logger
+	logger  logr.Logger
 	isDebug bool
 
 	targetFolder string
@@ -61,16 +64,46 @@ func addFlags(cmd *cobra.Command) {
 }
 
 func run(_ *cobra.Command, _ []string) error {
-	setupLogger()
-
-	if isDebug {
-		log.Info("debug logs enabled")
+	if logger.IsZero() {
+		setupLogger()
 	}
 
-	version.Print(log)
+	if isDebug {
+		logger.Info("debug logs enabled")
+	}
 
-	log.Info("Running in serverless mode...")
+	version.Print(logger)
+
+	logger.Info("Running in serverless mode...")
+
+	if keepAlive {
+		keepProcessAlive()
+	}
 	return nil
+}
+
+func keepProcessAlive() {
+	logger.V(1).Info("Running in keep-alive mode")
+
+	t := time.NewTicker(checkDeploymentStatusInterval)
+	defer t.Stop()
+
+	for {
+		select {
+		case <-t.C:
+			if requiredOneAgentVersionIsDeployed() {
+				logger.Info("OneAgent has been successfully deployed")
+				t.Stop()
+			} else {
+				logger.V(1).Info("The required OneAgent version has not been deployed yet")
+			}
+		}
+	}
+}
+
+func requiredOneAgentVersionIsDeployed() bool {
+	// TODO: Check whether the target directory contains required OneAgent version
+	return false
 }
 
 func setupLogger() {
@@ -81,11 +114,14 @@ func setupLogger() {
 	logLevel := zapcore.InfoLevel
 	if isDebug {
 		// zap's debug level is -1, however this is not a valid value for the logr.Logger, so we have to overrule it.
-		// use log.V(1).Info to create debug logs.
+		// use logger.V(1).Info to create debug logs.
 		logLevel = zap.DebugLevel
 	}
 
 	zapLog := zap.New(zapcore.NewCore(zapcore.NewJSONEncoder(config), os.Stdout, logLevel))
+	logger = zapr.NewLogger(zapLog)
+}
 
-	log = zapr.NewLogger(zapLog)
+func SetLogger(log logr.Logger) {
+	logger = log
 }

@@ -1,8 +1,12 @@
 package serverless
 
 import (
+	"bytes"
+	"log"
 	"testing"
+	"time"
 
+	"github.com/go-logr/stdr"
 	"github.com/stretchr/testify/require"
 )
 
@@ -55,5 +59,42 @@ func TestServerlessCmd(t *testing.T) {
 
 		err := cmd.Execute()
 		require.NoError(t, err)
+	})
+
+	t.Run("set 'keep-alive=true' and verify the bootstrapper runs for 5 seconds", func(t *testing.T) {
+		started := make(chan struct{})
+		finished := make(chan error, 1)
+
+		var buf bytes.Buffer
+		stdLogger := log.New(&buf, "", 0)
+
+		// set the standard logger for serverless to enable assertions during testing
+		stdr.SetVerbosity(1)
+		SetLogger(stdr.New(stdLogger))
+
+		go func() {
+			close(started)
+			cmd := New()
+
+			cmd.SetArgs([]string{"--keep-alive=true", "--debug", "--target", t.TempDir()})
+			finished <- cmd.Execute()
+		}()
+
+		// wait for keep-alive goroutine to start
+		select {
+		case <-started:
+			t.Log("keep-alive goroutine has started")
+		case <-time.After(5 * time.Second):
+			t.Fatal("keep-alive goroutine did not start within 5 seconds")
+		}
+
+		// test whether keep-alive is running for 5 seconds
+		select {
+		case err := <-finished:
+			t.Fatalf("the Bootstrapper finished execution in 'keep-alive=true' mode: %v", err)
+		case <-time.After(5 * time.Second):
+			require.Contains(t, buf.String(), "Running in keep-alive mode")
+			t.Log("keep-alive ran for 5 seconds")
+		}
 	})
 }
