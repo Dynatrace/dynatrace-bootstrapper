@@ -4,6 +4,8 @@ import (
 	"os"
 	"time"
 
+	"github.com/Dynatrace/dynatrace-bootstrapper/pkg/deployment"
+	"github.com/Dynatrace/dynatrace-bootstrapper/pkg/utils/log"
 	"github.com/Dynatrace/dynatrace-bootstrapper/pkg/version"
 	"github.com/go-logr/logr"
 	"github.com/go-logr/zapr"
@@ -18,10 +20,15 @@ const (
 	TargetFolderFlag = "target"
 	KeepAliveFlag    = "keep-alive"
 	TechnologyFlag   = "technology"
+	SourceFolderFlag = "source"
 	DebugFlag        = "debug"
 )
 
-const checkDeploymentStatusInterval = 1 * time.Second
+const (
+	defaultCodeModulesPathInSourceFolder = "/opt/dynatrace/oneagent"
+)
+
+const checkDeploymentStatusInterval = 10 * time.Second
 
 func New() *cobra.Command {
 	cmd := &cobra.Command{
@@ -41,6 +48,7 @@ var (
 	logger  logr.Logger
 	isDebug bool
 
+	sourceFolder string
 	targetFolder string
 	technology   string
 	keepAlive    bool
@@ -60,6 +68,7 @@ func addFlags(cmd *cobra.Command) {
 	}
 
 	cmd.Flags().StringVar(&technology, TechnologyFlag, "", "(Optional) Comma-separated list of CodeModule technologies to deploy.")
+	cmd.Flags().StringVar(&sourceFolder, SourceFolderFlag, defaultCodeModulesPathInSourceFolder, "(Optional) Base path where to copy the CodeModule from.")
 	cmd.Flags().BoolVar(&isDebug, DebugFlag, false, "(Optional) Enables debug logs.")
 }
 
@@ -76,34 +85,61 @@ func run(_ *cobra.Command, _ []string) error {
 
 	logger.Info("Running in serverless mode...")
 
-	if keepAlive {
-		keepProcessAlive()
+	status, err := deployment.CheckAgentDeploymentStatus(sourceFolder, targetFolder)
+	if err != nil {
+		logger.Error(err, "failed to check OneAgent deployment status. Skipping deployment.", "status", status.String())
+	} else if status == deployment.Deployed {
+		logger.Info("OneAgent is already deployed")
+	} else {
+		logger.Info("OneAgent deployment status", "status", status)
+
+		if status == deployment.NotDeployed {
+			// TODO: Acquire the lock file
+			// TODO: Deploy OneAgent code modules based on the new folder hierarchy
+			// TODO: Create the active symlink
+		} else if status == deployment.LinkMissing {
+			// TODO: Acquire the lock
+			// TODO: Create the active symlink
+		}
 	}
-	return nil
+
+	if keepAlive {
+		keepProcessAlive(status)
+	}
+
+	return err
 }
 
-func keepProcessAlive() {
-	logger.V(1).Info("Running in keep-alive mode")
+func keepProcessAlive(status deployment.Status) {
+	log.Debug(logger, "Running in keep-alive mode")
 
-	t := time.NewTicker(checkDeploymentStatusInterval)
-	defer t.Stop()
+	deploymentStatusTicker := time.NewTicker(checkDeploymentStatusInterval)
+	if status == deployment.Deployed {
+		deploymentStatusTicker.Stop()
+	}
 
+	var lastErr error
 	for {
 		select {
-		case <-t.C:
-			if requiredOneAgentVersionIsDeployed() {
+		case <-deploymentStatusTicker.C:
+			status, err := deployment.CheckAgentDeploymentStatus(sourceFolder, targetFolder)
+			if err != nil {
+				if lastErr == nil || err.Error() != lastErr.Error() {
+					logger.Error(err, "failed to check OneAgent deployment status", "status", status.String())
+					lastErr = err
+				}
+
+				continue
+			}
+
+			if status == deployment.Deployed {
 				logger.Info("OneAgent has been successfully deployed")
-				t.Stop()
+				deploymentStatusTicker.Stop()
 			} else {
-				logger.V(1).Info("The required OneAgent version has not been deployed yet")
+				log.Debug(logger, "The required OneAgent version is not deployed", "status", status.String())
 			}
 		}
 	}
-}
-
-func requiredOneAgentVersionIsDeployed() bool {
-	// TODO: Check whether the target directory contains required OneAgent version
-	return false
 }
 
 func setupLogger() {

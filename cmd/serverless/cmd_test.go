@@ -3,9 +3,15 @@ package serverless
 import (
 	"bytes"
 	"log"
+	"os"
+	"path/filepath"
+	"regexp"
+	"syscall"
 	"testing"
 	"time"
 
+	"github.com/Dynatrace/dynatrace-bootstrapper/pkg/deployment"
+	"github.com/Dynatrace/dynatrace-bootstrapper/pkg/utils/tests"
 	"github.com/go-logr/stdr"
 	"github.com/stretchr/testify/require"
 )
@@ -42,20 +48,30 @@ func TestServerlessCmd(t *testing.T) {
 	})
 
 	t.Run("no error if all required parameters are provided", func(t *testing.T) {
+		const agentVersion = "1.327.30.20251107-111521"
+
+		sourceDir := t.TempDir()
+		tests.SetupSourceDirectory(t, sourceDir, agentVersion)
+
 		cmd := New()
 
 		targetDir := t.TempDir()
-		cmd.SetArgs([]string{"--keep-alive=false", "--target", targetDir})
+		cmd.SetArgs([]string{"--source", sourceDir, "--keep-alive=false", "--target", targetDir})
 
 		err := cmd.Execute()
 		require.NoError(t, err)
 	})
 
 	t.Run("no error if an unknown parameters are provided", func(t *testing.T) {
+		const agentVersion = "1.327.30.20251107-111521"
+
+		sourceDir := t.TempDir()
+		tests.SetupSourceDirectory(t, sourceDir, agentVersion)
+
 		cmd := New()
 
 		targetDir := t.TempDir()
-		cmd.SetArgs([]string{"--keep-alive=false", "--target", targetDir, "--unknown", "--flag", "value"})
+		cmd.SetArgs([]string{"--source", sourceDir, "--keep-alive=false", "--target", targetDir, "--unknown", "--flag", "value"})
 
 		err := cmd.Execute()
 		require.NoError(t, err)
@@ -66,11 +82,7 @@ func TestServerlessCmd(t *testing.T) {
 		finished := make(chan error, 1)
 
 		var buf bytes.Buffer
-		stdLogger := log.New(&buf, "", 0)
-
-		// set the standard logger for serverless to enable assertions during testing
-		stdr.SetVerbosity(1)
-		SetLogger(stdr.New(stdLogger))
+		setupLoggerToBuffer(&buf)
 
 		go func() {
 			close(started)
@@ -93,8 +105,109 @@ func TestServerlessCmd(t *testing.T) {
 		case err := <-finished:
 			t.Fatalf("the Bootstrapper finished execution in 'keep-alive=true' mode: %v", err)
 		case <-time.After(5 * time.Second):
-			require.Contains(t, buf.String(), "Running in keep-alive mode")
+			expectedLog := `"level"=1 "msg"="Running in keep-alive mode"`
+			require.Contains(t, buf.String(), expectedLog)
 			t.Log("keep-alive ran for 5 seconds")
 		}
 	})
+
+	t.Run("the deployment status is 'Deployed'", func(t *testing.T) {
+		const agentVersion = "1.327.30.20251107-111521"
+
+		var buf bytes.Buffer
+		setupLoggerToBuffer(&buf)
+
+		sourceDir := t.TempDir()
+		tests.SetupSourceDirectory(t, sourceDir, agentVersion)
+
+		targetDir := t.TempDir()
+		tests.SetupTargetDirectory(t, targetDir, agentVersion, agentVersion)
+
+		cmd := New()
+		cmd.SetArgs([]string{"--keep-alive=false", "--source", sourceDir, "--target", targetDir})
+		err := cmd.Execute()
+
+		expectedLog := `"level"=0 "msg"="OneAgent is already deployed"`
+		require.Contains(t, buf.String(), expectedLog)
+		require.NoError(t, err)
+	})
+
+	t.Run("the deployment status is 'Not Deployed'", func(t *testing.T) {
+		const agentVersion = "1.327.30.20251107-111521"
+
+		var buf bytes.Buffer
+		setupLoggerToBuffer(&buf)
+
+		sourceDir := t.TempDir()
+		tests.SetupSourceDirectory(t, sourceDir, agentVersion)
+
+		targetDir := t.TempDir()
+
+		cmd := New()
+		cmd.SetArgs([]string{"--keep-alive=false", "--source", sourceDir, "--target", targetDir})
+		err := cmd.Execute()
+
+		expectedLog := `"level"=0 "msg"="OneAgent deployment status" "status"="Not deployed"`
+		require.Contains(t, buf.String(), expectedLog)
+		require.NoError(t, err)
+	})
+
+	t.Run("the deployment status is 'Link Missing'", func(t *testing.T) {
+		const agentVersion = "1.327.30.20251107-111521"
+
+		var buf bytes.Buffer
+		setupLoggerToBuffer(&buf)
+
+		sourceDir := t.TempDir()
+		tests.SetupSourceDirectory(t, sourceDir, agentVersion)
+
+		targetDir := t.TempDir()
+		tests.SetupTargetDirectory(t, targetDir, agentVersion, "")
+
+		cmd := New()
+		cmd.SetArgs([]string{"--keep-alive=false", "--source", sourceDir, "--target", targetDir})
+		err := cmd.Execute()
+
+		expectedLog := `"level"=0 "msg"="OneAgent deployment status" "status"="Deployment is not complete"`
+		require.Contains(t, buf.String(), expectedLog)
+		require.NoError(t, err)
+	})
+
+	t.Run("the deployment status returns an error", func(t *testing.T) {
+		const agentVersion = "1.327.30.20251107-111521"
+
+		var buf bytes.Buffer
+		setupLoggerToBuffer(&buf)
+
+		sourceDir := t.TempDir()
+		tests.SetupSourceDirectory(t, sourceDir, agentVersion)
+
+		targetDir := t.TempDir()
+		tests.SetupTargetDirectory(t, targetDir, agentVersion, agentVersion)
+
+		// change the permission of the target folder, so the deployment check must result into an error
+		agentTargetDirectory := deployment.GetAgentFolder(targetDir, agentVersion)
+		parentDir := filepath.Dir(agentTargetDirectory)
+		err := os.Chmod(parentDir, 0000)
+		defer func() {
+			require.NoError(t, os.Chmod(parentDir, 0700)) // restore permissions on exit to allow cleanup of the temporary directory
+		}()
+
+		require.NoError(t, err)
+
+		cmd := New()
+		cmd.SetArgs([]string{"--keep-alive=false", "--source", sourceDir, "--target", targetDir})
+		err = cmd.Execute()
+		require.ErrorIs(t, err, syscall.EACCES)
+
+		expectedLog := `"msg"="failed to check OneAgent deployment status\. Skipping deployment\." "error"="cannot obtain OneAgent directory info: stat .+: permission denied" "status"="Unknown"`
+		require.Regexp(t, regexp.MustCompile(expectedLog), buf.String())
+	})
+}
+
+// setupLoggerToBuffer configures the serverless logger to write log messages to the provided buffer
+func setupLoggerToBuffer(buf *bytes.Buffer) {
+	stdr.SetVerbosity(1)
+	stdLogger := log.New(buf, "", 0)
+	SetLogger(stdr.New(stdLogger))
 }
