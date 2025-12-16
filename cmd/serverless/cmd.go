@@ -19,13 +19,15 @@ const (
 
 	TargetFolderFlag = "target"
 	KeepAliveFlag    = "keep-alive"
-	TechnologyFlag   = "technology"
 	SourceFolderFlag = "source"
+	TechnologyFlag   = "technology"
+	WorkFolderFlag   = "work"
 	DebugFlag        = "debug"
 )
 
 const (
 	defaultCodeModulesPathInSourceFolder = "/opt/dynatrace/oneagent"
+	defaultWorkFolderPath                = "/home/dynatrace/oneagent/work"
 )
 
 const checkDeploymentStatusInterval = 10 * time.Second
@@ -48,10 +50,11 @@ var (
 	logger  logr.Logger
 	isDebug bool
 
-	sourceFolder string
-	targetFolder string
-	technology   string
-	keepAlive    bool
+	sourceFolder   string
+	targetFolder   string
+	workBaseFolder string
+	technology     string
+	keepAlive      bool
 )
 
 func addFlags(cmd *cobra.Command) {
@@ -67,9 +70,11 @@ func addFlags(cmd *cobra.Command) {
 		panic(err)
 	}
 
-	cmd.Flags().StringVar(&technology, TechnologyFlag, "", "(Optional) Comma-separated list of CodeModule technologies to deploy.")
 	cmd.Flags().StringVar(&sourceFolder, SourceFolderFlag, defaultCodeModulesPathInSourceFolder, "(Optional) Base path where to copy the CodeModule from.")
+	cmd.Flags().StringVar(&technology, TechnologyFlag, "", "(Optional) Comma-separated list of CodeModule technologies to deploy.")
+	cmd.Flags().StringVar(&workBaseFolder, WorkFolderFlag, defaultWorkFolderPath, "(Optional) Base path to a tmp working folder used for atomic copy. Must be on the same disk as the target.")
 	cmd.Flags().BoolVar(&isDebug, DebugFlag, false, "(Optional) Enables debug logs.")
+
 }
 
 func run(_ *cobra.Command, _ []string) error {
@@ -85,33 +90,48 @@ func run(_ *cobra.Command, _ []string) error {
 
 	logger.Info("Running in serverless mode...")
 
-	status, err := deployment.CheckAgentDeploymentStatus(sourceFolder, targetFolder)
-	if err != nil {
-		logger.Error(err, "failed to check OneAgent deployment status. Skipping deployment.", "status", status.String())
-	} else if status == deployment.Deployed {
-		logger.Info("OneAgent is already deployed")
+	result := deployment.CheckAgentDeploymentStatus(sourceFolder, targetFolder)
+	if result.Error != nil {
+		logger.Error(result.Error, "failed to check OneAgent deployment status. Skipping deployment.", "status", result.Status.String())
+	} else if result.Status == deployment.Deployed {
+		logger.Info("OneAgent is already deployed", "OneAgent version", result.AgentVersion)
 	} else {
-		logger.Info("OneAgent deployment status", "status", status)
+		logger.Info("OneAgent deployment status", "status", result.Status)
 
-		if status == deployment.NotDeployed {
+		agentFolder := deployment.GetAgentFolder(targetFolder, result.AgentVersion)
+		if result.Status == deployment.NotDeployed {
 			// TODO: Acquire the lock file
-			// TODO: Deploy OneAgent code modules based on the new folder hierarchy
-			// TODO: Create the active symlink
-		} else if status == deployment.LinkMissing {
+			err := deployment.CopyAgent(logger, sourceFolder, agentFolder, workBaseFolder, technology)
+			if err != nil {
+				logger.Error(err, "failed to deploy OneAgent in the target directory")
+				return err
+			}
+
+			err = deployment.CreateActiveSymlinkAtomically(logger, workBaseFolder, agentFolder)
+			if err != nil {
+				logger.Error(err, "failed to create `active` symlink in the target directory")
+				return err
+			}
+
+		} else if result.Status == deployment.LinkMissing {
 			// TODO: Acquire the lock
-			// TODO: Create the active symlink
+			err := deployment.CreateActiveSymlinkAtomically(logger, workBaseFolder, agentFolder)
+			if err != nil {
+				logger.Error(err, "failed to create `active` symlink in the target directory")
+				return err
+			}
 		}
 	}
 
 	if keepAlive {
-		keepProcessAlive(status)
+		keepProcessAlive(result.Status)
 	}
 
-	return err
+	return result.Error
 }
 
 func keepProcessAlive(status deployment.Status) {
-	log.Debug(logger, "Running in keep-alive mode")
+	log.Debug(logger, "Running in keep-alive mode", "status", status.String())
 
 	deploymentStatusTicker := time.NewTicker(checkDeploymentStatusInterval)
 	if status == deployment.Deployed {
@@ -122,21 +142,21 @@ func keepProcessAlive(status deployment.Status) {
 	for {
 		select {
 		case <-deploymentStatusTicker.C:
-			status, err := deployment.CheckAgentDeploymentStatus(sourceFolder, targetFolder)
-			if err != nil {
-				if lastErr == nil || err.Error() != lastErr.Error() {
-					logger.Error(err, "failed to check OneAgent deployment status", "status", status.String())
-					lastErr = err
+			result := deployment.CheckAgentDeploymentStatus(sourceFolder, targetFolder)
+			if result.Error != nil {
+				if lastErr == nil || result.Error.Error() != lastErr.Error() {
+					logger.Error(result.Error, "failed to check OneAgent deployment status", "status", result.Status.String())
+					lastErr = result.Error
 				}
 
 				continue
 			}
 
-			if status == deployment.Deployed {
-				logger.Info("OneAgent has been successfully deployed")
+			if result.Status == deployment.Deployed {
+				logger.Info("OneAgent has been successfully deployed", "OneAgent version", result.AgentVersion)
 				deploymentStatusTicker.Stop()
 			} else {
-				log.Debug(logger, "The required OneAgent version is not deployed", "status", status.String())
+				log.Debug(logger, "The required OneAgent version is not deployed", "status", result.Status.String())
 			}
 		}
 	}

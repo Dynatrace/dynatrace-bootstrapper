@@ -20,6 +20,16 @@ const (
 	Unknown                   // An error occurred during the deployment status check
 )
 
+type AgentDeploymentInfo struct {
+	Status       Status
+	AgentVersion string
+	Error        error
+}
+
+func NewAgentDeploymentInfo(status Status, version string, err error) AgentDeploymentInfo {
+	return AgentDeploymentInfo{Status: status, AgentVersion: version, Error: err}
+}
+
 func (ds Status) String() string {
 	switch ds {
 	case NotDeployed:
@@ -33,10 +43,10 @@ func (ds Status) String() string {
 	}
 }
 
-func CheckAgentDeploymentStatus(sourceBaseDir string, targetBaseDir string) (Status, error) {
+func CheckAgentDeploymentStatus(sourceBaseDir string, targetBaseDir string) AgentDeploymentInfo {
 	agentVersion, err := getAgentVersion(sourceBaseDir)
 	if err != nil {
-		return Unknown, fmt.Errorf("failed to determine OneAgent version to deploy: %w", err)
+		return NewAgentDeploymentInfo(Unknown, "", fmt.Errorf("failed to determine OneAgent version to deploy: %w", err))
 	}
 
 	// check whether the agent directory exists
@@ -44,14 +54,14 @@ func CheckAgentDeploymentStatus(sourceBaseDir string, targetBaseDir string) (Sta
 	info, err := os.Stat(agentDirPath)
 	if err != nil {
 		if os.IsNotExist(err) {
-			return NotDeployed, nil
+			return NewAgentDeploymentInfo(NotDeployed, agentVersion, nil)
 		}
 
-		return Unknown, fmt.Errorf("cannot obtain OneAgent directory info: %w", err)
+		return NewAgentDeploymentInfo(Unknown, agentVersion, fmt.Errorf("cannot obtain OneAgent directory info: %w", err))
 	}
 
 	if !info.IsDir() {
-		return Unknown, fmt.Errorf("OneAgent deployment target is not a directory: %s", agentDirPath)
+		return NewAgentDeploymentInfo(Unknown, agentVersion, fmt.Errorf("OneAgent deployment target is not a directory: %s", agentDirPath))
 	}
 
 	// check whether the oneagent active symlink exists
@@ -59,26 +69,26 @@ func CheckAgentDeploymentStatus(sourceBaseDir string, targetBaseDir string) (Sta
 	info, err = os.Lstat(activeLink)
 	if err != nil {
 		if os.IsNotExist(err) {
-			return LinkMissing, nil
+			return NewAgentDeploymentInfo(LinkMissing, agentVersion, nil)
 		}
 
-		return Unknown, fmt.Errorf("cannot obtain OneAgent `active` symlink info: %w", err)
+		return NewAgentDeploymentInfo(Unknown, agentVersion, fmt.Errorf("cannot obtain OneAgent `active` symlink info: %w", err))
 	}
 
 	if info.Mode()&os.ModeSymlink == 0 {
-		return Unknown, fmt.Errorf("OneAgent `active` is not a symlink: %s", info.Mode().String())
+		return NewAgentDeploymentInfo(Unknown, agentVersion, fmt.Errorf("OneAgent `active` is not a symlink: %s", info.Mode().String()))
 	}
 
 	activeLinkTarget, err := os.Readlink(activeLink)
 	if err != nil {
-		return Unknown, fmt.Errorf("cannot read OneAgent `active` symlink: %w", err)
+		return NewAgentDeploymentInfo(Unknown, agentVersion, fmt.Errorf("cannot read OneAgent `active` symlink: %w", err))
 	}
 
 	if activeLinkTarget != agentVersion {
-		return LinkMissing, nil
+		return NewAgentDeploymentInfo(LinkMissing, agentVersion, nil)
 	}
 
-	return Deployed, nil
+	return NewAgentDeploymentInfo(Deployed, agentVersion, nil)
 }
 
 // GetAgentFolder returns the absolute path to the specified version of the OneAgent directory

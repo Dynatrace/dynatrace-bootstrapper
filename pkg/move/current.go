@@ -40,3 +40,16 @@ func CreateCurrentSymlink(log logr.Logger, targetDir string) error {
 
 	return symlink.Create(log, string(version), targetCurrentDir)
 }
+
+// CreateCurrentSymlinkOnCopy wraps the given copy function to create the current symlink right after the copy operation.
+// The copy wrapper is used to create the current symlink in the working directory before it is moved to the target directory.
+func CreateCurrentSymlinkOnCopy(copyFunc CopyFunc) CopyFunc {
+	return func(log logr.Logger, from, to string) (err error) {
+		err = copyFunc(log, from, to)
+		if err != nil {
+			return err
+		}
+
+		return CreateCurrentSymlink(log, to)
+	}
+}

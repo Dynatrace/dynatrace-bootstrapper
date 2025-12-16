@@ -56,7 +56,7 @@ func TestServerlessCmd(t *testing.T) {
 		cmd := New()
 
 		targetDir := t.TempDir()
-		cmd.SetArgs([]string{"--source", sourceDir, "--keep-alive=false", "--target", targetDir})
+		cmd.SetArgs([]string{"--source", sourceDir, "--keep-alive=false", "--target", targetDir, "--work", t.TempDir()})
 
 		err := cmd.Execute()
 		require.NoError(t, err)
@@ -71,7 +71,7 @@ func TestServerlessCmd(t *testing.T) {
 		cmd := New()
 
 		targetDir := t.TempDir()
-		cmd.SetArgs([]string{"--source", sourceDir, "--keep-alive=false", "--target", targetDir, "--unknown", "--flag", "value"})
+		cmd.SetArgs([]string{"--source", sourceDir, "--keep-alive=false", "--target", targetDir, "--work", t.TempDir(), "--unknown", "--flag", "value"})
 
 		err := cmd.Execute()
 		require.NoError(t, err)
@@ -144,7 +144,7 @@ func TestServerlessCmd(t *testing.T) {
 		targetDir := t.TempDir()
 
 		cmd := New()
-		cmd.SetArgs([]string{"--keep-alive=false", "--source", sourceDir, "--target", targetDir})
+		cmd.SetArgs([]string{"--keep-alive=false", "--source", sourceDir, "--target", targetDir, "--work", t.TempDir()})
 		err := cmd.Execute()
 
 		expectedLog := `"level"=0 "msg"="OneAgent deployment status" "status"="Not deployed"`
@@ -165,7 +165,7 @@ func TestServerlessCmd(t *testing.T) {
 		tests.SetupTargetDirectory(t, targetDir, agentVersion, "")
 
 		cmd := New()
-		cmd.SetArgs([]string{"--keep-alive=false", "--source", sourceDir, "--target", targetDir})
+		cmd.SetArgs([]string{"--keep-alive=false", "--source", sourceDir, "--target", targetDir, "--work", t.TempDir()})
 		err := cmd.Execute()
 
 		expectedLog := `"level"=0 "msg"="OneAgent deployment status" "status"="Deployment is not complete"`
