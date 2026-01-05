@@ -34,14 +34,21 @@ func CopyByTechnologyWrapper(technology string) CopyFunc {
 }
 
 func CopyByTechnology(log logr.Logger, from string, to string, technology string) error {
-	log.Info("starting to copy (filtered)", "from", from, "to", to)
+	log.Info("starting to copy (filtered)", "from", from, "to", to, "technology", technology)
 
 	filteredPaths, err := filterFilesByTechnology(log, from, strings.Split(technology, ","))
 	if err != nil {
 		return err
 	}
 
-	return copyByList(log, from, to, filteredPaths)
+	err = copyByList(log, from, to, filteredPaths)
+	if err != nil {
+		return err
+	}
+
+	log.Info("successfully copied (filtered)", "from", from, "to", to, "technology", technology)
+
+	return nil
 }
 
 func copyByList(log logr.Logger, from string, to string, paths []string) error {
