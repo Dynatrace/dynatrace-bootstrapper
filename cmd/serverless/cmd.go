@@ -2,6 +2,8 @@ package serverless
 
 import (
 	"os"
+	"os/signal"
+	"syscall"
 	"time"
 
 	"github.com/Dynatrace/dynatrace-bootstrapper/pkg/deployment"
@@ -131,35 +133,36 @@ func run(_ *cobra.Command, _ []string) error {
 }
 
 func keepProcessAlive(status deployment.Status) {
-	log.Debug(logger, "Running in keep-alive mode", "status", status.String())
+	logger.Info("Running in keep-alive mode...")
+	
+	if status != deployment.Deployed {
+		var lastErr error
 
-	deploymentStatusTicker := time.NewTicker(checkDeploymentStatusInterval)
-	if status == deployment.Deployed {
-		deploymentStatusTicker.Stop()
-	}
-
-	var lastErr error
-	for {
-		select {
-		case <-deploymentStatusTicker.C:
+		// periodically check OneAgent deployment status,
+		// in a multi-instance environment, another Bootstrapper may perform the deployment.
+		for {
 			result := deployment.CheckAgentDeploymentStatus(sourceFolder, targetFolder)
 			if result.Error != nil {
+				// log the deployment error if it is different from the previous one
 				if lastErr == nil || result.Error.Error() != lastErr.Error() {
 					logger.Error(result.Error, "failed to check OneAgent deployment status", "status", result.Status.String())
 					lastErr = result.Error
 				}
-
-				continue
-			}
-
-			if result.Status == deployment.Deployed {
+			} else if result.Status == deployment.Deployed {
 				logger.Info("OneAgent has been successfully deployed", "OneAgent version", result.AgentVersion)
-				deploymentStatusTicker.Stop()
+				break
 			} else {
 				log.Debug(logger, "The required OneAgent version is not deployed", "status", result.Status.String())
 			}
+
+			time.Sleep(checkDeploymentStatusInterval)
 		}
 	}
+
+	// keep process alive after the deployment check
+	sigCh := make(chan os.Signal, 1)
+	signal.Notify(sigCh, syscall.SIGINT, syscall.SIGTERM)
+	<-sigCh
 }
 
 func setupLogger() {

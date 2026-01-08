@@ -105,7 +105,7 @@ func TestServerlessCmd(t *testing.T) {
 		case err := <-finished:
 			t.Fatalf("the Bootstrapper finished execution in 'keep-alive=true' mode: %v", err)
 		case <-time.After(5 * time.Second):
-			expectedLog := `"level"=1 "msg"="Running in keep-alive mode"`
+			expectedLog := `"level"=0 "msg"="Running in keep-alive mode..."`
 			require.Contains(t, buf.String(), expectedLog)
 			t.Log("keep-alive ran for 5 seconds")
 		}
