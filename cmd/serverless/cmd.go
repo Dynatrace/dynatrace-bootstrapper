@@ -76,10 +76,9 @@ func addFlags(cmd *cobra.Command) {
 	cmd.Flags().StringVar(&technology, TechnologyFlag, "", "(Optional) Comma-separated list of CodeModule technologies to deploy.")
 	cmd.Flags().StringVar(&workBaseFolder, WorkFolderFlag, defaultWorkFolderPath, "(Optional) Base path to a tmp working folder used for atomic copy. Must be on the same disk as the target.")
 	cmd.Flags().BoolVar(&isDebug, DebugFlag, false, "(Optional) Enables debug logs.")
-
 }
 
-func run(_ *cobra.Command, _ []string) error {
+func run(_ *cobra.Command, _ []string) (err error) {
 	if logger.IsZero() {
 		setupLogger()
 	}
@@ -93,63 +92,50 @@ func run(_ *cobra.Command, _ []string) error {
 	logger.Info("Running in serverless mode...")
 
 	result := deployment.CheckAgentDeploymentStatus(sourceFolder, targetFolder)
+	var agentAlreadyDeployed bool
+
 	if result.Error != nil {
 		logger.Error(result.Error, "failed to check OneAgent deployment status. Skipping deployment.", "status", result.Status.String())
+		err = result.Error
 	} else if result.Status == deployment.Deployed {
 		logger.Info("OneAgent is already deployed", "OneAgent version", result.AgentVersion)
+		agentAlreadyDeployed = true
 	} else {
 		logger.Info("OneAgent deployment status", "status", result.Status)
-
-		agentFolder := deployment.GetAgentFolder(targetFolder, result.AgentVersion)
-		if result.Status == deployment.NotDeployed {
-			// TODO: Acquire the lock file
-			err := deployment.CopyAgent(logger, sourceFolder, agentFolder, workBaseFolder, technology)
-			if err != nil {
-				logger.Error(err, "failed to deploy OneAgent in the target directory")
-				return err
-			}
-
-			err = deployment.CreateActiveSymlinkAtomically(logger, workBaseFolder, agentFolder)
-			if err != nil {
-				logger.Error(err, "failed to create `active` symlink in the target directory")
-				return err
-			}
-
-		} else if result.Status == deployment.LinkMissing {
-			// TODO: Acquire the lock
-			err := deployment.CreateActiveSymlinkAtomically(logger, workBaseFolder, agentFolder)
-			if err != nil {
-				logger.Error(err, "failed to create `active` symlink in the target directory")
-				return err
-			}
+		err, agentAlreadyDeployed = deployment.DeployOneAgent(logger, sourceFolder, targetFolder, workBaseFolder, technology)
+		if err != nil {
+			logger.Error(err, "OneAgent deployment has failed")
 		}
 	}
 
 	if keepAlive {
-		keepProcessAlive(result.Status)
+		keepProcessAlive(!agentAlreadyDeployed)
 	}
 
-	return result.Error
+	return err
 }
 
-func keepProcessAlive(status deployment.Status) {
+// keepProcessAlive keeps the process alive.
+// If monitorDeployment is true, the OneAgent deployment status will be periodically checked until deployment is complete.
+func keepProcessAlive(monitorDeployment bool) {
 	logger.Info("Running in keep-alive mode...")
-	
-	if status != deployment.Deployed {
+
+	if monitorDeployment {
 		var lastErr error
 
-		// periodically check OneAgent deployment status,
-		// in a multi-instance environment, another Bootstrapper may perform the deployment.
+		// Periodically check the OneAgent deployment status until it is deployed.
+		// In a multi-instance environment, another Bootstrapper may handle the deployment.
 		for {
 			result := deployment.CheckAgentDeploymentStatus(sourceFolder, targetFolder)
 			if result.Error != nil {
-				// log the deployment error if it is different from the previous one
+				// Log the deployment error only if it differs from the previous one to avoid log spam
 				if lastErr == nil || result.Error.Error() != lastErr.Error() {
 					logger.Error(result.Error, "failed to check OneAgent deployment status", "status", result.Status.String())
 					lastErr = result.Error
 				}
 			} else if result.Status == deployment.Deployed {
 				logger.Info("OneAgent has been successfully deployed", "OneAgent version", result.AgentVersion)
+
 				break
 			} else {
 				log.Debug(logger, "The required OneAgent version is not deployed", "status", result.Status.String())
@@ -159,7 +145,7 @@ func keepProcessAlive(status deployment.Status) {
 		}
 	}
 
-	// keep process alive after the deployment check
+	// Keep the process alive when the deployment check is completed
 	sigCh := make(chan os.Signal, 1)
 	signal.Notify(sigCh, syscall.SIGINT, syscall.SIGTERM)
 	<-sigCh
