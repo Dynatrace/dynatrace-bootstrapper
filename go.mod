@@ -4,7 +4,6 @@ go 1.25.0
 
 require (
 	github.com/go-logr/logr v1.4.3
-	github.com/go-logr/stdr v1.2.2
 	github.com/go-logr/zapr v1.3.0
 	github.com/pkg/errors v0.9.1
 	github.com/spf13/cobra v1.10.2

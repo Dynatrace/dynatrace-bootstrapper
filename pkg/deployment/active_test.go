@@ -7,15 +7,12 @@ import (
 	"testing"
 
 	"github.com/Dynatrace/dynatrace-bootstrapper/pkg/utils/tests"
-	"github.com/go-logr/zapr"
 	"github.com/stretchr/testify/require"
-	"go.uber.org/zap"
 )
-
-var testLogger = zapr.NewLogger(zap.NewExample())
 
 func TestCreateActiveSymlink(t *testing.T) {
 	t.Run("the `active` symlink successfully created", func(t *testing.T) {
+		logger, _ := tests.NewTestLogger()
 		const agentVersion = "1.327.30.20251107-111521"
 
 		workDir := t.TempDir()
@@ -23,7 +20,7 @@ func TestCreateActiveSymlink(t *testing.T) {
 		tests.SetupTargetDirectory(t, targetBaseDir, agentVersion, "")
 
 		agentTargetPath := GetAgentFolder(targetBaseDir, agentVersion)
-		err := CreateActiveSymlinkAtomically(testLogger, workDir, agentTargetPath)
+		err := CreateActiveSymlinkAtomically(logger, workDir, agentTargetPath)
 		require.NoError(t, err)
 
 		activeSymlink := getPathToActiveLink(agentTargetPath)
@@ -33,6 +30,7 @@ func TestCreateActiveSymlink(t *testing.T) {
 	})
 
 	t.Run("the existing `active` symlink is successfully updated", func(t *testing.T) {
+		logger, _ := tests.NewTestLogger()
 		const existingAgentVersion = "1.325.51.20251103-195814"
 		const targetAgentVersion = "1.327.30.20251107-111521"
 
@@ -41,7 +39,7 @@ func TestCreateActiveSymlink(t *testing.T) {
 		tests.SetupTargetDirectory(t, targetBaseDir, existingAgentVersion, existingAgentVersion)
 
 		agentTargetPath := GetAgentFolder(targetBaseDir, targetAgentVersion)
-		err := CreateActiveSymlinkAtomically(testLogger, workDir, agentTargetPath)
+		err := CreateActiveSymlinkAtomically(logger, workDir, agentTargetPath)
 		require.NoError(t, err)
 
 		activeSymlink := getPathToActiveLink(agentTargetPath)
@@ -51,13 +49,14 @@ func TestCreateActiveSymlink(t *testing.T) {
 	})
 
 	t.Run("fail if the target folder is missing", func(t *testing.T) {
+		logger, _ := tests.NewTestLogger()
 		const agentVersion = "1.327.30.20251107-111521"
 
 		workDir := t.TempDir()
 		targetBaseDir := t.TempDir()
 
 		agentTargetPath := GetAgentFolder(targetBaseDir, agentVersion)
-		err := CreateActiveSymlinkAtomically(testLogger, workDir, agentTargetPath)
+		err := CreateActiveSymlinkAtomically(logger, workDir, agentTargetPath)
 		require.ErrorIs(t, err, syscall.ENOENT)
 
 		expectedLog := `failed to rename the temporary symlink: rename .+: no such file or directory`
@@ -65,6 +64,7 @@ func TestCreateActiveSymlink(t *testing.T) {
 	})
 
 	t.Run("the temporary symlink is removed if the rename operation fails", func(t *testing.T) {
+		logger, _ := tests.NewTestLogger()
 		const agentVersion = "1.327.30.20251107-111521"
 
 		workDir := t.TempDir()
@@ -80,7 +80,7 @@ func TestCreateActiveSymlink(t *testing.T) {
 		require.NoError(t, err)
 
 		agentTargetPath := GetAgentFolder(targetBaseDir, agentVersion)
-		err = CreateActiveSymlinkAtomically(testLogger, workDir, agentTargetPath)
+		err = CreateActiveSymlinkAtomically(logger, workDir, agentTargetPath)
 		require.ErrorIs(t, err, syscall.EACCES)
 
 		entries, err := os.ReadDir(workDir)
