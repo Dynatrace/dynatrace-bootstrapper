@@ -5,7 +5,7 @@ gci_version=v0.13.7
 # renovate depName=golang.org/x/tools
 golang_tools_version=v0.40.0
 # renovate depName=github.com/vektra/mockery
-mockery_version=v3.6.1
+mockery_version=v3.6.3
 # renovate depName=github.com/igorshubovych/markdownlint-cli
 markdownlint_cli_version=v0.47.0
 
