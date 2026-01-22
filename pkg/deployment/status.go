@@ -51,6 +51,7 @@ func CheckAgentDeploymentStatus(sourceBaseDir string, targetBaseDir string) Agen
 
 	// check whether the agent directory exists
 	agentDirPath := GetAgentFolder(targetBaseDir, agentVersion)
+
 	info, err := os.Stat(agentDirPath)
 	if err != nil {
 		if os.IsNotExist(err) {
@@ -66,6 +67,7 @@ func CheckAgentDeploymentStatus(sourceBaseDir string, targetBaseDir string) Agen
 
 	// check whether the oneagent active symlink exists
 	activeLink := filepath.Join(targetBaseDir, ActiveLinkPath)
+
 	info, err = os.Lstat(activeLink)
 	if err != nil {
 		if os.IsNotExist(err) {
@@ -94,6 +96,7 @@ func CheckAgentDeploymentStatus(sourceBaseDir string, targetBaseDir string) Agen
 // GetAgentFolder returns the absolute path to the specified version of the OneAgent directory
 func GetAgentFolder(targetBaseDir string, agentVersion string) string {
 	agentFolder := filepath.Join(targetBaseDir, "oneagent", agentVersion)
+
 	return agentFolder
 }
 

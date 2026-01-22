@@ -61,12 +61,14 @@ var (
 
 func addFlags(cmd *cobra.Command) {
 	cmd.Flags().StringVar(&targetFolder, TargetFolderFlag, "", "Base path where to copy the CodeModule to.")
+
 	err := cmd.MarkFlagRequired(TargetFolderFlag)
 	if err != nil {
 		panic(err)
 	}
 
 	cmd.Flags().BoolVar(&keepAlive, KeepAliveFlag, false, "Keep the Bootstrapper process running even after deployment is finished.")
+
 	err = cmd.MarkFlagRequired(KeepAliveFlag)
 	if err != nil {
 		panic(err)
@@ -92,17 +94,21 @@ func run(_ *cobra.Command, _ []string) (err error) {
 	logger.Info("Running in serverless mode...")
 
 	result := deployment.CheckAgentDeploymentStatus(sourceFolder, targetFolder)
+
 	var agentAlreadyDeployed bool
 
-	if result.Error != nil {
+	switch {
+	case result.Error != nil:
 		logger.Error(result.Error, "failed to check OneAgent deployment status. Skipping deployment.", "status", result.Status.String())
 		err = result.Error
-	} else if result.Status == deployment.Deployed {
+	case result.Status == deployment.Deployed:
 		logger.Info("OneAgent is already deployed", "OneAgent version", result.AgentVersion)
+
 		agentAlreadyDeployed = true
-	} else {
+	default:
 		logger.Info("OneAgent deployment status", "status", result.Status)
-		err, agentAlreadyDeployed = deployment.DeployOneAgent(logger, sourceFolder, targetFolder, workBaseFolder, technology)
+
+		agentAlreadyDeployed, err = deployment.DeployOneAgent(logger, sourceFolder, targetFolder, workBaseFolder, technology)
 		if err != nil {
 			logger.Error(err, "OneAgent deployment has failed")
 		}
@@ -125,19 +131,21 @@ func keepProcessAlive(monitorDeployment bool) {
 
 		// Periodically check the OneAgent deployment status until it is deployed.
 		// In a multi-instance environment, another Bootstrapper may handle the deployment.
+	monitorLoop:
 		for {
 			result := deployment.CheckAgentDeploymentStatus(sourceFolder, targetFolder)
-			if result.Error != nil {
+			switch {
+			case result.Error != nil:
 				// Log the deployment error only if it differs from the previous one to avoid log spam
 				if lastErr == nil || result.Error.Error() != lastErr.Error() {
 					logger.Error(result.Error, "failed to check OneAgent deployment status", "status", result.Status.String())
 					lastErr = result.Error
 				}
-			} else if result.Status == deployment.Deployed {
+			case result.Status == deployment.Deployed:
 				logger.Info("OneAgent has been successfully deployed", "OneAgent version", result.AgentVersion)
 
-				break
-			} else {
+				break monitorLoop
+			default:
 				log.Debug(logger, "The required OneAgent version is not deployed", "status", result.Status.String())
 			}
 

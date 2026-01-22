@@ -80,9 +80,11 @@ func TestServerlessCmd(t *testing.T) {
 
 		go func() {
 			close(started)
+
 			cmd := New()
 
 			cmd.SetArgs([]string{"--keep-alive=true", "--debug", "--target", t.TempDir()})
+
 			finished <- cmd.Execute()
 		}()
 
@@ -106,6 +108,7 @@ func TestServerlessCmd(t *testing.T) {
 
 	t.Run("the deployment status is 'Deployed'", func(t *testing.T) {
 		logsObserver := setupServerlessLogger()
+
 		const agentVersion = "1.327.30.20251107-111521"
 
 		sourceDir := t.TempDir()
@@ -124,6 +127,7 @@ func TestServerlessCmd(t *testing.T) {
 
 	t.Run("the deployment status is 'Not Deployed'", func(t *testing.T) {
 		logsObserver := setupServerlessLogger()
+
 		const agentVersion = "1.327.30.20251107-111521"
 
 		sourceDir := t.TempDir()
@@ -141,6 +145,7 @@ func TestServerlessCmd(t *testing.T) {
 
 	t.Run("the deployment status is 'Link Missing'", func(t *testing.T) {
 		logsObserver := setupServerlessLogger()
+
 		const agentVersion = "1.327.30.20251107-111521"
 
 		sourceDir := t.TempDir()
@@ -172,6 +177,7 @@ func TestServerlessCmd(t *testing.T) {
 		agentTargetDirectory := deployment.GetAgentFolder(targetDir, agentVersion)
 		parentDir := filepath.Dir(agentTargetDirectory)
 		err := os.Chmod(parentDir, 0000)
+
 		defer func() {
 			require.NoError(t, os.Chmod(parentDir, 0700)) // restore permissions on exit to allow cleanup of the temporary directory
 		}()

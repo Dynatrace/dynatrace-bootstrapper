@@ -2,7 +2,6 @@ package deployment
 
 import (
 	"os"
-	"regexp"
 	"syscall"
 	"testing"
 
@@ -13,6 +12,7 @@ import (
 func TestCreateActiveSymlink(t *testing.T) {
 	t.Run("the `active` symlink successfully created", func(t *testing.T) {
 		logger, _ := tests.NewTestLogger()
+
 		const agentVersion = "1.327.30.20251107-111521"
 
 		workDir := t.TempDir()
@@ -26,13 +26,16 @@ func TestCreateActiveSymlink(t *testing.T) {
 		activeSymlink := getPathToActiveLink(agentTargetPath)
 		symlinkTarget, err := os.Readlink(activeSymlink)
 		require.NoError(t, err)
-		require.Equal(t, symlinkTarget, agentVersion)
+		require.Equal(t, agentVersion, symlinkTarget)
 	})
 
 	t.Run("the existing `active` symlink is successfully updated", func(t *testing.T) {
 		logger, _ := tests.NewTestLogger()
-		const existingAgentVersion = "1.325.51.20251103-195814"
-		const targetAgentVersion = "1.327.30.20251107-111521"
+
+		const (
+			existingAgentVersion = "1.325.51.20251103-195814"
+			targetAgentVersion   = "1.327.30.20251107-111521"
+		)
 
 		workDir := t.TempDir()
 		targetBaseDir := t.TempDir()
@@ -45,11 +48,12 @@ func TestCreateActiveSymlink(t *testing.T) {
 		activeSymlink := getPathToActiveLink(agentTargetPath)
 		symlinkTarget, err := os.Readlink(activeSymlink)
 		require.NoError(t, err)
-		require.Equal(t, symlinkTarget, targetAgentVersion)
+		require.Equal(t, targetAgentVersion, symlinkTarget)
 	})
 
 	t.Run("fail if the target folder is missing", func(t *testing.T) {
 		logger, _ := tests.NewTestLogger()
+
 		const agentVersion = "1.327.30.20251107-111521"
 
 		workDir := t.TempDir()
@@ -60,11 +64,12 @@ func TestCreateActiveSymlink(t *testing.T) {
 		require.ErrorIs(t, err, syscall.ENOENT)
 
 		expectedLog := `failed to rename the temporary symlink: rename .+: no such file or directory`
-		require.Regexp(t, regexp.MustCompile(expectedLog), err.Error())
+		require.Regexp(t, expectedLog, err.Error())
 	})
 
 	t.Run("the temporary symlink is removed if the rename operation fails", func(t *testing.T) {
 		logger, _ := tests.NewTestLogger()
+
 		const agentVersion = "1.327.30.20251107-111521"
 
 		workDir := t.TempDir()
@@ -73,10 +78,12 @@ func TestCreateActiveSymlink(t *testing.T) {
 
 		// change the target folder's permissions to cause the rename of the temporary symlink to fail
 		err := os.Chmod(targetBaseDir, 0000)
+
 		defer func() {
 			// restore permissions on exit to allow cleanup of the temporary directory
 			require.NoError(t, os.Chmod(targetBaseDir, 0700))
 		}()
+
 		require.NoError(t, err)
 
 		agentTargetPath := GetAgentFolder(targetBaseDir, agentVersion)
@@ -85,6 +92,6 @@ func TestCreateActiveSymlink(t *testing.T) {
 
 		entries, err := os.ReadDir(workDir)
 		require.NoError(t, err)
-		require.Len(t, entries, 0, "the work directory should be empty if the temporary symlink was removed")
+		require.Empty(t, entries, "the work directory should be empty if the temporary symlink was removed")
 	})
 }

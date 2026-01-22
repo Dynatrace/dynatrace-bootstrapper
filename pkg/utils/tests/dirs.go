@@ -1,11 +1,18 @@
 package tests
 
 import (
+	"io/fs"
 	"os"
 	"path/filepath"
 	"testing"
 
 	"github.com/stretchr/testify/require"
+)
+
+const (
+	dirPerm755  fs.FileMode = 0o755
+	dirPerm700  fs.FileMode = 0o700
+	filePerm600 fs.FileMode = 0o600
 )
 
 // SetupSourceDirectory creates a mock source directory for testing purposes
@@ -14,11 +21,12 @@ func SetupSourceDirectory(t *testing.T, sourceBaseDir, agentVersion string) {
 
 	versionFilePath := filepath.Join(sourceBaseDir, "agent/installer.version")
 	require.NoError(t, os.MkdirAll(filepath.Dir(versionFilePath), os.ModePerm))
-	require.NoError(t, os.WriteFile(versionFilePath, []byte(agentVersion), 0600))
+	require.NoError(t, os.WriteFile(versionFilePath, []byte(agentVersion), filePerm600))
 
 	const agentBinDir = "agent/bin/"
+
 	agentBinFolder := filepath.Join(sourceBaseDir, agentBinDir, agentVersion)
-	require.NoError(t, os.MkdirAll(agentBinFolder, 0700))
+	require.NoError(t, os.MkdirAll(agentBinFolder, dirPerm700))
 }
 
 // SetupTargetDirectory creates a mock target directory for testing purposes.
@@ -34,7 +42,7 @@ func SetupTargetDirectory(t *testing.T, targetBaseDir, agentVersionDir, activeLi
 	t.Helper()
 
 	oneAgentDirPath := filepath.Join(targetBaseDir, "oneagent", agentVersionDir)
-	err := os.MkdirAll(oneAgentDirPath, 0755)
+	err := os.MkdirAll(oneAgentDirPath, dirPerm755)
 	require.NoError(t, err)
 
 	if activeLinkAgentVersion != "" {

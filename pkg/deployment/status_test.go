@@ -3,7 +3,6 @@ package deployment
 import (
 	"os"
 	"path/filepath"
-	"regexp"
 	"syscall"
 	"testing"
 
@@ -22,12 +21,14 @@ func TestDeploymentStatus(t *testing.T) {
 		result := CheckAgentDeploymentStatus(sourceBaseDir, targetBaseDir)
 
 		require.NoError(t, result.Error)
-		require.Equal(t, result.Status, NotDeployed)
+		require.Equal(t, NotDeployed, result.Status)
 	})
 
 	t.Run("the deployment status is 'Not Deployed' (target contains another agent version)", func(t *testing.T) {
-		const sourceAgentVersion = "1.327.30.20251107-111521"
-		const targetAgentVersion = "1.325.51.20251103-195814"
+		const (
+			sourceAgentVersion = "1.327.30.20251107-111521"
+			targetAgentVersion = "1.325.51.20251103-195814"
+		)
 
 		sourceBaseDir := t.TempDir()
 		tests.SetupSourceDirectory(t, sourceBaseDir, sourceAgentVersion)
@@ -38,7 +39,7 @@ func TestDeploymentStatus(t *testing.T) {
 		result := CheckAgentDeploymentStatus(sourceBaseDir, targetBaseDir)
 
 		require.NoError(t, result.Error)
-		require.Equal(t, result.Status, NotDeployed)
+		require.Equal(t, NotDeployed, result.Status)
 	})
 
 	t.Run("the deployment status is 'Link Missing' (the `active` symlink is missing)", func(t *testing.T) {
@@ -53,12 +54,14 @@ func TestDeploymentStatus(t *testing.T) {
 		result := CheckAgentDeploymentStatus(sourceBaseDir, targetBaseDir)
 
 		require.NoError(t, result.Error)
-		require.Equal(t, result.Status, LinkMissing)
+		require.Equal(t, LinkMissing, result.Status)
 	})
 
 	t.Run("the deployment status is 'Link Missing' (the `active` symlink points to another agent version)", func(t *testing.T) {
-		const sourceAgentVersion = "1.327.30.20251107-111521"
-		const targetAgentVersion = "1.325.51.20251103-195814"
+		const (
+			sourceAgentVersion = "1.327.30.20251107-111521"
+			targetAgentVersion = "1.325.51.20251103-195814"
+		)
 
 		sourceBaseDir := t.TempDir()
 		tests.SetupSourceDirectory(t, sourceBaseDir, sourceAgentVersion)
@@ -69,7 +72,7 @@ func TestDeploymentStatus(t *testing.T) {
 		result := CheckAgentDeploymentStatus(sourceBaseDir, targetBaseDir)
 
 		require.NoError(t, result.Error)
-		require.Equal(t, result.Status, LinkMissing)
+		require.Equal(t, LinkMissing, result.Status)
 	})
 
 	t.Run("the deployment status is 'Deployed'", func(t *testing.T) {
@@ -84,7 +87,7 @@ func TestDeploymentStatus(t *testing.T) {
 		result := CheckAgentDeploymentStatus(sourceBaseDir, targetBaseDir)
 
 		require.NoError(t, result.Error)
-		require.Equal(t, result.Status, Deployed)
+		require.Equal(t, Deployed, result.Status)
 	})
 
 	t.Run("the deployment status is 'Unknown' (due to the target folder permission issue)", func(t *testing.T) {
@@ -100,17 +103,19 @@ func TestDeploymentStatus(t *testing.T) {
 		agentTargetDirectory := GetAgentFolder(targetBaseDir, agentVersion)
 		parentDir := filepath.Dir(agentTargetDirectory)
 		err := os.Chmod(parentDir, 0000)
+
 		defer func() {
 			require.NoError(t, os.Chmod(parentDir, 0700)) // restore permissions on exit to allow cleanup of the temporary directory
 		}()
+
 		require.NoError(t, err)
 
 		result := CheckAgentDeploymentStatus(sourceBaseDir, targetBaseDir)
 		require.ErrorIs(t, result.Error, syscall.EACCES)
-		require.Equal(t, result.Status, Unknown)
+		require.Equal(t, Unknown, result.Status)
 
 		expectedLog := `cannot obtain OneAgent directory info: stat .+: permission denied`
-		require.Regexp(t, regexp.MustCompile(expectedLog), result.Error.Error())
+		require.Regexp(t, expectedLog, result.Error.Error())
 	})
 
 	t.Run("the deployment status is 'Unknown' (the `active` symlink is a directory)", func(t *testing.T) {
@@ -130,7 +135,7 @@ func TestDeploymentStatus(t *testing.T) {
 		result := CheckAgentDeploymentStatus(sourceBaseDir, targetBaseDir)
 
 		require.ErrorContains(t, result.Error, "OneAgent `active` is not a symlink: drwxr-xr-x")
-		require.Equal(t, result.Status, Unknown)
+		require.Equal(t, Unknown, result.Status)
 	})
 
 	t.Run("the deployment status is 'Unknown' (the oneagent directory is of a file type)", func(t *testing.T) {
@@ -147,7 +152,9 @@ func TestDeploymentStatus(t *testing.T) {
 		err := os.RemoveAll(agentTargetDirectory)
 		require.NoError(t, err)
 
-		file, err := os.OpenFile(agentTargetDirectory, os.O_CREATE, 0755)
+		file, err := os.OpenFile(agentTargetDirectory, os.O_CREATE, dirPerm755)
+		require.NoError(t, err)
+
 		defer func() {
 			require.NoError(t, file.Close())
 		}()
@@ -155,7 +162,7 @@ func TestDeploymentStatus(t *testing.T) {
 		result := CheckAgentDeploymentStatus(sourceBaseDir, targetBaseDir)
 
 		require.ErrorContains(t, result.Error, "OneAgent deployment target is not a directory")
-		require.Equal(t, result.Status, Unknown)
+		require.Equal(t, Unknown, result.Status)
 	})
 
 	t.Run("the deployment status is 'Unknown' (the installer.version file is not found in the source directory)", func(t *testing.T) {
@@ -176,7 +183,6 @@ func TestDeploymentStatus(t *testing.T) {
 
 		require.ErrorContains(t, result.Error, "failed to determine OneAgent version to deploy")
 		require.ErrorIs(t, result.Error, syscall.ENOENT)
-		require.Equal(t, result.Status, Unknown)
+		require.Equal(t, Unknown, result.Status)
 	})
-
 }

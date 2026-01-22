@@ -66,7 +66,7 @@ func TestCreateCurrentSymlink(t *testing.T) {
 		symlinkPath := filepath.Join(targetDir, CurrentDir)
 		info, err := os.Lstat(symlinkPath)
 		require.NoError(t, err)
-		require.True(t, info.Mode()&os.ModeSymlink != 0, "current should be a symlink type")
+		require.NotEqual(t, 0, info.Mode()&os.ModeSymlink, "current should be a symlink type")
 
 		// check if the symlink points to the versioned oneagent folder
 		linkTarget, err := os.Readlink(symlinkPath)
