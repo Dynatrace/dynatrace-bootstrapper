@@ -19,7 +19,7 @@ RUN --mount=type=cache,target="/root/.cache/go-build" \
     -o ./build/_output/bin/dynatrace-bootstrapper
 
 # platform is required, otherwise the copy command will copy the wrong architecture files, don't trust GitHub Actions linting warnings
-FROM --platform=$TARGETPLATFORM public.ecr.aws/dynatrace/dynatrace-codemodules:1.311.70.20250416-094918 AS codemodules
+FROM --platform=$TARGETPLATFORM public.ecr.aws/dynatrace/dynatrace-codemodules:1.329.73.20260123-140641 AS codemodules
 
 # copy bootstrapper binary
 COPY --from=build /app/build/_output/bin /opt/dynatrace/oneagent/agent/lib64/
