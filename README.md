@@ -7,9 +7,23 @@ The `dynatrace-bootstrapper` is a small CLI binary built into a [Dynatrace CodeM
 - Copy a Dynatrace CodeModule to a target directory
 - Configure the Dynatrace CodeModule according to the configuration options provided
 
-## How to use
+## CLI Commands
 
-### Args
+The bootstrapper provides two CLI commands:
+
+- `k8s-init` - Deploy the Dynatrace CodeModule in a Kubernetes environment
+- `serverless` - Deploy the Dynatrace CodeModule in a serverless environment
+
+> **Note:** For backward compatibility, the Bootstrapper executes `k8s-init` command by default when no command is specified.
+
+---
+
+## k8s-init command
+
+Deploy the Dynatrace CodeModule in a Kubernetes environment. This command is designed to be used as an init container,
+ensuring the CodeModule is properly copied and configured before the main application container starts.
+
+### k8s-init args
 
 #### `--source`
 
@@ -128,6 +142,64 @@ The `dynatrace-bootstrapper` is a small CLI binary built into a [Dynatrace CodeM
 - This is an **optional** arg
   - Defaults to `false`
 - The `--debug` arg will enabled the debug logs.
+
+---
+
+## serverless command
+
+Deploy the Dynatrace CodeModule in a serverless environment (e.g., Azure App Service on Linux).
+This command is designed for environments where multiple Bootstrapper instances may start simultaneously,
+implementing concurrency-safe deployment to a persistent shared storage to ensure only one instance performs the actual deployment while others wait for completion.
+The keep-alive mode allows the Bootstrapper to continue running even after deployment, which may be necessary for certain serverless environments.
+
+### serverless Args
+
+#### `--target`
+
+*Example*: `--target="/home/dynatrace/oneagent"`
+
+- ⚠️This is a **required** arg⚠️
+- The `--target` arg defines the base path where to copy the CodeModule TO.
+
+#### `--keep-alive`
+
+*Example*: `--keep-alive`
+
+- ⚠️This is a **required** arg⚠️
+- The `--keep-alive` arg defines whether to keep the Bootstrapper process running even after deployment is finished.
+
+#### `--source`
+
+*Example*: `--source="/opt/dynatrace/oneagent"`
+
+- This is an **optional** arg
+  - Defaults to `/opt/dynatrace/oneagent`
+- The `--source` arg defines the base path where to copy the CodeModule FROM.
+
+#### `--technology`
+
+*Example*: `--technology="python,java"`
+
+- This is an **optional** arg
+- The `--technology` arg defines the paths associated to the given technology in the `<source>/manifest.json` file. Only those files will be copied that match the technology. It is a comma-separated list.
+
+#### `--work`
+
+*Example*: `--work="/home/dynatrace/oneagent/work"`
+
+- This is an **optional** arg
+  - Defaults to `/home/dynatrace/oneagent/work`
+- The `--work` arg defines the base path for a work folder, this is where the command will do its work, to make sure the operations are atomic. It must be on the same disk as the target folder.
+
+#### `--debug`
+
+*Example*: `--debug`
+
+- This is an **optional** arg
+  - Defaults to `false`
+- The `--debug` arg will enable debug logs.
+
+---
 
 ## Development
 
