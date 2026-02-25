@@ -15,6 +15,13 @@ type fileContent struct {
 	pod.Attributes `json:",inline"`
 
 	ContainerName string `json:"k8s.container.name"`
+
+	// Deprecated
+	DTClusterID string `json:"dt.kubernetes.cluster.id,omitempty"`
+	// Deprecated
+	DTWorkloadKind string `json:"dt.kubernetes.workload.kind,omitempty"`
+	// Deprecated
+	DTWorkloadName string `json:"dt.kubernetes.workload.name,omitempty"`
 }
 
 func (c fileContent) toMap() (map[string]string, error) {
@@ -62,7 +69,10 @@ func (c fileContent) toProperties() (string, error) {
 
 func fromAttributes(containerAttr container.Attributes, podAttr pod.Attributes) fileContent {
 	return fileContent{
-		Attributes:    podAttr,
-		ContainerName: containerAttr.ContainerName,
+		Attributes:     podAttr,
+		ContainerName:  containerAttr.ContainerName,
+		DTClusterID:    podAttr.ClusterUID,
+		DTWorkloadKind: podAttr.WorkloadKind,
+		DTWorkloadName: podAttr.WorkloadName,
 	}
 }
