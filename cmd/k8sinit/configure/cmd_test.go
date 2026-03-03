@@ -18,6 +18,10 @@ import (
 	"go.uber.org/zap"
 )
 
+const (
+	alwaysEnableDeprecatedAttributes = true
+)
+
 var testLog = zapr.NewLogger(zap.NewExample())
 
 // Only checking the counts of files in the folders, checking exact paths and contents are done in the sub-package tests.
@@ -125,7 +129,7 @@ func TestEnrichWithMetadata(t *testing.T) {
 		preExecuteConfigCount := countFiles(t, configDir)
 		require.Equal(t, 0, preExecuteConfigCount)
 
-		err := EnrichWithMetadata(testLog)
+		err := EnrichWithMetadata(testLog, alwaysEnableDeprecatedAttributes)
 		require.NoError(t, err)
 
 		expectedContainerSpecificConfigCount := 3 // endpoint(1) + metadata(2)
@@ -147,7 +151,7 @@ func TestEnrichWithMetadata(t *testing.T) {
 		configDir = filepath.Join(baseTempDir, "conf")
 		inputDir = ""
 
-		err := EnrichWithMetadata(testLog)
+		err := EnrichWithMetadata(testLog, alwaysEnableDeprecatedAttributes)
 		require.NoError(t, err)
 
 		postExecuteConfigCount := countFiles(t, configDir)
@@ -159,7 +163,7 @@ func TestEnrichWithMetadata(t *testing.T) {
 		configDir = ""
 		inputDir = filepath.Join(baseTempDir, "input")
 
-		err := EnrichWithMetadata(testLog)
+		err := EnrichWithMetadata(testLog, alwaysEnableDeprecatedAttributes)
 		require.NoError(t, err)
 
 		postExecuteConfigCount := countFiles(t, configDir)
