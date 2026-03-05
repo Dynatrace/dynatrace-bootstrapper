@@ -123,7 +123,7 @@ func configureFromInputDir(log logr.Logger, containerConfigDir, inputDir string)
 	return nil
 }
 
-func EnrichWithMetadata(log logr.Logger) error {
+func EnrichWithMetadata(log logr.Logger, withDeprecatedAttributes bool) error {
 	if configDir == "" || inputDir == "" {
 		return nil
 	}
@@ -151,7 +151,7 @@ func EnrichWithMetadata(log logr.Logger) error {
 			return err
 		}
 
-		err = metadata.Configure(log, containerConfigDir, podAttr, containerAttr)
+		err = metadata.Configure(log, containerConfigDir, podAttr, containerAttr, withDeprecatedAttributes)
 		if err != nil {
 			log.Info("failed to configure the enrichment files", "config-directory", containerConfigDir)
 

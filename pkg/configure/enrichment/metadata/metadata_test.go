@@ -14,6 +14,10 @@ import (
 	"go.uber.org/zap"
 )
 
+const (
+	alwaysEnableDeprecatedAttributes = true
+)
+
 var testLog = zapr.NewLogger(zap.NewExample())
 
 func TestConfigure(t *testing.T) {
@@ -46,10 +50,10 @@ func TestConfigure(t *testing.T) {
 		baseTempDir := filepath.Join(t.TempDir(), "path")
 		configDir := filepath.Join(baseTempDir, "config")
 
-		err := Configure(testLog, configDir, podAttr, containerAttr)
+		err := Configure(testLog, configDir, podAttr, containerAttr, alwaysEnableDeprecatedAttributes)
 		require.NoError(t, err)
 
-		expectedContent, err := fromAttributes(containerAttr, podAttr).toMap()
+		expectedContent, err := fromAttributes(containerAttr, podAttr, alwaysEnableDeprecatedAttributes).toMap()
 		require.NoError(t, err)
 
 		jsonFilePath := filepath.Join(configDir, JSONFilePath)

@@ -99,7 +99,8 @@ func RunE(_ *cobra.Command, _ []string) error {
 		return err
 	}
 
-	err = configure.EnrichWithMetadata(log)
+	// always enrich with deprecated attributes.
+	err = configure.EnrichWithMetadata(log, true)
 	if err != nil {
 		if areErrorsSuppressed {
 			log.Error(err, "error during enrichment, the error was suppressed")

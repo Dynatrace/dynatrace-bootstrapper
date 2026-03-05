@@ -14,8 +14,8 @@ const (
 	PropertiesFilePath = "enrichment/dt_metadata.properties"
 )
 
-func Configure(log logr.Logger, configDirectory string, podAttr pod.Attributes, containerAttr container.Attributes) error {
-	confContent := fromAttributes(containerAttr, podAttr)
+func Configure(log logr.Logger, configDirectory string, podAttr pod.Attributes, containerAttr container.Attributes, withDeprecatedAttributes bool) error {
+	confContent := fromAttributes(containerAttr, podAttr, withDeprecatedAttributes)
 
 	log.V(1).Info("format content into a raw form", "struct", confContent)
 

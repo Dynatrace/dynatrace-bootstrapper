@@ -67,12 +67,17 @@ func (c fileContent) toProperties() (string, error) {
 	return confContent.String(), nil
 }
 
-func fromAttributes(containerAttr container.Attributes, podAttr pod.Attributes) fileContent {
-	return fileContent{
-		Attributes:     podAttr,
-		ContainerName:  containerAttr.ContainerName,
-		DTClusterID:    podAttr.ClusterUID,
-		DTWorkloadKind: podAttr.WorkloadKind,
-		DTWorkloadName: podAttr.WorkloadName,
+func fromAttributes(containerAttr container.Attributes, podAttr pod.Attributes, withDeprecatedAttributes bool) fileContent {
+	fc := fileContent{
+		Attributes:    podAttr,
+		ContainerName: containerAttr.ContainerName,
 	}
+
+	if withDeprecatedAttributes {
+		fc.DTClusterID = podAttr.ClusterUID
+		fc.DTWorkloadKind = podAttr.WorkloadKind
+		fc.DTWorkloadName = podAttr.WorkloadName
+	}
+
+	return fc
 }
