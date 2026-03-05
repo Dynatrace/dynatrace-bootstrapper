@@ -7,7 +7,7 @@ golang_tools_version=v0.42.0
 # renovate depName=github.com/vektra/mockery
 mockery_version=v3.6.3
 # renovate depName=github.com/igorshubovych/markdownlint-cli
-markdownlint_cli_version=v0.47.0
+markdownlint_cli_version=v0.48.0
 
 # Get the currently used golang install path (in GOPATH/bin, unless GOBIN is set)
 ifeq (,$(shell go env GOBIN))
