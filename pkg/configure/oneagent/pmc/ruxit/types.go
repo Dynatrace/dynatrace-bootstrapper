@@ -2,8 +2,9 @@ package ruxit
 
 import (
 	"fmt"
+	"maps"
 	"path/filepath"
-	"sort"
+	"slices"
 	"strings"
 )
 
@@ -107,26 +108,13 @@ func (pm ProcMap) SetupReadonly(installPath string) ProcMap {
 }
 
 func (pm ProcMap) ToString() string {
-	sections := make([]string, 0, len(pm))
-	for section := range pm {
-		sections = append(sections, section)
-	}
-
-	sort.Strings(sections)
-
 	var content strings.Builder
-	for _, section := range sections {
+
+	for _, section := range slices.Sorted(maps.Keys(pm)) {
 		_, _ = content.WriteString("[" + section + "]")
 		_, _ = content.WriteString("\n")
 
-		var props []string
-		for prop := range pm[section] {
-			props = append(props, prop)
-		}
-
-		sort.Strings(props)
-
-		for _, prop := range props {
+		for _, prop := range slices.Sorted(maps.Keys(pm[section])) {
 			_, _ = content.WriteString(prop)
 			_, _ = content.WriteString(" ")
 			_, _ = content.WriteString(pm[section][prop])
@@ -146,9 +134,7 @@ func (pm ProcMap) Merge(override ProcMap) ProcMap {
 			pm[section] = map[string]string{}
 		}
 
-		for key, value := range props {
-			pm[section][key] = value
-		}
+		maps.Copy(pm[section], props)
 	}
 
 	return pm
