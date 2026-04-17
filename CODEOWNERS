@@ -1,1 +1,21 @@
-*   @Dynatrace/kubernetes-operator
+# Default owners
+*                       @Dynatrace/kubernetes-operator @Dynatrace/team-aid
+
+# k8sinit
+/cmd/k8sinit/           @Dynatrace/kubernetes-operator
+/pkg/configure/         @Dynatrace/kubernetes-operator
+/pkg/move/              @Dynatrace/kubernetes-operator
+
+# serverless
+/main.go                @Dynatrace/team-aid
+/cmd/serverless/        @Dynatrace/team-aid
+
+# Shared packages
+/pkg/deployment/        @Dynatrace/kubernetes-operator @Dynatrace/team-aid
+/pkg/lock/              @Dynatrace/kubernetes-operator @Dynatrace/team-aid
+/pkg/utils/             @Dynatrace/kubernetes-operator @Dynatrace/team-aid
+
+# CI
+/hack/                  @Dynatrace/kubernetes-operator @Dynatrace/team-aid
+/Makefile               @Dynatrace/kubernetes-operator @Dynatrace/team-aid
+/Dockerfile             @Dynatrace/kubernetes-operator @Dynatrace/team-aid
