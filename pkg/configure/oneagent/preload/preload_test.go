@@ -59,4 +59,11 @@ func TestConfigure(t *testing.T) {
 		err := Configure(testLog, t.TempDir(), "/valid/../path")
 		require.Error(t, err)
 	})
+
+	// Valid on Linux but rejected: spaces in paths are indistinguishable from
+	// whitespace separators in ld.so.preload, so we treat them as invalid.
+	t.Run("path with space is rejected despite being a valid linux path", func(t *testing.T) {
+		err := Configure(testLog, t.TempDir(), "/opt/my agent/dynatrace")
+		require.Error(t, err)
+	})
 }
