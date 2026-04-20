@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"path/filepath"
 	"strings"
+	"unicode"
 
 	fsutils "github.com/Dynatrace/dynatrace-bootstrapper/pkg/utils/fs"
 	"github.com/go-logr/logr"
@@ -30,8 +31,12 @@ func validateInstallPath(installPath string) error {
 		return fmt.Errorf("install path must be absolute, got: %s", installPath)
 	}
 
-	if strings.ContainsAny(installPath, "\n\r\t\x00 ,:") {
-		return errors.New("install path must be a single path with no separators or whitespace")
+	if strings.ContainsFunc(installPath, unicode.IsSpace) {
+		return errors.New("install path must be a single path with no whitespace")
+	}
+
+	if strings.ContainsAny(installPath, "\x00,:") {
+		return errors.New("install path must be a single path with no separators")
 	}
 
 	if cleaned := filepath.Clean(installPath); cleaned != installPath {
