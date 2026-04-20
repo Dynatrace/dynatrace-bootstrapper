@@ -42,6 +42,7 @@ func TestSetupOneAgent(t *testing.T) {
 		baseTempDir := filepath.Join(t.TempDir(), "path")
 		configDir = filepath.Join(baseTempDir, "conf")
 		inputDir = filepath.Join(baseTempDir, "input")
+		installPath = filepath.Join(baseTempDir, "install")
 		targetFolder := filepath.Join(baseTempDir, "target")
 
 		setupInputFs(t, inputDir)
