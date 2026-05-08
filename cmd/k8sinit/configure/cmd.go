@@ -52,6 +52,7 @@ func AddFlags(cmd *cobra.Command) {
 }
 
 func SetupOneAgent(log logr.Logger, targetDir string) error {
+	log.Info("HALLO HALLO I BIMS DA BOOTSTRAPPER")
 	if configDir == "" || inputDir == "" {
 		return nil
 	}
