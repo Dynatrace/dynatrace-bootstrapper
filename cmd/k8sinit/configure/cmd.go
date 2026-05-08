@@ -10,6 +10,7 @@ import (
 	"github.com/Dynatrace/dynatrace-bootstrapper/pkg/configure/oneagent/ca"
 	"github.com/Dynatrace/dynatrace-bootstrapper/pkg/configure/oneagent/conf"
 	"github.com/Dynatrace/dynatrace-bootstrapper/pkg/configure/oneagent/curl"
+	"github.com/Dynatrace/dynatrace-bootstrapper/pkg/configure/oneagent/pgc"
 	"github.com/Dynatrace/dynatrace-bootstrapper/pkg/configure/oneagent/pmc"
 	"github.com/Dynatrace/dynatrace-bootstrapper/pkg/configure/oneagent/preload"
 	"github.com/go-logr/logr"
@@ -60,6 +61,13 @@ func SetupOneAgent(log logr.Logger, targetDir string) error {
 	err := preload.Configure(log, configDir, installPath)
 	if err != nil {
 		log.Info("failed to configure the ld.so.preload", "config-directory", configDir)
+
+		return err
+	}
+
+	err = pgc.Configure(log, inputDir, targetDir)
+	if err != nil {
+		log.Info("failed to configure processgroup.json", "target-directory", targetDir)
 
 		return err
 	}

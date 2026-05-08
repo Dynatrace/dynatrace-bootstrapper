@@ -10,6 +10,7 @@ import (
 	"github.com/Dynatrace/dynatrace-bootstrapper/pkg/configure/enrichment/endpoint"
 	"github.com/Dynatrace/dynatrace-bootstrapper/pkg/configure/oneagent/ca"
 	"github.com/Dynatrace/dynatrace-bootstrapper/pkg/configure/oneagent/curl"
+	"github.com/Dynatrace/dynatrace-bootstrapper/pkg/configure/oneagent/pgc"
 	"github.com/Dynatrace/dynatrace-bootstrapper/pkg/configure/oneagent/pmc"
 	"github.com/Dynatrace/dynatrace-bootstrapper/pkg/configure/oneagent/pmc/ruxit"
 	fsutils "github.com/Dynatrace/dynatrace-bootstrapper/pkg/utils/fs"
@@ -71,7 +72,7 @@ func TestSetupOneAgent(t *testing.T) {
 		require.Equal(t, expectedPostExecuteConfigCount, postExecuteConfigCount)
 
 		postExecuteTargetCount := countFiles(t, targetFolder)
-		require.Equal(t, preExecuteTargetCount, postExecuteTargetCount) // no change to the target folder during configuration
+		require.Equal(t, preExecuteTargetCount+1, postExecuteTargetCount) // pgc adds processgroup.json to target folder
 	})
 
 	t.Run("no input-directory ==> do nothing", func(t *testing.T) {
@@ -225,6 +226,9 @@ func setupInputFs(t *testing.T, inputDir string) {
 	rawProcConf, err := json.Marshal(procConf)
 	require.NoError(t, err)
 	require.NoError(t, fsutils.CreateFile(filepath.Join(inputDir, pmc.InputFileName), string(rawProcConf)))
+
+	// pgc
+	require.NoError(t, fsutils.CreateFile(filepath.Join(inputDir, pgc.InputFileName), "pgc-data"))
 }
 
 func setupTargetFs(t *testing.T, targetDir string) {
