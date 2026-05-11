@@ -72,7 +72,7 @@ func TestSetupOneAgent(t *testing.T) {
 		require.Equal(t, expectedPostExecuteConfigCount, postExecuteConfigCount)
 
 		postExecuteTargetCount := countFiles(t, targetFolder)
-		require.Equal(t, preExecuteTargetCount+1, postExecuteTargetCount) // pgc adds processgroup.json to target folder
+		require.Equal(t, preExecuteTargetCount+1, postExecuteTargetCount) // +1 for declarative.cbor
 	})
 
 	t.Run("no input-directory ==> do nothing", func(t *testing.T) {
@@ -228,7 +228,7 @@ func setupInputFs(t *testing.T, inputDir string) {
 	require.NoError(t, fsutils.CreateFile(filepath.Join(inputDir, pmc.InputFileName), string(rawProcConf)))
 
 	// pgc
-	require.NoError(t, fsutils.CreateFile(filepath.Join(inputDir, pgc.InputFileName), "pgc-data"))
+	require.NoError(t, fsutils.CreateFile(filepath.Join(inputDir, pgc.InputFileName), "declarative.cbor"))
 }
 
 func setupTargetFs(t *testing.T, targetDir string) {

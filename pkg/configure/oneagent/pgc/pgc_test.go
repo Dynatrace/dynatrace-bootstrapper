@@ -39,7 +39,7 @@ func TestConfigure(t *testing.T) {
 		err := Configure(testLog, inputDir, targetDir)
 		require.NoError(t, err)
 
-		_, err = os.ReadFile(filepath.Join(targetDir, DestinationDeclarativePath))
+		_, err = os.ReadFile(GetDestinationFilePath(targetDir))
 		require.True(t, os.IsNotExist(err))
 	})
 }
