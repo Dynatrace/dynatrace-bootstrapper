@@ -9,30 +9,27 @@ import (
 )
 
 const (
-	InputFileName   = "processgroup.json"
-	DestinationPath = "agent/conf/processgroup.json"
+	InputFileName             = "declarative.cbor"
+	DestinationDeclarativePath = "agent/conf/declarative.cbor"
 )
+
+func GetDestinationFilePath(targetDir string) string {
+	return filepath.Join(targetDir, DestinationDeclarativePath)
+}
 
 func Configure(log logr.Logger, inputDir, targetDir string) error {
 	inputFilePath := filepath.Join(inputDir, InputFileName)
 
-	if _, err := os.Stat(inputFilePath); err != nil {
-		if os.IsNotExist(err) {
-			log.Info("Input file not present, skipping processgroup.json configuration", "path", inputFilePath)
+	if _, err := os.Stat(inputFilePath); os.IsNotExist(err) {
+		return nil
+	}
 
-			return nil
-		}
+	dstPath := GetDestinationFilePath(targetDir)
 
+	if err := os.MkdirAll(filepath.Dir(dstPath), 0o755); err != nil {
 		return err
 	}
 
-	dstPath := filepath.Join(targetDir, DestinationPath)
-
-	if err := os.MkdirAll(filepath.Dir(dstPath), os.ModePerm); err != nil {
-		return err
-	}
-
-	log.Info("writing processgroup.json", "destination", dstPath)
-
+	log.Info("copying declarative.cbor", "src", inputFilePath, "dst", dstPath)
 	return fs.CopyFile(inputFilePath, dstPath)
 }

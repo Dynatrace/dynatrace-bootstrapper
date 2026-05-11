@@ -52,7 +52,6 @@ func AddFlags(cmd *cobra.Command) {
 }
 
 func SetupOneAgent(log logr.Logger, targetDir string) error {
-	log.Info("HALLO HALLO I BIMS DA BOOTSTRAPPER")
 	if configDir == "" || inputDir == "" {
 		return nil
 	}
@@ -68,7 +67,7 @@ func SetupOneAgent(log logr.Logger, targetDir string) error {
 
 	err = pgc.Configure(log, inputDir, targetDir)
 	if err != nil {
-		log.Info("failed to configure processgroup.json", "target-directory", targetDir)
+		log.Info("failed to configure declarative.cbor", "target-directory", targetDir)
 
 		return err
 	}
