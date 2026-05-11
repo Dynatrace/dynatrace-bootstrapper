@@ -9,6 +9,9 @@ import (
 	"github.com/pkg/errors"
 )
 
+// ruxitagentproc.conf contains sensitive data, like tenantToken, so we should restrict access as much as we can
+const filePerm = 0600
+
 func Create(log logr.Logger, srcPath, dstPath string, conf ruxit.ProcConf) error {
 	srcFile, err := os.Open(srcPath)
 	if err != nil {
@@ -18,13 +21,6 @@ func Create(log logr.Logger, srcPath, dstPath string, conf ruxit.ProcConf) error
 	}
 
 	defer func() { _ = srcFile.Close() }()
-
-	srcInfo, err := srcFile.Stat()
-	if err != nil {
-		log.Info("failed to stat the source file", "path", srcPath)
-
-		return err
-	}
 
 	srcConf, err := ruxit.FromConf(srcFile)
 	if err != nil {
@@ -42,7 +38,7 @@ func Create(log logr.Logger, srcPath, dstPath string, conf ruxit.ProcConf) error
 		return err
 	}
 
-	dstFile, err := os.OpenFile(dstPath, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, srcInfo.Mode())
+	dstFile, err := os.OpenFile(dstPath, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, filePerm)
 	if err != nil {
 		log.Info("failed to open destination file to write", "path", dstPath)
 
