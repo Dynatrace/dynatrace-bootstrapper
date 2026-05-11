@@ -10,7 +10,8 @@ import (
 
 const (
 	InputFileName              = "declarative.cbor"
-	DestinationDeclarativePath = "oneagent/agent/config/declarative.cbor"
+	DestinationDeclarativePath = "oneagent/agent/config/" + InputFileName
+	FileMode = os.FileMode(0600)
 )
 
 func GetDestinationFilePath(containerConfigDir string) string {
@@ -26,7 +27,7 @@ func Configure(log logr.Logger, inputDir, _ string, containerConfigDir string) e
 
 	dstPath := GetDestinationFilePath(containerConfigDir)
 
-	if err := os.MkdirAll(filepath.Dir(dstPath), os.FileMode(0600)); err != nil {
+	if err := os.MkdirAll(filepath.Dir(dstPath), FileMode); err != nil {
 		return err
 	}
 
