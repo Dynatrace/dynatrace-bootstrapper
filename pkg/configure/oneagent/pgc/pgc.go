@@ -4,20 +4,21 @@ import (
 	"os"
 	"path/filepath"
 
-	fs "github.com/Dynatrace/dynatrace-bootstrapper/pkg/utils/fs"
+	"github.com/Dynatrace/dynatrace-bootstrapper/pkg/utils/fs"
 	"github.com/go-logr/logr"
 )
 
 const (
 	InputFileName              = "declarative.cbor"
 	DestinationDeclarativePath = "oneagent/agent/config/declarative.cbor"
+	dirPermissions             = 0o755
 )
 
 func GetDestinationFilePath(containerConfigDir string) string {
 	return filepath.Join(containerConfigDir, DestinationDeclarativePath)
 }
 
-func Configure(log logr.Logger, inputDir, targetDir, containerConfigDir string) error {
+func Configure(log logr.Logger, inputDir, _ string, containerConfigDir string) error {
 	inputFilePath := filepath.Join(inputDir, InputFileName)
 
 	if _, err := os.Stat(inputFilePath); os.IsNotExist(err) {
@@ -26,10 +27,11 @@ func Configure(log logr.Logger, inputDir, targetDir, containerConfigDir string) 
 
 	dstPath := GetDestinationFilePath(containerConfigDir)
 
-	if err := os.MkdirAll(filepath.Dir(dstPath), 0o755); err != nil {
+	if err := os.MkdirAll(filepath.Dir(dstPath), dirPermissions); err != nil {
 		return err
 	}
 
 	log.Info("copying declarative.cbor", "src", inputFilePath, "dst", dstPath)
+
 	return fs.CopyFile(inputFilePath, dstPath)
 }

@@ -77,38 +77,48 @@ func SetupOneAgent(log logr.Logger, targetDir string) error {
 
 	for _, containerAttr := range containerAttrs {
 		containerConfigDir := filepath.Join(configDir, containerAttr.ContainerName)
-		log.Info("starting to configure the container", "path", containerConfigDir)
 
-		err = pmc.Configure(log, inputDir, targetDir, containerConfigDir, installPath)
+		err = configureContainer(log, inputDir, targetDir, containerConfigDir, containerAttr, podAttr, tenant, isFullstack)
 		if err != nil {
-			log.Info("failed to configure the ruxitagentproc.conf", "config-directory", containerConfigDir)
-
-			return err
-		}
-
-		err = conf.Configure(log, containerConfigDir, containerAttr, podAttr, tenant, isFullstack)
-		if err != nil {
-			log.Info("failed to configure the container-conf files", "config-directory", containerConfigDir)
-
-			return err
-		}
-
-		err = configureFromInputDir(log, containerConfigDir, inputDir)
-		if err != nil {
-			log.Info("failed to configure container", "config-directory", containerConfigDir)
-
-			return err
-		}
-
-		err = pgc.Configure(log, inputDir, targetDir, containerConfigDir)
-		if err != nil {
-			log.Info("failed to configure declarative.cbor", "config-directory", containerConfigDir)
-
 			return err
 		}
 	}
 
 	log.Info("finished oneagent configuration", "config-directory", configDir, "input-directory", inputDir)
+
+	return nil
+}
+
+func configureContainer(log logr.Logger, inputDir, targetDir, containerConfigDir string, containerAttr container.Attributes, podAttr pod.Attributes, tenant string, isFullstack bool) error {
+	log.Info("starting to configure the container", "path", containerConfigDir)
+
+	err := pmc.Configure(log, inputDir, targetDir, containerConfigDir, installPath)
+	if err != nil {
+		log.Info("failed to configure the ruxitagentproc.conf", "config-directory", containerConfigDir)
+
+		return err
+	}
+
+	err = conf.Configure(log, containerConfigDir, containerAttr, podAttr, tenant, isFullstack)
+	if err != nil {
+		log.Info("failed to configure the container-conf files", "config-directory", containerConfigDir)
+
+		return err
+	}
+
+	err = configureFromInputDir(log, containerConfigDir, inputDir)
+	if err != nil {
+		log.Info("failed to configure container", "config-directory", containerConfigDir)
+
+		return err
+	}
+
+	err = pgc.Configure(log, inputDir, targetDir, containerConfigDir)
+	if err != nil {
+		log.Info("failed to configure declarative.cbor", "config-directory", containerConfigDir)
+
+		return err
+	}
 
 	return nil
 }
