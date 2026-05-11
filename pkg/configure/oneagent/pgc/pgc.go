@@ -10,28 +10,36 @@ import (
 
 const (
 	InputFileName              = "declarative.cbor"
-	DestinationDeclarativePath = "oneagent/agent/config/" + InputFileName
-	FileMode = os.FileMode(0600)
+	DestinationDeclarativePath = "oneagent/agent/config/declarative.cbor"
 )
 
 func GetDestinationFilePath(containerConfigDir string) string {
 	return filepath.Join(containerConfigDir, DestinationDeclarativePath)
 }
 
-func Configure(log logr.Logger, inputDir, _ string, containerConfigDir string) error {
+func Configure(log logr.Logger, inputDir, containerConfigDir string) error {
 	inputFilePath := filepath.Join(inputDir, InputFileName)
 
-	if _, err := os.Stat(inputFilePath); os.IsNotExist(err) {
-		return nil
+	srcInfo, err := os.Stat(inputFilePath)
+	if err != nil {
+		if os.IsNotExist(err) {
+			return nil
+		}
+
+		return err
 	}
 
 	dstPath := GetDestinationFilePath(containerConfigDir)
 
-	if err := os.MkdirAll(filepath.Dir(dstPath), FileMode); err != nil {
+	if err := os.MkdirAll(filepath.Dir(dstPath), os.ModePerm); err != nil {
 		return err
 	}
 
 	log.Info("copying declarative.cbor", "src", inputFilePath, "dst", dstPath)
 
-	return fs.CopyFile(inputFilePath, dstPath)
+	if err := fs.CopyFile(inputFilePath, dstPath); err != nil {
+		return err
+	}
+
+	return os.Chmod(dstPath, srcInfo.Mode().Perm())
 }

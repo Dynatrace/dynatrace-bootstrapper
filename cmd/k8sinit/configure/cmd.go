@@ -113,7 +113,7 @@ func configureContainer(log logr.Logger, inputDir, targetDir, containerConfigDir
 		return err
 	}
 
-	err = pgc.Configure(log, inputDir, targetDir, containerConfigDir)
+	err = pgc.Configure(log, inputDir, containerConfigDir)
 	if err != nil {
 		log.Info("failed to configure declarative.cbor", "config-directory", containerConfigDir)
 
