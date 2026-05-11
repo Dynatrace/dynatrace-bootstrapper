@@ -22,7 +22,7 @@ func TestCreate(t *testing.T) {
 		}
 
 		srcPath := filepath.Join(srcDir, "ruxitagentproc.conf")
-		require.NoError(t, os.WriteFile(srcPath, []byte(srcConf.ToString()), 0644))
+		require.NoError(t, os.WriteFile(srcPath, []byte(srcConf.ToString()), 0644)) //nolint:gosec
 
 		dstPath := filepath.Join(dstDir, "ruxitagentproc.conf")
 
