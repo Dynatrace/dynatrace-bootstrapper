@@ -58,7 +58,7 @@ func TestSetupOneAgent(t *testing.T) {
 		err := SetupOneAgent(testLog, targetFolder)
 		require.NoError(t, err)
 
-		expectedContainerSpecificConfigCount := 5 // curl(1) + ca(2) + conf(1) + ruxitagentproc.conf(1)
+		expectedContainerSpecificConfigCount := 6 // curl(1) + ca(2) + conf(1) + ruxitagentproc.conf(1) + declarative.cbor(1)
 
 		for _, name := range containerNames {
 			containerConfigFolder := filepath.Join(configDir, name)
@@ -72,7 +72,7 @@ func TestSetupOneAgent(t *testing.T) {
 		require.Equal(t, expectedPostExecuteConfigCount, postExecuteConfigCount)
 
 		postExecuteTargetCount := countFiles(t, targetFolder)
-		require.Equal(t, preExecuteTargetCount+1, postExecuteTargetCount) // +1 for declarative.cbor
+		require.Equal(t, preExecuteTargetCount, postExecuteTargetCount) // no change to the target folder during configuration
 	})
 
 	t.Run("no input-directory ==> do nothing", func(t *testing.T) {

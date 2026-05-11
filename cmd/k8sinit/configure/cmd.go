@@ -65,13 +65,6 @@ func SetupOneAgent(log logr.Logger, targetDir string) error {
 		return err
 	}
 
-	err = pgc.Configure(log, inputDir, targetDir)
-	if err != nil {
-		log.Info("failed to configure declarative.cbor", "target-directory", targetDir)
-
-		return err
-	}
-
 	podAttr, err := pod.ParseAttributes(podAttributes)
 	if err != nil {
 		return err
@@ -103,6 +96,13 @@ func SetupOneAgent(log logr.Logger, targetDir string) error {
 		err = configureFromInputDir(log, containerConfigDir, inputDir)
 		if err != nil {
 			log.Info("failed to configure container", "config-directory", containerConfigDir)
+
+			return err
+		}
+
+		err = pgc.Configure(log, inputDir, targetDir, containerConfigDir)
+		if err != nil {
+			log.Info("failed to configure declarative.cbor", "config-directory", containerConfigDir)
 
 			return err
 		}

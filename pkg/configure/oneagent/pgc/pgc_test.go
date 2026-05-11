@@ -19,14 +19,15 @@ func TestConfigure(t *testing.T) {
 		baseTempDir := filepath.Join(t.TempDir(), "path")
 		inputDir := filepath.Join(baseTempDir, "input")
 		targetDir := filepath.Join(baseTempDir, "target")
+		containerConfigDir := filepath.Join(baseTempDir, "config")
 
 		testData := "test-pgc-data"
 		require.NoError(t, fsutils.CreateFile(filepath.Join(inputDir, InputFileName), testData))
 
-		err := Configure(testLog, inputDir, targetDir)
+		err := Configure(testLog, inputDir, targetDir, containerConfigDir)
 		require.NoError(t, err)
 
-		content, err := os.ReadFile(GetDestinationFilePath(targetDir))
+		content, err := os.ReadFile(GetDestinationFilePath(containerConfigDir))
 		require.NoError(t, err)
 		assert.Equal(t, testData, string(content))
 	})
@@ -35,11 +36,12 @@ func TestConfigure(t *testing.T) {
 		baseTempDir := filepath.Join(t.TempDir(), "path")
 		inputDir := filepath.Join(baseTempDir, "input")
 		targetDir := filepath.Join(baseTempDir, "target")
+		containerConfigDir := filepath.Join(baseTempDir, "config")
 
-		err := Configure(testLog, inputDir, targetDir)
+		err := Configure(testLog, inputDir, targetDir, containerConfigDir)
 		require.NoError(t, err)
 
-		_, err = os.ReadFile(GetDestinationFilePath(targetDir))
+		_, err = os.ReadFile(GetDestinationFilePath(containerConfigDir))
 		require.True(t, os.IsNotExist(err))
 	})
 }
