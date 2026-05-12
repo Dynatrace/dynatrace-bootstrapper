@@ -12,7 +12,7 @@ import (
 )
 
 func TestCreate(t *testing.T) {
-	t.Run("destination file has fixed 0600 permissions", func(t *testing.T) {
+	t.Run("destination file has fixed 0444 permissions", func(t *testing.T) {
 		srcDir := t.TempDir()
 		dstDir := t.TempDir()
 

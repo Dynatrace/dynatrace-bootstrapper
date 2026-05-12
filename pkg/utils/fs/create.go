@@ -7,7 +7,6 @@ import (
 	"github.com/pkg/errors"
 )
 
-// ruxitagentproc.conf contains
 const ReadOnlyFilePerm = 0444
 
 func CreateFile(path string, content string) error {
