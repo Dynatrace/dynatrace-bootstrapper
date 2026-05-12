@@ -10,10 +10,11 @@ import (
 )
 
 func TestCreateFile(t *testing.T) {
+	const expectedContent = "test\n\ntest"
+
 	t.Run("success, simple file", func(t *testing.T) {
 		tmpDir := t.TempDir()
 
-		expectedContent := "test\n\ntest"
 		fileName := filepath.Join(tmpDir, "test.txt")
 
 		err := CreateFile(fileName, expectedContent)
@@ -26,7 +27,6 @@ func TestCreateFile(t *testing.T) {
 
 	t.Run("success, nested file", func(t *testing.T) {
 		tmpDir := t.TempDir()
-		expectedContent := "test\n\ntest"
 
 		fileName := filepath.Join(tmpDir, "folder", "inside", "test.txt")
 
@@ -57,7 +57,6 @@ func TestCreateReadOnlyFile(t *testing.T) {
 		require.NoError(t, err)
 		assert.Equal(t, ReadOnlyFilePerm, info.Mode().Perm())
 	})
-
 	t.Run("success, nested file", func(t *testing.T) {
 		tmpDir := t.TempDir()
 		expectedContent := "test\n\ntest"
@@ -75,5 +74,4 @@ func TestCreateReadOnlyFile(t *testing.T) {
 		require.NoError(t, err)
 		assert.Equal(t, ReadOnlyFilePerm, info.Mode().Perm())
 	})
-
 }
