@@ -5,6 +5,7 @@ import (
 	"path/filepath"
 	"testing"
 
+	"github.com/Dynatrace/dynatrace-bootstrapper/pkg/utils/fs"
 	"github.com/go-logr/zapr"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -23,9 +24,15 @@ func TestConfigure(t *testing.T) {
 		err := Configure(testLog, configDir, installPath)
 		require.NoError(t, err)
 
-		content, err := os.ReadFile(filepath.Join(configDir, ConfigPath))
+		configPath := filepath.Join(configDir, ConfigPath)
+
+		content, err := os.ReadFile(configPath)
 		require.NoError(t, err)
 		assert.Equal(t, expectedContent, string(content))
+
+		info, err := os.Stat(configPath)
+		require.NoError(t, err)
+		assert.Equal(t, fs.ReadOnlyFilePerm, info.Mode().Perm())
 	})
 
 	t.Run("relative install path is rejected", func(t *testing.T) {

@@ -32,7 +32,7 @@ func TestCreate(t *testing.T) {
 
 		info, err := os.Stat(dstPath)
 		require.NoError(t, err)
-		assert.Equal(t, os.FileMode(fs.ReadOnlyFilePerm), info.Mode().Perm())
+		assert.Equal(t, fs.ReadOnlyFilePerm, info.Mode().Perm())
 	})
 
 	t.Run("merges source and override configs", func(t *testing.T) {

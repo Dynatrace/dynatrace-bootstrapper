@@ -10,10 +10,11 @@ import (
 )
 
 func TestCreateFile(t *testing.T) {
+	const expectedContent = "test\n\ntest"
+
 	t.Run("success, simple file", func(t *testing.T) {
 		tmpDir := t.TempDir()
 
-		expectedContent := "test\n\ntest"
 		fileName := filepath.Join(tmpDir, "test.txt")
 
 		err := CreateFile(fileName, expectedContent)
@@ -26,7 +27,6 @@ func TestCreateFile(t *testing.T) {
 
 	t.Run("success, nested file", func(t *testing.T) {
 		tmpDir := t.TempDir()
-		expectedContent := "test\n\ntest"
 
 		fileName := filepath.Join(tmpDir, "folder", "inside", "test.txt")
 
@@ -36,5 +36,40 @@ func TestCreateFile(t *testing.T) {
 		content, err := os.ReadFile(fileName)
 		require.NoError(t, err)
 		assert.Equal(t, expectedContent, string(content))
+	})
+}
+
+func TestCreateReadOnlyFile(t *testing.T) {
+	const expectedContent = "test\n\ntest"
+
+	t.Run("success, simple file", func(t *testing.T) {
+		tmpDir := t.TempDir()
+		fileName := filepath.Join(tmpDir, "test.txt")
+
+		err := CreateReadOnlyFile(fileName, expectedContent)
+		require.NoError(t, err)
+
+		content, err := os.ReadFile(fileName)
+		require.NoError(t, err)
+		assert.Equal(t, expectedContent, string(content))
+
+		info, err := os.Stat(fileName)
+		require.NoError(t, err)
+		assert.Equal(t, ReadOnlyFilePerm, info.Mode().Perm())
+	})
+	t.Run("success, nested file", func(t *testing.T) {
+		tmpDir := t.TempDir()
+		fileName := filepath.Join(tmpDir, "folder", "inside", "test.txt")
+
+		err := CreateReadOnlyFile(fileName, expectedContent)
+		require.NoError(t, err)
+
+		content, err := os.ReadFile(fileName)
+		require.NoError(t, err)
+		assert.Equal(t, expectedContent, string(content))
+
+		info, err := os.Stat(fileName)
+		require.NoError(t, err)
+		assert.Equal(t, ReadOnlyFilePerm, info.Mode().Perm())
 	})
 }
