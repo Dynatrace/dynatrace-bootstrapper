@@ -10,6 +10,7 @@ import (
 	"github.com/Dynatrace/dynatrace-bootstrapper/pkg/configure/enrichment/endpoint"
 	"github.com/Dynatrace/dynatrace-bootstrapper/pkg/configure/oneagent/ca"
 	"github.com/Dynatrace/dynatrace-bootstrapper/pkg/configure/oneagent/curl"
+	"github.com/Dynatrace/dynatrace-bootstrapper/pkg/configure/oneagent/pgc"
 	"github.com/Dynatrace/dynatrace-bootstrapper/pkg/configure/oneagent/pmc"
 	"github.com/Dynatrace/dynatrace-bootstrapper/pkg/configure/oneagent/pmc/ruxit"
 	fsutils "github.com/Dynatrace/dynatrace-bootstrapper/pkg/utils/fs"
@@ -57,7 +58,7 @@ func TestSetupOneAgent(t *testing.T) {
 		err := SetupOneAgent(testLog, targetFolder)
 		require.NoError(t, err)
 
-		expectedContainerSpecificConfigCount := 5 // curl(1) + ca(2) + conf(1) + ruxitagentproc.conf(1)
+		expectedContainerSpecificConfigCount := 6 // curl(1) + ca(2) + conf(1) + ruxitagentproc.conf(1) + declarative.cbor(1)
 
 		for _, name := range containerNames {
 			containerConfigFolder := filepath.Join(configDir, name)
@@ -225,6 +226,9 @@ func setupInputFs(t *testing.T, inputDir string) {
 	rawProcConf, err := json.Marshal(procConf)
 	require.NoError(t, err)
 	require.NoError(t, fsutils.CreateFile(filepath.Join(inputDir, pmc.InputFileName), string(rawProcConf)))
+
+	// pgc
+	require.NoError(t, fsutils.CreateFile(filepath.Join(inputDir, pgc.InputFileName), "declarative.cbor"))
 }
 
 func setupTargetFs(t *testing.T, targetDir string) {
