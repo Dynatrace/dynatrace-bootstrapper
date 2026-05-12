@@ -1,7 +1,7 @@
 # renovate depName=github.com/golangci/golangci-lint/v2
 golang_ci_cmd_version=v2.11.2
 # renovate depName=github.com/daixiang0/gci
-gci_version=v0.13.7
+gci_version=v0.14.0
 # renovate depName=golang.org/x/tools
 golang_tools_version=v0.42.0
 # renovate depName=github.com/vektra/mockery
