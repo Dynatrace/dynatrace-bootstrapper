@@ -20,7 +20,7 @@ func GetDestinationFilePath(containerConfigDir string) string {
 func Configure(log logr.Logger, inputDir, containerConfigDir string) error {
 	inputFilePath := filepath.Join(inputDir, InputFileName)
 
-	srcInfo, err := os.Stat(inputFilePath)
+	_, err := os.Stat(inputFilePath)
 	if err != nil {
 		if os.IsNotExist(err) {
 			return nil
@@ -37,9 +37,5 @@ func Configure(log logr.Logger, inputDir, containerConfigDir string) error {
 
 	log.Info("copying declarative.cbor", "src", inputFilePath, "dst", dstPath)
 
-	if err := fs.CopyFile(inputFilePath, dstPath); err != nil {
-		return err
-	}
-
-	return os.Chmod(dstPath, srcInfo.Mode().Perm())
+	return fs.CopyFile(inputFilePath, dstPath)
 }
