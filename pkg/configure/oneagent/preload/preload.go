@@ -23,7 +23,7 @@ func Configure(log logr.Logger, configDir, installPath string) error {
 		return err
 	}
 
-	return fsutils.CreateFile(filepath.Join(configDir, ConfigPath), filepath.Join(installPath, LibAgentProcPath))
+	return fsutils.CreateReadOnlyFile(filepath.Join(configDir, ConfigPath), filepath.Join(installPath, LibAgentProcPath))
 }
 
 func validateInstallPath(installPath string) error {

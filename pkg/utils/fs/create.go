@@ -7,7 +7,7 @@ import (
 	"github.com/pkg/errors"
 )
 
-const ReadOnlyFilePerm = 0444
+const ReadOnlyFilePerm os.FileMode = 0444
 
 func CreateFile(path string, content string) error {
 	return createFileImpl(path, content, os.ModePerm)
