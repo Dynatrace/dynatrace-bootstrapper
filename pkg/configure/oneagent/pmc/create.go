@@ -2,15 +2,12 @@ package pmc
 
 import (
 	"os"
-	"path/filepath"
 
 	"github.com/Dynatrace/dynatrace-bootstrapper/pkg/configure/oneagent/pmc/ruxit"
+	"github.com/Dynatrace/dynatrace-bootstrapper/pkg/utils/fs"
 	"github.com/go-logr/logr"
 	"github.com/pkg/errors"
 )
-
-// ruxitagentproc.conf contains sensitive data, like tenantToken, so we should restrict access as much as we can
-const filePerm = 0600
 
 func Create(log logr.Logger, srcPath, dstPath string, conf ruxit.ProcConf) error {
 	srcFile, err := os.Open(srcPath)
@@ -31,28 +28,5 @@ func Create(log logr.Logger, srcPath, dstPath string, conf ruxit.ProcConf) error
 
 	mergedConf := srcConf.Merge(conf)
 
-	err = os.MkdirAll(filepath.Dir(dstPath), os.ModePerm)
-	if err != nil {
-		log.Info("failed to create destination dir", "path", filepath.Dir(filepath.Dir(dstPath)))
-
-		return err
-	}
-
-	dstFile, err := os.OpenFile(dstPath, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, filePerm)
-	if err != nil {
-		log.Info("failed to open destination file to write", "path", dstPath)
-
-		return errors.WithStack(err)
-	}
-
-	defer func() { _ = dstFile.Close() }()
-
-	_, err = dstFile.WriteString(mergedConf.ToString())
-	if err != nil {
-		log.Info("failed to write merged config into destination file", "path", dstPath)
-
-		return errors.WithStack(err)
-	}
-
-	return nil
+	return fs.CreateReadOnlyFile(dstPath, mergedConf.ToString())
 }

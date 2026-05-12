@@ -6,6 +6,7 @@ import (
 	"testing"
 
 	"github.com/Dynatrace/dynatrace-bootstrapper/pkg/configure/oneagent/pmc/ruxit"
+	"github.com/Dynatrace/dynatrace-bootstrapper/pkg/utils/fs"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -31,7 +32,7 @@ func TestCreate(t *testing.T) {
 
 		info, err := os.Stat(dstPath)
 		require.NoError(t, err)
-		assert.Equal(t, os.FileMode(filePerm), info.Mode().Perm())
+		assert.Equal(t, os.FileMode(fs.ReadOnlyFilePerm), info.Mode().Perm())
 	})
 
 	t.Run("merges source and override configs", func(t *testing.T) {
