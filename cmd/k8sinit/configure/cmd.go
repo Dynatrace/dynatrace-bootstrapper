@@ -113,12 +113,6 @@ func configureContainer(log logr.Logger, inputDir, targetDir, containerConfigDir
 		return err
 	}
 
-	err = pgc.Configure(log, inputDir, containerConfigDir)
-	if err != nil {
-		log.Info("failed to configure declarative.cbor", "config-directory", containerConfigDir)
-
-		return err
-	}
 
 	return nil
 }
@@ -134,6 +128,13 @@ func configureFromInputDir(log logr.Logger, containerConfigDir, inputDir string)
 	err = ca.Configure(log, inputDir, containerConfigDir)
 	if err != nil {
 		log.Info("failed to configure the CAs", "config-directory", containerConfigDir)
+
+		return err
+	}
+	
+	err = pgc.Configure(log, inputDir, containerConfigDir)
+	if err != nil {
+		log.Info("failed to configure declarative.cbor", "config-directory", containerConfigDir)
 
 		return err
 	}
