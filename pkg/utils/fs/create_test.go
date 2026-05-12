@@ -40,10 +40,10 @@ func TestCreateFile(t *testing.T) {
 }
 
 func TestCreateReadOnlyFile(t *testing.T) {
+	const expectedContent = "test\n\ntest"
+
 	t.Run("success, simple file", func(t *testing.T) {
 		tmpDir := t.TempDir()
-
-		expectedContent := "test\n\ntest"
 		fileName := filepath.Join(tmpDir, "test.txt")
 
 		err := CreateReadOnlyFile(fileName, expectedContent)
@@ -59,8 +59,6 @@ func TestCreateReadOnlyFile(t *testing.T) {
 	})
 	t.Run("success, nested file", func(t *testing.T) {
 		tmpDir := t.TempDir()
-		expectedContent := "test\n\ntest"
-
 		fileName := filepath.Join(tmpDir, "folder", "inside", "test.txt")
 
 		err := CreateReadOnlyFile(fileName, expectedContent)
