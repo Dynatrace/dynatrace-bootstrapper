@@ -21,7 +21,7 @@ linters:
     - gocyclo
     - goheader
     - gomoddirectives
-    - gomodguard
+    - gomodguard_v2
     - goprintffuncname
     - gosec
     - gosmopolitan
@@ -63,6 +63,8 @@ linters:
     - wsl_v5
     - zerologlint
   settings:
+    goconst:
+      ignore-tests: true
     revive:
       enable-all-rules: true
       rules:
