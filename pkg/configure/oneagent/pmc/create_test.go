@@ -12,7 +12,7 @@ import (
 )
 
 func TestCreate(t *testing.T) {
-	t.Run("destination file has fixed 0444 permissions", func(t *testing.T) {
+	t.Run("destination file has fixed 0644 permissions", func(t *testing.T) {
 		srcDir := t.TempDir()
 		dstDir := t.TempDir()
 
@@ -32,7 +32,7 @@ func TestCreate(t *testing.T) {
 
 		info, err := os.Stat(dstPath)
 		require.NoError(t, err)
-		assert.Equal(t, fs.ReadOnlyFilePerm, info.Mode().Perm())
+		assert.Equal(t, fs.MostlyReadonlyFilePerm, info.Mode().Perm())
 	})
 
 	t.Run("merges source and override configs", func(t *testing.T) {

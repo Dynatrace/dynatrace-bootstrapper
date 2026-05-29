@@ -32,7 +32,7 @@ func TestConfigure(t *testing.T) {
 
 		info, err := os.Stat(configPath)
 		require.NoError(t, err)
-		assert.Equal(t, fs.ReadOnlyFilePerm, info.Mode().Perm())
+		assert.Equal(t, fs.MostlyReadonlyFilePerm, info.Mode().Perm())
 	})
 
 	t.Run("relative install path is rejected", func(t *testing.T) {
