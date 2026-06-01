@@ -55,7 +55,7 @@ func TestCreateReadOnlyFile(t *testing.T) {
 
 		info, err := os.Stat(fileName)
 		require.NoError(t, err)
-		assert.Equal(t, ReadOnlyFilePerm, info.Mode().Perm())
+		assert.Equal(t, MostlyReadonlyFilePerm, info.Mode().Perm())
 	})
 	t.Run("success, nested file", func(t *testing.T) {
 		tmpDir := t.TempDir()
@@ -70,6 +70,6 @@ func TestCreateReadOnlyFile(t *testing.T) {
 
 		info, err := os.Stat(fileName)
 		require.NoError(t, err)
-		assert.Equal(t, ReadOnlyFilePerm, info.Mode().Perm())
+		assert.Equal(t, MostlyReadonlyFilePerm, info.Mode().Perm())
 	})
 }

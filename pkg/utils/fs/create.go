@@ -7,14 +7,16 @@ import (
 	"github.com/pkg/errors"
 )
 
-const ReadOnlyFilePerm os.FileMode = 0444
+// MostlyReadonlyFilePerm is only readonly for everyone but the owner.
+// The owner needs to be able to write it, so we can seamlessly handle node restarts, where the files are not cleaned up.
+const MostlyReadonlyFilePerm os.FileMode = 0644
 
 func CreateFile(path string, content string) error {
 	return createFileImpl(path, content, os.ModePerm)
 }
 
 func CreateReadOnlyFile(path string, content string) error {
-	return createFileImpl(path, content, ReadOnlyFilePerm)
+	return createFileImpl(path, content, MostlyReadonlyFilePerm)
 }
 
 func createFileImpl(path string, content string, mode os.FileMode) error {
