@@ -9,6 +9,8 @@ on:
   pull_request:
     branches:
       - "*"
+  merge_group:
+    types: [checks_requested]
 
 permissions:
   contents: read
@@ -86,7 +88,7 @@ jobs:
     needs: [prepare]
     permissions:
       packages: write
-    if: github.repository_owner == 'Dynatrace'
+    if: github.repository_owner == 'Dynatrace' && github.event_name != 'merge_group'
     steps:
       - name: Checkout
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
