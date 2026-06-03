@@ -127,6 +127,14 @@ ensuring the CodeModule is properly copied and configured before the main applic
 - This is an **optional** arg
 - The `--attribute-container` arg defines the passed in Container attributes that will be used to configure the metadata-enrichment and injected CodeModule. It is a JSON formatted string.
 
+#### `--enable-attributes-dt-kubernetes`
+
+*Example*: `--enable-attributes-dt-kubernetes=false`
+
+- This is an **optional** arg
+  - Defaults to `true`
+- The `--enable-attributes-dt-kubernetes` arg controls whether the deprecated `dt.kubernetes.*` attributes (`dt.kubernetes.cluster.id`, `dt.kubernetes.workload.kind`, `dt.kubernetes.workload.name`) are added to the metadata enrichment files. Set to `false` to opt out of these deprecated attributes.
+
 #### `--suppress-error`
 
 *Example*: `--suppress-error`

@@ -67,6 +67,73 @@ func TestBootstrapper(t *testing.T) {
 	})
 }
 
+func TestEnableAttributesDTKubernetes(t *testing.T) {
+	const containerName = "test-container"
+
+	podAttrArgs := []string{
+		"--attribute=k8s.cluster.uid=test-cluster-uid",
+		"--attribute=k8s.workload.kind=Deployment",
+		"--attribute=k8s.workload.name=test-workload",
+	}
+	containerAttrArg := `--attribute-container={"k8s.container.name": "` + containerName + `"}`
+
+	t.Run("flag defaults to true", func(t *testing.T) {
+		cmd := New()
+		flag := cmd.Flags().Lookup(EnableAttributesDTKubernetesFlag)
+		require.NotNil(t, flag)
+		require.Equal(t, "true", flag.DefValue)
+	})
+
+	t.Run("deprecated dt.kubernetes attributes included when flag is true (default)", func(t *testing.T) {
+		srcDir := t.TempDir()
+		cfgDir := t.TempDir()
+		inputDir := t.TempDir()
+		setupSource(t, srcDir, "123")
+
+		cmd := New()
+		cmd.SetArgs(append([]string{
+			"--source", srcDir,
+			"--target", t.TempDir(),
+			"--config-directory", cfgDir,
+			"--input-directory", inputDir,
+			containerAttrArg,
+		}, podAttrArgs...))
+
+		require.NoError(t, cmd.Execute())
+
+		jsonContent, err := os.ReadFile(filepath.Join(cfgDir, containerName, "enrichment", "dt_metadata.json"))
+		require.NoError(t, err)
+		require.Contains(t, string(jsonContent), "dt.kubernetes.cluster.id")
+		require.Contains(t, string(jsonContent), "dt.kubernetes.workload.kind")
+		require.Contains(t, string(jsonContent), "dt.kubernetes.workload.name")
+	})
+
+	t.Run("deprecated dt.kubernetes attributes excluded when flag is false", func(t *testing.T) {
+		srcDir := t.TempDir()
+		cfgDir := t.TempDir()
+		inputDir := t.TempDir()
+		setupSource(t, srcDir, "123")
+
+		cmd := New()
+		cmd.SetArgs(append([]string{
+			"--source", srcDir,
+			"--target", t.TempDir(),
+			"--config-directory", cfgDir,
+			"--input-directory", inputDir,
+			"--" + EnableAttributesDTKubernetesFlag + "=false",
+			containerAttrArg,
+		}, podAttrArgs...))
+
+		require.NoError(t, cmd.Execute())
+
+		jsonContent, err := os.ReadFile(filepath.Join(cfgDir, containerName, "enrichment", "dt_metadata.json"))
+		require.NoError(t, err)
+		require.NotContains(t, string(jsonContent), "dt.kubernetes.cluster.id")
+		require.NotContains(t, string(jsonContent), "dt.kubernetes.workload.kind")
+		require.NotContains(t, string(jsonContent), "dt.kubernetes.workload.name")
+	})
+}
+
 func setupSource(t *testing.T, folder, version string) {
 	t.Helper()
 

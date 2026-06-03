@@ -16,10 +16,11 @@ import (
 const (
 	Use = "k8s-init"
 
-	SourceFolderFlag   = "source"
-	TargetFolderFlag   = "target"
-	DebugFlag          = "debug"
-	SuppressErrorsFlag = "suppress-error"
+	SourceFolderFlag                 = "source"
+	TargetFolderFlag                 = "target"
+	DebugFlag                        = "debug"
+	SuppressErrorsFlag               = "suppress-error"
+	EnableAttributesDTKubernetesFlag = "enable-attributes-dt-kubernetes"
 )
 
 func New() *cobra.Command {
@@ -37,9 +38,10 @@ func New() *cobra.Command {
 }
 
 var (
-	log                 logr.Logger
-	isDebug             bool
-	areErrorsSuppressed bool
+	log                          logr.Logger
+	isDebug                      bool
+	areErrorsSuppressed          bool
+	enableAttributesDTKubernetes bool
 
 	sourceFolder string
 	targetFolder string
@@ -57,6 +59,8 @@ func AddFlags(cmd *cobra.Command) {
 	cmd.Flags().Lookup(DebugFlag).NoOptDefVal = "true"
 
 	cmd.Flags().BoolVar(&areErrorsSuppressed, SuppressErrorsFlag, false, "(Optional) Always return exit code 0, even on error")
+
+	cmd.Flags().BoolVar(&enableAttributesDTKubernetes, EnableAttributesDTKubernetesFlag, true, "(Optional) Should the deprecated attributes dt.kubernetes be added to the metadata enrichment.")
 
 	cmd.Flags().Lookup(SuppressErrorsFlag).NoOptDefVal = "true"
 
@@ -100,7 +104,7 @@ func RunE(_ *cobra.Command, _ []string) error {
 	}
 
 	// always enrich with deprecated attributes.
-	err = configure.EnrichWithMetadata(log, true)
+	err = configure.EnrichWithMetadata(log, enableAttributesDTKubernetes)
 	if err != nil {
 		if areErrorsSuppressed {
 			log.Error(err, "error during enrichment, the error was suppressed")
