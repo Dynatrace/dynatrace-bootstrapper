@@ -135,6 +135,26 @@
       enabled: true,
       automerge: true,
     },
+    {
+      matchPackageNames: ["golang.org/x/**"],
+      groupName: "golang.org/x",
+    },
+    {
+      matchManagers: ["github-actions"],
+      groupName: "GitHub Actions",
+    },
+    {
+      matchManagers: ["dockerfile"],
+      groupName: "Dockerfile base images",
+    },
+    {
+      matchManagers: ["regex"],
+      groupName: "Dev tooling",
+    },
+    {
+      matchPackageNames: ["github.com/spf13/**"],
+      groupName: "spf13",
+    },
   ],
   platformAutomerge: true,
 }
