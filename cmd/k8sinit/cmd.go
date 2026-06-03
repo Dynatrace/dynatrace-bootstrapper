@@ -60,9 +60,11 @@ func AddFlags(cmd *cobra.Command) {
 
 	cmd.Flags().BoolVar(&areErrorsSuppressed, SuppressErrorsFlag, false, "(Optional) Always return exit code 0, even on error")
 
+	cmd.Flags().Lookup(SuppressErrorsFlag).NoOptDefVal = "true"
+
 	cmd.Flags().BoolVar(&enableAttributesDTKubernetes, EnableAttributesDTKubernetesFlag, true, "(Optional) Should the deprecated attributes dt.kubernetes be added to the metadata enrichment.")
 
-	cmd.Flags().Lookup(SuppressErrorsFlag).NoOptDefVal = "true"
+	cmd.Flags().Lookup(EnableAttributesDTKubernetesFlag).NoOptDefVal = "true"
 
 	move.AddFlags(cmd)
 	configure.AddFlags(cmd)
