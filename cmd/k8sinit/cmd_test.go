@@ -19,7 +19,7 @@ func TestBootstrapper(t *testing.T) {
 	})
 	t.Run("should validate required flags - present flags -> no error", func(t *testing.T) {
 		tmpDir := t.TempDir()
-		setupSource(t, tmpDir, "123")
+		setupSource(t, tmpDir)
 
 		cmd := New()
 		cmd.SetArgs([]string{"--source", tmpDir, "--target", t.TempDir()})
@@ -56,7 +56,7 @@ func TestBootstrapper(t *testing.T) {
 
 	t.Run("should allow unknown flags -> no error", func(t *testing.T) {
 		tmpDir := t.TempDir()
-		setupSource(t, tmpDir, "123")
+		setupSource(t, tmpDir)
 
 		cmd := New()
 		cmd.SetArgs([]string{"--source", tmpDir, "--target", t.TempDir(), "--unknown", "--flag", "value"})
@@ -88,7 +88,7 @@ func TestEnableAttributesDTKubernetes(t *testing.T) {
 		srcDir := t.TempDir()
 		cfgDir := t.TempDir()
 		inputDir := t.TempDir()
-		setupSource(t, srcDir, "123")
+		setupSource(t, srcDir)
 
 		cmd := New()
 		cmd.SetArgs(append([]string{
@@ -112,7 +112,7 @@ func TestEnableAttributesDTKubernetes(t *testing.T) {
 		srcDir := t.TempDir()
 		cfgDir := t.TempDir()
 		inputDir := t.TempDir()
-		setupSource(t, srcDir, "123")
+		setupSource(t, srcDir)
 
 		cmd := New()
 		cmd.SetArgs(append([]string{
@@ -134,8 +134,10 @@ func TestEnableAttributesDTKubernetes(t *testing.T) {
 	})
 }
 
-func setupSource(t *testing.T, folder, version string) {
+func setupSource(t *testing.T, folder string) {
 	t.Helper()
+
+	version := "123"
 
 	versionFilePath := filepath.Join(folder, move.InstallerVersionFilePath)
 	require.NoError(t, os.MkdirAll(filepath.Dir(versionFilePath), os.ModePerm))
