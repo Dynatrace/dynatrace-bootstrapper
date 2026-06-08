@@ -1,6 +1,6 @@
 # check=skip=RedundantTargetPlatform
 # setup build image
-FROM --platform=$BUILDPLATFORM golang:1.26.3@sha256:6df14f4a4bc9d979a3721f488981e0d1b318006377e473ed23d026796f5f4c0a AS build
+FROM --platform=$BUILDPLATFORM golang:1.26.4@sha256:68cb6d68bed024785b69195b89af7ac7a444f27791435f98647edff595aa0479 AS build
 
 WORKDIR /app
 
@@ -19,7 +19,7 @@ RUN --mount=type=cache,target="/root/.cache/go-build" \
     -o ./build/_output/bin/dynatrace-bootstrapper
 
 # platform is required, otherwise the copy command will copy the wrong architecture files, don't trust GitHub Actions linting warnings
-FROM --platform=$TARGETPLATFORM public.ecr.aws/dynatrace/dynatrace-codemodules:1.337.50.20260513-172732 AS codemodules
+FROM --platform=$TARGETPLATFORM public.ecr.aws/dynatrace/dynatrace-codemodules:1.337.50.20260513-172732@sha256:d44a67abbf5475f4584fcb2bc48081408e6b3f73fa6f411d562ab0bde7c12ed6 AS codemodules
 
 # copy bootstrapper binary
 COPY --from=build /app/build/_output/bin /opt/dynatrace/oneagent/agent/lib64/
