@@ -103,7 +103,6 @@ func RunE(_ *cobra.Command, _ []string) error {
 		return err
 	}
 
-	// always enrich with deprecated attributes.
 	err = configure.EnrichWithMetadata(log, enableAttributesDTKubernetes)
 	if err != nil {
 		if areErrorsSuppressed {
