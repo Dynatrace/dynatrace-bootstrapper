@@ -1,168 +1,181 @@
 {
-  $schema: "https://docs.renovatebot.com/renovate-schema.json",
-  "extends": [
-    "config:best-practices",
+  $schema: 'https://docs.renovatebot.com/renovate-schema.json',
+  extends: [
+    'config:best-practices',
   ],
   osvVulnerabilityAlerts: true,
   vulnerabilityAlerts: {
     enabled: true,
   },
   labels: [
-    "dependencies",
+    'dependencies',
   ],
   digest: {
     enabled: false,
   },
-  timezone: "Europe/Vienna",
+  timezone: 'Europe/Vienna',
   schedule: [
-    "* 0-7,20-23 * * 1-5",
-    "* * * * 0,6",
+    '* 0-7,20-23 * * 1-5',
+    '* * * * 0,6',
   ],
-  baseBranches: [
-    "$default",
+  baseBranchPatterns: [
+    '$default',
   ],
   enabledManagers: [
-    "regex",
-    "dockerfile",
-    "gomod",
-    "github-actions",
-    "npm",
+    'custom.regex',
+    'dockerfile',
+    'gomod',
+    'github-actions',
+    'npm',
   ],
   postUpdateOptions: [
-    "gomodTidy",
-    "gomodTidy1.17",
+    'gomodTidy',
+    'gomodTidy1.17',
   ],
-  automergeType: "pr",
+  automergeType: 'pr',
   automerge: true,
-  regexManagers: [
+  customManagers: [
     {
-      fileMatch: [
-        "(^|/|\\.)prerequisites.mk$",
+      customType: 'regex',
+      managerFilePatterns: [
+        '/(^|/|\\.)prerequisites.mk$/',
       ],
       matchStrings: [
-        "depName=(?<depName>.*?)\\s.*?_version=(?<currentValue>.*)\\s",
+        'depName=(?<depName>.*?)\\s.*?_version=(?<currentValue>.*)\\s',
       ],
-      datasourceTemplate: "go",
+      datasourceTemplate: 'go',
     },
     {
-      fileMatch: [
-        "(^|/|\\.)ci.yaml$",
+      customType: 'regex',
+      managerFilePatterns: [
+        '/(^|/|\\.)ci.yaml$/',
       ],
       matchStrings: [
-        "depName=(?<depName>.*?)\\s.*?version\\:\\s(?<currentValue>.*)\\s",
+        'depName=(?<depName>.*?)\\s.*?version\\:\\s(?<currentValue>.*)\\s',
       ],
-      datasourceTemplate: "go",
+      datasourceTemplate: 'go',
     },
     {
-      fileMatch: [
-        "(^|/|\\.)action.yaml$",
+      customType: 'regex',
+      managerFilePatterns: [
+        '/(^|/|\\.)action.yaml$/',
       ],
       matchStrings: [
-        "depName=(?<depName>.*?)\\s.*?PREFLIGHT_VERSION\\:\\s(?<currentValue>.*)\\s",
+        'depName=(?<depName>.*?)\\s.*?PREFLIGHT_VERSION\\:\\s(?<currentValue>.*)\\s',
       ],
-      datasourceTemplate: "github-releases",
+      datasourceTemplate: 'github-releases',
     },
   ],
   packageRules: [
     {
       matchBaseBranches: [
-        "$default",
+        '$default',
       ],
       matchUpdateTypes: [
-        "major",
-        "minor",
+        'major',
+        'minor',
       ],
       enabled: false,
       automerge: true,
     },
     {
       matchManagers: [
-        "dockerfile",
+        'dockerfile',
       ],
       matchBaseBranches: [
-        "$default",
+        '$default',
       ],
-      commitMessagePrefix: "Docker:",
+      commitMessagePrefix: 'Docker:',
       enabled: true,
-      allowedVersions: "/^v?[0-9]+[\\.\\-][0-9]+([\\-\\.][0-9]+)*$/",
-      minimumReleaseAge: "3 days",
+      allowedVersions: '/^v?[0-9]+[\\.\\-][0-9]+([\\-\\.][0-9]+)*$/',
+      minimumReleaseAge: '3 days',
       automerge: true,
     },
     {
       matchManagers: [
-        "gomod",
+        'gomod',
       ],
       matchBaseBranches: [
-        "$default",
+        '$default',
       ],
-      commitMessagePrefix: "Go:",
+      commitMessagePrefix: 'Go:',
       enabled: true,
-      allowedVersions: "/^v?[0-9]+[\\.\\-][0-9]+([\\-\\.][0-9]+)*$/",
-      minimumReleaseAge: "3 days",
+      allowedVersions: '/^v?[0-9]+[\\.\\-][0-9]+([\\-\\.][0-9]+)*$/',
+      minimumReleaseAge: '3 days',
       automerge: true,
     },
     {
       matchManagers: [
-        "gomod",
+        'gomod',
       ],
       matchDepTypes: [
-        "indirect",
+        'indirect',
       ],
       enabled: false,
       automerge: true,
     },
     {
       matchManagers: [
-        "github-actions",
+        'github-actions',
       ],
       matchBaseBranches: [
-        "$default",
+        '$default',
       ],
-      commitMessagePrefix: "Actions:",
+      commitMessagePrefix: 'Actions:',
       enabled: true,
       automerge: true,
-      allowedVersions: "/^v?[0-9]+[\\.\\-][0-9]+([\\-\\.][0-9]+)*$/",
-      minimumReleaseAge: "3 days",
+      allowedVersions: '/^v?[0-9]+[\\.\\-][0-9]+([\\-\\.][0-9]+)*$/',
+      minimumReleaseAge: '3 days',
     },
     {
       matchManagers: [
-        "regex",
+        'custom.regex',
       ],
       matchBaseBranches: [
-        "$default",
+        '$default',
       ],
-      commitMessagePrefix: "Dev:",
+      commitMessagePrefix: 'Dev:',
       enabled: true,
       automerge: true,
     },
     {
       matchPackageNames: [
-        "markdownlint-cli",
+        'markdownlint-cli',
       ],
-      pinVersions: true,
-      minimumReleaseAge: "3 days",
+      rangeStrategy: 'pin',
+      minimumReleaseAge: '3 days',
       enabled: true,
       automerge: true,
     },
     {
-      matchPackageNames: ["golang.org/x/**"],
-      groupName: "golang.org/x",
+      matchPackageNames: [
+        'golang.org/x/**',
+      ],
+      groupName: 'golang.org/x',
     },
     {
-      matchManagers: ["github-actions"],
-      groupName: "GitHub Actions",
+      matchManagers: [
+        'github-actions',
+      ],
+      groupName: 'GitHub Actions',
     },
     {
-      matchManagers: ["dockerfile"],
-      groupName: "Dockerfile base images",
+      matchManagers: [
+        'dockerfile',
+      ],
+      groupName: 'Dockerfile base images',
     },
     {
-      matchManagers: ["regex"],
-      groupName: "Dev tooling",
+      matchManagers: [
+        'custom.regex',
+      ],
+      groupName: 'Dev tooling',
     },
     {
-      matchPackageNames: ["github.com/spf13/**"],
-      groupName: "spf13",
+      matchPackageNames: [
+        'github.com/spf13/**',
+      ],
+      groupName: 'spf13',
     },
   ],
   platformAutomerge: true,
