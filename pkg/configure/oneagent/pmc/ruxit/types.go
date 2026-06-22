@@ -64,12 +64,12 @@ func (pc ProcConf) ToMap() ProcMap {
 type ProcMap map[string]map[string]string
 
 var (
-	redundantEntries = map[string][]string{
-		"general": {"logDir", "dataStorageDir"},
-	}
-	additionalEntries = ProcMap{
+	redundantEntries  = map[string][]string{}
+	overriddenEntries = ProcMap{
 		"general": map[string]string{
 			"storage": "\"/var/lib/dynatrace/oneagent\"", // TODO: Make configurable?
+			"logDir": "\"/var/lib/dynatrace/oneagent/log\"",
+			"dataStorageDir": "\"/var/lib/dynatrace/oneagent\"",
 		},
 	}
 )
@@ -104,7 +104,7 @@ func (pm ProcMap) SetupReadonly(installPath string) ProcMap {
 		}
 	}
 
-	return pm.Merge(additionalEntries)
+	return pm.Merge(overriddenEntries)
 }
 
 func (pm ProcMap) ToString() string {
