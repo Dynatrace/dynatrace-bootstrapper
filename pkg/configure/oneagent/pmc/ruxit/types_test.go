@@ -218,9 +218,21 @@ func TestSetupReadonly(t *testing.T) {
 				Value:   "added-value",
 			},
 			{
-				// added to be work with a readonly CodeModule bin
+				// overridden to work with a readonly CodeModule bin
 				Section: "general",
 				Key:     "storage",
+				Value:   "\"/var/lib/dynatrace/oneagent\"",
+			},
+			{
+				// overridden to work with a readonly CodeModule bin
+				Section: "general",
+				Key:     "logDir",
+				Value:   "\"/var/lib/dynatrace/oneagent/log\"",
+			},
+			{
+				// overridden to work with a readonly CodeModule bin
+				Section: "general",
+				Key:     "dataStorageDir",
 				Value:   "\"/var/lib/dynatrace/oneagent\"",
 			},
 		}
@@ -242,13 +254,13 @@ func TestSetupReadonly(t *testing.T) {
 				Value:   "\"../bin/1.2.3.4-5/linux-musl-x86-64\"",
 			},
 			{
-				// will be removed, as it is not needed in readonly
+				// will be overridden for readonly
 				Section: "general",
 				Key:     "logDir",
 				Value:   "some-path",
 			},
 			{
-				// will be removed, as it is not needed in readonly
+				// will be overridden for readonly
 				Section: "general",
 				Key:     "dataStorageDir",
 				Value:   "some-path",
