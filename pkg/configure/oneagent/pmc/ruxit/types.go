@@ -107,17 +107,24 @@ func (pm ProcMap) SetupReadonly(installPath string) ProcMap {
 	return pm.Merge(overriddenEntries)
 }
 
+var controlCharReplacer = strings.NewReplacer("\n", "", "\t", "", "\r", "", "\x00", "")
+
+// stripControlChars removes control characters that could be used to inject malicious INI sections/keys into the PMC
+func stripControlChars(s string) string {
+	return controlCharReplacer.Replace(s)
+}
+
 func (pm ProcMap) ToString() string {
 	var content strings.Builder
 
 	for _, section := range slices.Sorted(maps.Keys(pm)) {
-		_, _ = content.WriteString("[" + section + "]")
+		_, _ = content.WriteString("[" + stripControlChars(section) + "]")
 		_, _ = content.WriteString("\n")
 
 		for _, prop := range slices.Sorted(maps.Keys(pm[section])) {
-			_, _ = content.WriteString(prop)
+			_, _ = content.WriteString(stripControlChars(prop))
 			_, _ = content.WriteString(" ")
-			_, _ = content.WriteString(pm[section][prop])
+			_, _ = content.WriteString(stripControlChars(pm[section][prop]))
 			_, _ = content.WriteString("\n")
 		}
 
