@@ -190,6 +190,59 @@ func TestMerge(t *testing.T) {
 	})
 }
 
+func TestStripControlChars(t *testing.T) {
+	tests := []struct {
+		name string
+		in   string
+		out  string
+	}{
+		{name: "empty string => unchanged", in: "", out: ""},
+		{name: "clean string => unchanged", in: "foo=bar", out: "foo=bar"},
+		{name: "regular whitespace => kept", in: "foo  bar", out: "foo  bar"},
+		{name: "newline => stripped", in: "foo\nbar", out: "foobar"},
+		{name: "tab => stripped", in: "foo\tbar", out: "foobar"},
+		{name: "carriage return => stripped", in: "foo\rbar", out: "foobar"},
+		{name: "null byte => stripped", in: "foo\x00bar", out: "foobar"},
+		{name: "multiple control chars at once => all stripped", in: "\nfoo\t\rbar\x00", out: "foobar"},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			assert.Equal(t, tt.out, stripControlChars(tt.in))
+		})
+	}
+}
+
+func TestToStringStripsControlChars(t *testing.T) {
+	t.Run("newline injected in property value => no INI section injected", func(t *testing.T) {
+		props := []Property{
+			{
+				Section: "general",
+				Key:     "containerInjectionRules",
+				Value:   "x\n[illegal]\nbooooooom\n[general]\nx",
+			},
+		}
+
+		rawString := ProcConf{Properties: props}.ToString()
+
+		for line := range strings.SplitSeq(rawString, "\n") {
+			assert.NotEqual(t, "[illegal]", line, "injected value must not create a new INI section")
+		}
+
+		assert.Equal(t, 1, strings.Count(rawString, "booooooom"))
+	})
+
+	t.Run("control chars in section, key and value => stripped from rendered output", func(t *testing.T) {
+		props := []Property{
+			{Section: "sec\ntion", Key: "k\ney", Value: "v\nalue"},
+		}
+
+		rawString := ProcConf{Properties: props}.ToString()
+
+		assert.Equal(t, "[section]\nkey value\n\n", rawString)
+	})
+}
+
 func TestSetupReadonly(t *testing.T) {
 	t.Run("do adjustments according to installPath", func(t *testing.T) {
 		installPath := "/absolute/path"
