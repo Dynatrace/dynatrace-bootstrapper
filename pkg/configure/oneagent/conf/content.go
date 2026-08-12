@@ -5,6 +5,7 @@ import (
 
 	"github.com/Dynatrace/dynatrace-bootstrapper/cmd/k8sinit/configure/attributes/container"
 	"github.com/Dynatrace/dynatrace-bootstrapper/cmd/k8sinit/configure/attributes/pod"
+	"github.com/Dynatrace/dynatrace-bootstrapper/pkg/utils/sanitize"
 	"github.com/Dynatrace/dynatrace-bootstrapper/pkg/utils/structs"
 )
 
@@ -74,9 +75,9 @@ func (cs containerSection) toString() (string, error) {
 			continue
 		}
 
-		_, _ = content.WriteString(key)
+		_, _ = content.WriteString(sanitize.StripControlChars(key))
 		_, _ = content.WriteString(" ")
-		_, _ = content.WriteString(value)
+		_, _ = content.WriteString(sanitize.StripControlChars(value))
 		_, _ = content.WriteString("\n")
 	}
 
@@ -108,9 +109,9 @@ func (hs hostSection) toString() (string, error) {
 			continue
 		}
 
-		_, _ = content.WriteString(key)
+		_, _ = content.WriteString(sanitize.StripControlChars(key))
 		_, _ = content.WriteString(" ")
-		_, _ = content.WriteString(value)
+		_, _ = content.WriteString(sanitize.StripControlChars(value))
 		_, _ = content.WriteString("\n")
 	}
 

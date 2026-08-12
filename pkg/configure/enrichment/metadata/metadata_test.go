@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 
 	"github.com/Dynatrace/dynatrace-bootstrapper/cmd/k8sinit/configure/attributes/container"
@@ -70,5 +71,27 @@ func TestConfigure(t *testing.T) {
 		for key, value := range expectedContent {
 			assert.Contains(t, string(propsContent), key+"="+value)
 		}
+	})
+
+	t.Run("newline injected in user-defined annotation => no property injected", func(t *testing.T) {
+		baseTempDir := filepath.Join(t.TempDir(), "path")
+		configDir := filepath.Join(baseTempDir, "config")
+
+		cursedPodAttr := podAttr
+		cursedPodAttr.UserDefined = map[string]string{
+			"beep": "boop\ncursed.key=cursed-value",
+		}
+
+		err := Configure(testLog, configDir, cursedPodAttr, containerAttr, alwaysEnableDeprecatedAttributes)
+		require.NoError(t, err)
+
+		propsContent, err := os.ReadFile(filepath.Join(configDir, PropertiesFilePath))
+		require.NoError(t, err)
+
+		for line := range strings.SplitSeq(string(propsContent), "\n") {
+			assert.NotEqual(t, "cursed.key=cursed-value", line, "properties must not be sneaked in via control characters")
+		}
+
+		assert.Contains(t, string(propsContent), "beep=boopcursed.key=cursed-value")
 	})
 }
