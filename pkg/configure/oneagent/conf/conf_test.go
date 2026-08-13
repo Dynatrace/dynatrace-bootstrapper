@@ -3,6 +3,7 @@ package conf
 import (
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 
 	"github.com/Dynatrace/dynatrace-bootstrapper/cmd/k8sinit/configure/attributes/container"
@@ -101,5 +102,27 @@ func TestConfigure(t *testing.T) {
 
 		err := Configure(testLog, configDir, containerAttr, podAttr, "", true)
 		require.Error(t, err)
+	})
+
+	t.Run("newline injected in attribute => no new section created", func(t *testing.T) {
+		baseTempDir := filepath.Join(t.TempDir(), "path")
+		configDir := filepath.Join(baseTempDir, "config")
+
+		cursedPodAttr := podAttr
+		cursedPodAttr.PodName = "podname\n[host]\ntenant cursed-tenant\nisCloudNativeFullStack lol"
+
+		err := Configure(testLog, configDir, containerAttr, cursedPodAttr, "", false)
+		require.NoError(t, err)
+
+		content, err := os.ReadFile(filepath.Join(configDir, ConfigPath))
+		require.NoError(t, err)
+
+		for line := range strings.SplitSeq(string(content), "\n") {
+			assert.NotEqual(t, "[host]", line, "injected value must not create a new INI section")
+			assert.NotEqual(t, "tenant cursed-tenant", line, "injected value must not create a new INI entry")
+		}
+
+		assert.Equal(t, 1, strings.Count(string(content), "[container]"))
+		assert.Contains(t, string(content), "k8s_fullpodname podname[host]tenant cursed-tenantisCloudNativeFullStack lol")
 	})
 }

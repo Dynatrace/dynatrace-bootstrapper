@@ -6,6 +6,8 @@ import (
 	"path/filepath"
 	"slices"
 	"strings"
+
+	"github.com/Dynatrace/dynatrace-bootstrapper/pkg/utils/sanitize"
 )
 
 // ProcConf represents the response of the /deployment/installer/agent/processmoduleconfig endpoint from the Dynatrace Environment(v1) API.
@@ -67,8 +69,8 @@ var (
 	redundantEntries  = map[string][]string{}
 	overriddenEntries = ProcMap{
 		"general": map[string]string{
-			"storage": "\"/var/lib/dynatrace/oneagent\"", // TODO: Make configurable?
-			"logDir": "\"/var/lib/dynatrace/oneagent/log\"",
+			"storage":        "\"/var/lib/dynatrace/oneagent\"", // TODO: Make configurable?
+			"logDir":         "\"/var/lib/dynatrace/oneagent/log\"",
 			"dataStorageDir": "\"/var/lib/dynatrace/oneagent\"",
 		},
 	}
@@ -107,24 +109,17 @@ func (pm ProcMap) SetupReadonly(installPath string) ProcMap {
 	return pm.Merge(overriddenEntries)
 }
 
-var controlCharReplacer = strings.NewReplacer("\n", "", "\t", "", "\r", "", "\x00", "")
-
-// stripControlChars removes control characters that could be used to inject malicious INI sections/keys into the PMC
-func stripControlChars(s string) string {
-	return controlCharReplacer.Replace(s)
-}
-
 func (pm ProcMap) ToString() string {
 	var content strings.Builder
 
 	for _, section := range slices.Sorted(maps.Keys(pm)) {
-		_, _ = content.WriteString("[" + stripControlChars(section) + "]")
+		_, _ = content.WriteString("[" + sanitize.StripControlChars(section) + "]")
 		_, _ = content.WriteString("\n")
 
 		for _, prop := range slices.Sorted(maps.Keys(pm[section])) {
-			_, _ = content.WriteString(stripControlChars(prop))
+			_, _ = content.WriteString(sanitize.StripControlChars(prop))
 			_, _ = content.WriteString(" ")
-			_, _ = content.WriteString(stripControlChars(pm[section][prop]))
+			_, _ = content.WriteString(sanitize.StripControlChars(pm[section][prop]))
 			_, _ = content.WriteString("\n")
 		}
 

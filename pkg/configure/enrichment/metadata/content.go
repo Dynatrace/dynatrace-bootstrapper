@@ -7,6 +7,7 @@ import (
 
 	"github.com/Dynatrace/dynatrace-bootstrapper/cmd/k8sinit/configure/attributes/container"
 	"github.com/Dynatrace/dynatrace-bootstrapper/cmd/k8sinit/configure/attributes/pod"
+	"github.com/Dynatrace/dynatrace-bootstrapper/pkg/utils/sanitize"
 	"github.com/Dynatrace/dynatrace-bootstrapper/pkg/utils/structs"
 	"github.com/pkg/errors"
 )
@@ -58,9 +59,9 @@ func (c fileContent) toProperties() (string, error) {
 	}
 
 	for key, value := range contentMap {
-		_, _ = confContent.WriteString(key)
+		_, _ = confContent.WriteString(sanitize.StripControlChars(key))
 		_, _ = confContent.WriteString("=")
-		_, _ = confContent.WriteString(value)
+		_, _ = confContent.WriteString(sanitize.StripControlChars(value))
 		_, _ = confContent.WriteString("\n")
 	}
 
