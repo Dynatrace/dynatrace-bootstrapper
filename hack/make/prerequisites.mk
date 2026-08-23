@@ -1,11 +1,11 @@
 # renovate depName=github.com/golangci/golangci-lint/v2
-golang_ci_cmd_version=v2.12.2
+golang_ci_cmd_version=v2.13.1
 # renovate depName=github.com/daixiang0/gci
 gci_version=v0.14.0
 # renovate depName=golang.org/x/tools
-golang_tools_version=v0.48.0
+golang_tools_version=v0.49.0
 # renovate depName=github.com/vektra/mockery
-mockery_version=v3.7.2
+mockery_version=v3.7.4
 # renovate depName=github.com/igorshubovych/markdownlint-cli
 markdownlint_cli_version=v0.49.1
 
