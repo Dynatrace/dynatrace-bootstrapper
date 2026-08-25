@@ -1,3 +1,5 @@
+[![OpenSSF Scorecard](https://api.scorecard.dev/projects/github.com/Dynatrace/dynatrace-bootstrapper/badge)](https://scorecard.dev/viewer/?uri=github.com/Dynatrace/dynatrace-bootstrapper)
+
 # dynatrace-bootstrapper
 
 The `dynatrace-bootstrapper` is a small CLI binary built into a [Dynatrace CodeModule](https://gallery.ecr.aws/dynatrace/dynatrace-codemodules) (after version `<to-be-determined-codemodule-version>`) so that it can be used in conjunction with the [dynatrace-operator](https://github.com/Dynatrace/dynatrace-operator) to optimize the download and configuration of a CodeModule in Kubernetes.
